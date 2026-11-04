@@ -57,3 +57,7 @@ Small native programs in `sketchybar/helper/`, compiled by `build.sh` (binaries 
 ## Keys
 
 `alt-shift-/` shows the AeroSpace key cheat sheet in the bar. Bindings live in `aerospace/aerospace.toml`.
+
+- **Modes**: `alt-shift-;` service mode, `alt-shift-r` resize mode (h/j/k/l or arrows, `b` equal sizes, esc to leave). A pill next to the workspaces shows which mode is on; click it to go back to normal.
+- **App workspaces**: new windows open on a fixed workspace: 3 Obsidian and Notion, 5 Excel, 6 Outlook, 7 WhatsApp, Telegram and Slack, 8 Spotify. Browsers, terminals and the rest open where you are.
+- **Floating**: System Settings, Calculator, Activity Monitor, Archive Utility, Finder's Get Info, System Information, Disk Utility and FaceTime float instead of tiling.

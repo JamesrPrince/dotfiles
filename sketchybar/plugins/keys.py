@@ -26,7 +26,7 @@ KEYS = {"backtick": "`", "slash": "/", "comma": ",", "minus": "-", "equal": "=",
         "left": "←", "right": "→", "up": "↑", "down": "↓"}
 
 # Section order and the commands that belong to each
-SECTIONS = ["Switch", "Rearrange", "Layout", "Open apps", "Service mode (⌥⇧; then)"]
+SECTIONS = ["Switch", "Rearrange", "Layout", "Open apps", "Service mode (⌥⇧; then)", "Resize mode (⌥⇧R then)"]
 
 
 def parse_bindings():
@@ -110,6 +110,14 @@ def describe(cmds, cache):
         return "Service", "Reload config, exit"
     if c == "mode service":
         return "Layout", "Service mode"
+    if c == "mode resize":
+        return "Layout", "Resize mode"
+    if m := re.match(r"resize (width|height) ([+-])", c):
+        return "Resize", ("Wider" if m.group(1) == "width" else "Taller") if m.group(2) == "+" else ("Narrower" if m.group(1) == "width" else "Shorter")
+    if c == "balance-sizes":
+        return "Service", "Equal sizes"
+    if c == "":
+        return "Resize", "Done"
     if "cheat sheet" in c or "keys.py" in c:
         return "Layout", "This cheat sheet"
     return "Layout", c
@@ -151,6 +159,11 @@ def build_rows():
         section, desc = describe(cmds, cache)
         grouped[section].append((pretty_key(key), desc))
     for key, cmds in modes.get("service", []):
+        grouped[SECTIONS[-2]].append((pretty_key(key), describe(cmds, cache)[1]))
+    # Resize mode: the arrows repeat h/j/k/l, so list the letters only
+    for key, cmds in modes.get("resize", []):
+        if key in ("left", "right", "up", "down", "enter"):
+            continue
         grouped[SECTIONS[-1]].append((pretty_key(key), describe(cmds, cache)[1]))
     grouped["Open apps"].sort(key=lambda r: r[0])
     os.makedirs(os.path.dirname(CACHE), exist_ok=True)

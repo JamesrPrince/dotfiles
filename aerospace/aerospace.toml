@@ -34,7 +34,8 @@ automatically-unhide-macos-hidden-apps = false
 # Numbered workspaces only: alt-<letter> stays free for typing accents and symbols
 persistent-workspaces = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
 
-on-mode-changed = []
+# Tell SketchyBar which mode is on (the pill next to the workspaces)
+on-mode-changed = ['exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_mode_change MODE=$(/usr/local/bin/aerospace list-modes --current)']
 focus-follows-mouse.enabled = false
 key-mapping.preset = 'qwerty'
 
@@ -62,6 +63,57 @@ gaps.outer.right =      8
 [[on-window-detected]]
     if.app-id = 'com.apple.archiveutility'
     run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-id = 'com.apple.finder'
+    if.window-title-regex-substring = ' Info$'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-id = 'com.apple.SystemProfiler'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-id = 'com.apple.DiskUtility'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-id = 'com.apple.FaceTime'
+    run = 'layout floating'
+
+# Apps that always open on their own workspace (new windows only)
+# 3 notes, 5 spreadsheets, 6 mail, 7 chat, 8 music
+[[on-window-detected]]
+    if.app-id = 'md.obsidian'
+    run = 'move-node-to-workspace 3'
+
+[[on-window-detected]]
+    if.app-id = 'notion.id'
+    run = 'move-node-to-workspace 3'
+
+[[on-window-detected]]
+    if.app-id = 'com.microsoft.Excel'
+    run = 'move-node-to-workspace 5'
+
+[[on-window-detected]]
+    if.app-id = 'com.microsoft.Outlook'
+    run = 'move-node-to-workspace 6'
+
+[[on-window-detected]]
+    if.app-id = 'net.whatsapp.WhatsApp'
+    run = 'move-node-to-workspace 7'
+
+[[on-window-detected]]
+    if.app-id = 'ru.keepcoder.Telegram'
+    run = 'move-node-to-workspace 7'
+
+[[on-window-detected]]
+    if.app-id = 'com.tinyspeck.slackmacgap'
+    run = 'move-node-to-workspace 7'
+
+[[on-window-detected]]
+    if.app-id = 'com.spotify.client'
+    run = 'move-node-to-workspace 8'
 
 [mode.main.binding]
     alt-slash = 'layout tiles horizontal vertical'
@@ -110,6 +162,7 @@ gaps.outer.right =      8
     alt-shift-tab = 'move-workspace-to-monitor --wrap-around next'
 
     alt-shift-semicolon = 'mode service'
+    alt-shift-r = 'mode resize'
 
     # Key-binding cheat sheet (SketchyBar popup, built from this file)
     alt-shift-slash = 'exec-and-forget /usr/bin/python3 ~/.config/sketchybar/plugins/keys.py toggle'
@@ -133,8 +186,23 @@ gaps.outer.right =      8
     r = ['flatten-workspace-tree', 'mode main'] # reset layout
     f = ['layout floating tiling', 'mode main'] # toggle floating/tiling
     backspace = ['close-all-windows-but-current', 'mode main']
+    b = ['balance-sizes', 'mode main'] # equal sizes
 
     alt-shift-h = ['join-with left', 'mode main']
     alt-shift-j = ['join-with down', 'mode main']
     alt-shift-k = ['join-with up', 'mode main']
     alt-shift-l = ['join-with right', 'mode main']
+
+# Resize mode: hold the arrows down, esc or enter to leave
+[mode.resize.binding]
+    h = 'resize width -50'
+    l = 'resize width +50'
+    k = 'resize height -50'
+    j = 'resize height +50'
+    left = 'resize width -50'
+    right = 'resize width +50'
+    up = 'resize height -50'
+    down = 'resize height +50'
+    b = ['balance-sizes', 'mode main']
+    esc = 'mode main'
+    enter = 'mode main'
