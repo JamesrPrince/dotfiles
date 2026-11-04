@@ -129,6 +129,20 @@ popup () {
   "$HOME/.config/sketchybar/plugins/popup.sh" spotify.anchor $1
 }
 
+# Hover opens the popup; a click on the anchor closes it and keeps it shut for
+# a moment, or the pointer still resting on the anchor would reopen it at once.
+HUSH="${TMPDIR:-/tmp}/sketchybar_spotify_hush"
+hushed() {
+  [ -f "$HUSH" ] && [ $(( $(date +%s) - $(stat -f %m "$HUSH") )) -le 1 ]
+}
+click_anchor() {
+  if [ "$(sketchybar --query spotify.anchor | jq -r '.popup.drawing')" = "on" ]; then
+    touch "$HUSH"; popup off
+  else
+    rm -f "$HUSH"; popup on
+  fi
+}
+
 # Bar progress line; never asks Spotify (which would launch it) unless it runs
 progress() {
   pgrep -xq Spotify || exit 0
@@ -148,10 +162,12 @@ routine() {
   esac
 }
 
+[ "$1" = "click" ] && { click_anchor; exit 0; }
+
 case "$SENDER" in
   "mouse.clicked") mouse_clicked
   ;;
-  "mouse.entered") popup on
+  "mouse.entered") hushed || popup on
   ;;
   "mouse.exited"|"mouse.exited.global") popup off
   ;;

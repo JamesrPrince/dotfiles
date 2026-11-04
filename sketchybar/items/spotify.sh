@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SPOTIFY_EVENT="com.spotify.client.PlaybackStateChanged"
-POPUP_SCRIPT="/usr/local/bin/sketchybar -m --set spotify.anchor popup.drawing=toggle"
+POPUP_SCRIPT="$PLUGIN_DIR/spotify.sh click"
 
 spotify_anchor=(
   script="$PLUGIN_DIR/spotify.sh"
@@ -45,7 +45,7 @@ spotify_progress=(
 
 spotify_cover=(
   script="$PLUGIN_DIR/spotify.sh"
-  click_script="open -a 'Spotify'; $POPUP_SCRIPT"
+  click_script="open -a 'Spotify'; $PLUGIN_DIR/popup.sh spotify.anchor off"
   label.drawing=off
   icon.drawing=off
   padding_left=12
