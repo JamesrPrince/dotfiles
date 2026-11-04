@@ -6,8 +6,8 @@ config-version = 2
 # SketchyBar starts with AeroSpace, so the bar always has a server to query
 after-startup-command = [
     'exec-and-forget /usr/local/bin/sketchybar',
-    # Highlight border on the focused window (JankyBorders)
-    'exec-and-forget /usr/local/bin/borders active_color=0xff8aadf4 inactive_color=0x00000000 width=5.0 style=round hidpi=on'
+    # Highlight border on the focused window (JankyBorders), in the bar theme's accent
+    'exec-and-forget /bin/bash ~/.config/sketchybar/plugins/theme.sh borders'
 ]
 
 # Tell SketchyBar which workspace is focused
@@ -158,6 +158,9 @@ gaps.outer.right =      8
 
     # Key-binding cheat sheet (SketchyBar popup, built from this file)
     alt-shift-slash = 'exec-and-forget /usr/bin/python3 ~/.config/sketchybar/plugins/keys.py toggle'
+
+    # Next bar and border theme (Macchiato, Tokyo Night, Gruvbox)
+    alt-shift-t = 'exec-and-forget /bin/bash ~/.config/sketchybar/plugins/theme.sh next'
 
     # App launchers: ctrl-alt-<letter> opens or focuses the app (by bundle id)
     ctrl-alt-b = 'exec-and-forget open -b com.brave.Browser'

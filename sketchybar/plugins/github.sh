@@ -1,6 +1,7 @@
 #!/bin/bash
 # GitHub notifications via the gh CLI: count on the icon, latest 8 in the popup.
 export PATH="/usr/local/bin:$PATH"
+source "$HOME/.config/sketchybar/plugins/hover.sh"
 source "$CONFIG_DIR/colors.sh"
 NAME=github
 
@@ -39,4 +40,5 @@ else
       ((.subject.url // "") | sub("api.github.com/repos"; "github.com") | sub("/pulls/"; "/pull/")
        | if . == "" then "https://github.com/notifications" else . end)] | @tsv' <<<"$json")
 fi
-sketchybar "${rows[@]}" --set $NAME popup.drawing=toggle
+sketchybar "${rows[@]}"
+"$HOME/.config/sketchybar/plugins/popup.sh" "$NAME"

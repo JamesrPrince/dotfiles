@@ -1,6 +1,7 @@
 #!/bin/bash
 # One item per AeroSpace workspace. Click to focus it. The label lists the
-# apps on that workspace (sketchybar-app-font); the focused one turns red.
+# apps on that workspace (sketchybar-app-font). The focused one sits in an
+# accent pill, empty ones fade to grey, and hovering highlights the rest.
 
 sketchybar --add event aerospace_workspace_change
 
@@ -12,7 +13,13 @@ for sid in $(aerospace list-workspaces --all); do
     padding_left=2
     padding_right=2
     label.padding_right=20
-    icon.highlight_color=$RED
+    icon.highlight_color=$ACCENT
+    icon.font="$FONT:Heavy:14.0"
+    background.height=26
+    background.corner_radius=8
+    background.color=$TRANSPARENT
+    background.border_width=0
+    background.drawing=on
     label.font="sketchybar-app-font:Regular:16.0"
     label.background.height=26
     label.background.drawing=on
@@ -20,10 +27,12 @@ for sid in $(aerospace list-workspaces --all); do
     label.background.corner_radius=8
     label.drawing=off
     click_script="/usr/local/bin/aerospace workspace $sid"
+    script="$PLUGIN_DIR/hover.sh"
   )
 
   sketchybar --add item space.$sid left    \
-             --set space.$sid "${space[@]}"
+             --set space.$sid "${space[@]}" \
+             --subscribe space.$sid mouse.entered mouse.exited
 done
 
 # Hidden item that refreshes every workspace in one pass

@@ -27,7 +27,7 @@ toggle_devices() {
   source "$HOME/.config/sketchybar/colors.sh"
   source "$HOME/.config/sketchybar/icons.sh"
 
-  args=(--remove '/volume.device\..*/' --set "$NAME" popup.drawing=toggle popup.align=right)
+  args=(--remove '/volume.device\..*/' --set "$NAME" popup.align=right)
   COUNTER=0
   CURRENT="$("$AUDIO" current)"
   while IFS= read -r device; do
@@ -44,6 +44,7 @@ toggle_devices() {
   done <<< "$("$AUDIO" list)"
 
   sketchybar -m "${args[@]}" > /dev/null
+  "$HOME/.config/sketchybar/plugins/popup.sh" "$NAME"
 }
 
 if [ "$BUTTON" = "right" ] || [ "$MODIFIER" = "shift" ]; then

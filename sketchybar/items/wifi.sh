@@ -12,7 +12,7 @@ wifi=(
   updates=on
   popup.align=right
   script="$PLUGIN_DIR/wifi.sh"
-  click_script="/usr/local/bin/sketchybar --set wifi popup.drawing=toggle; NAME=wifi SENDER=refresh $PLUGIN_DIR/wifi.sh"
+  click_script="$PLUGIN_DIR/popup.sh wifi; NAME=wifi SENDER=refresh $PLUGIN_DIR/wifi.sh"
 )
 
 popup_row=(

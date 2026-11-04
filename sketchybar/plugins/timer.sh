@@ -1,6 +1,7 @@
 #!/bin/bash
 # Focus timer. The end time lives in a file so the countdown survives a bar reload.
 export PATH="/usr/local/bin:$PATH"
+source "$HOME/.config/sketchybar/plugins/hover.sh"
 source "$HOME/.config/sketchybar/colors.sh"
 NAME=${NAME:-timer}
 STATE="${TMPDIR:-/tmp}/sketchybar_timer"

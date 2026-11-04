@@ -2,6 +2,7 @@
 # Wi-Fi icon and popup. Signal: green above -60 dBm, yellow above -70, orange below.
 
 export PATH="/usr/local/bin:$PATH"
+source "$HOME/.config/sketchybar/plugins/hover.sh"
 source "$HOME/.config/sketchybar/colors.sh"
 source "$HOME/.config/sketchybar/icons.sh"
 

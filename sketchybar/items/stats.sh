@@ -2,11 +2,11 @@
 # System stats: CPU graph and load, memory, GPU, network speed. Click any of them
 # for a popup with CPU temperature, fan speed, disk and uptime.
 
-POPUP_TOGGLE="/usr/local/bin/sketchybar --set cpu.percent popup.drawing=toggle; NAME=cpu.percent $PLUGIN_DIR/stats.sh"
+POPUP_TOGGLE="$PLUGIN_DIR/popup.sh cpu.percent; NAME=cpu.percent $PLUGIN_DIR/stats.sh"
 
 cpu_graph=(
   graph.color=$BLUE
-  graph.fill_color=0x408aadf4
+  graph.fill_color=$ACCENT_FILL
   label.drawing=off
   icon.drawing=off
   background.height=26

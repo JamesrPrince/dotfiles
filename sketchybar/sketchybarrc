@@ -87,4 +87,19 @@ status_bracket=(
 sketchybar --add bracket status control keys wifi battery volume_icon \
            --set status "${status_bracket[@]}"
 
+# Hover highlight on everything you can click. Items with a plugin handle it
+# there (plugins/hover.sh is sourced first); the rest use hover.sh directly.
+for item in apple.logo badge.slack badge.whatsapp badge.telegram badge.outlook keys \
+            mem gpu volume_icon; do
+  sketchybar --set $item script="$PLUGIN_DIR/hover.sh"
+done
+for item in apple.logo calendar weather timer github badge.slack badge.whatsapp \
+            badge.telegram badge.outlook control keys wifi disk volume_icon \
+            cpu.percent mem gpu; do
+  sketchybar --subscribe $item mouse.entered mouse.exited
+done
+
+# Window border follows the theme accent (updates a running JankyBorders)
+pgrep -xq borders && "$PLUGIN_DIR/theme.sh" borders
+
 sketchybar --update

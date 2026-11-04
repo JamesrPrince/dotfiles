@@ -3,6 +3,7 @@
 # use, GPU load, network speed on en0, and the popup's temperature, fan, disk, uptime.
 
 export PATH="/usr/local/bin:$PATH"
+source "$HOME/.config/sketchybar/plugins/hover.sh"
 source "$HOME/.config/sketchybar/colors.sh"
 source "$HOME/.config/sketchybar/icons.sh"
 

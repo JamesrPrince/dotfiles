@@ -15,9 +15,20 @@ CONFIG = os.path.expanduser("~/.aerospace.toml")
 CACHE = os.path.expanduser("~/.cache/sketchybar-keys-apps.json")
 SKETCHYBAR = "/usr/local/bin/sketchybar"
 FONT = "SF Pro"
-ACCENT = "0xff8aadf4"
-TEXT = "0xffcad3f5"
-DIM = "0xff939ab7"
+def theme_colors():
+    """Accent, text and dim colours of the active bar theme (colors.sh)."""
+    try:
+        out = subprocess.run(
+            ["/bin/bash", "-c", 'source "$HOME/.config/sketchybar/colors.sh"; echo $BLUE $WHITE $GREY'],
+            capture_output=True, text=True, timeout=2).stdout.split()
+        if len(out) == 3:
+            return out
+    except Exception:
+        pass
+    return ["0xff8aadf4", "0xffcad3f5", "0xff939ab7"]
+
+
+ACCENT, TEXT, DIM = theme_colors()
 
 MODS = {"ctrl": "⌃", "alt": "⌥", "shift": "⇧", "cmd": "⌘"}
 KEYS = {"backtick": "`", "slash": "/", "comma": ",", "minus": "-", "equal": "=",
@@ -118,6 +129,8 @@ def describe(cmds, cache):
         return "Service", "Equal sizes"
     if c == "":
         return "Resize", "Done"
+    if "theme.sh next" in c:
+        return "Layout", "Next bar theme"
     if "cheat sheet" in c or "keys.py" in c:
         return "Layout", "This cheat sheet"
     return "Layout", c
@@ -192,7 +205,7 @@ def main():
                  "label.padding_top=%d" % (6 if header and i else 0)]
     subprocess.run(args, capture_output=True)
     if len(sys.argv) > 1 and sys.argv[1] == "toggle":
-        subprocess.run([SKETCHYBAR, "--set", "keys", "popup.drawing=toggle"])
+        subprocess.run([os.path.expanduser("~/.config/sketchybar/plugins/popup.sh"), "keys"])
 
 
 if __name__ == "__main__":

@@ -2,6 +2,7 @@
 # Current weather in the bar, the next six 3-hour slots in the popup.
 # Keeps the last reading if the network is down.
 export PATH="/usr/local/bin:$PATH"
+source "$HOME/.config/sketchybar/plugins/hover.sh"
 source "$HOME/.config/sketchybar/colors.sh"
 NAME=${NAME:-weather}
 CACHE="${TMPDIR:-/tmp}/sketchybar_weather.json"
@@ -47,4 +48,5 @@ while IFS=$'\t' read -r day time code temp rain; do
   i=$((i+1))
 done < <(jq -r '.weather[0:2] | to_entries[] | .key as $d | .value.hourly[] |
                 [$d, .time, .weatherCode, .tempC, .chanceofrain] | @tsv' "$CACHE")
-sketchybar "${args[@]}" --set $NAME popup.drawing=toggle
+sketchybar "${args[@]}"
+"$HOME/.config/sketchybar/plugins/popup.sh" "$NAME"

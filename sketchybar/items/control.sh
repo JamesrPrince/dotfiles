@@ -1,6 +1,6 @@
 #!/bin/bash
 # Control centre: a brightness slider, toggles for Wi-Fi, Bluetooth, Focus, dark mode
-# and keep-awake, battery charge and health, and a shortcut to System Settings.
+# and keep-awake, battery charge and health, the bar theme, and System Settings.
 # Green icon = on.
 
 control=(
@@ -12,7 +12,7 @@ control=(
   padding_right=4
   popup.align=right
   script="$PLUGIN_DIR/control.sh"
-  click_script="/usr/local/bin/sketchybar --set control popup.drawing=toggle; NAME=control $PLUGIN_DIR/control.sh refresh"
+  click_script="$PLUGIN_DIR/popup.sh control; NAME=control $PLUGIN_DIR/control.sh refresh"
 )
 
 popup_row=(
@@ -49,7 +49,7 @@ sketchybar --add slider control.brightness popup.control 150 \
            --set control.brightness "${brightness[@]}"       \
            --subscribe control.brightness mouse.clicked
 
-for row in wifi bluetooth focus dark awake battery health settings; do
+for row in wifi bluetooth focus dark awake battery health theme settings; do
   sketchybar --add item control.$row popup.control \
              --set control.$row "${popup_row[@]}"    \
                    click_script="$PLUGIN_DIR/control.sh $row"
@@ -62,4 +62,7 @@ sketchybar --set control.wifi      icon=$WIFI                                  \
            --set control.awake     icon=$AWAKE                                 \
            --set control.battery   icon=$BATTERY_75                            \
            --set control.health    icon=$HEART icon.color=$RED                 \
+           --set control.theme     icon="🎨" icon.font="$FONT:Regular:13.0"     \
+                                   label="Theme: $THEME_NAME"                  \
+                                   click_script="$PLUGIN_DIR/theme.sh next"    \
            --set control.settings  icon=$GEAR icon.color=$GREY label="System Settings…"

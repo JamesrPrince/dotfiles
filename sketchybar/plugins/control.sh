@@ -3,6 +3,7 @@
 # battery, health, settings) it acts on that; with none, or "refresh", it redraws the rows.
 
 export PATH="/usr/local/bin:$PATH"
+source "$HOME/.config/sketchybar/plugins/hover.sh"
 source "$HOME/.config/sketchybar/colors.sh"
 source "$HOME/.config/sketchybar/icons.sh"
 

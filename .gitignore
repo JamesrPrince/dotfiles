@@ -8,3 +8,4 @@ sketchybar/helper/SketchyBarCal.app/Contents/MacOS/
 sketchybar/helper/SketchyBarCal.app/Contents/_CodeSignature/
 *.bak-*
 .DS_Store
+sketchybar/.theme

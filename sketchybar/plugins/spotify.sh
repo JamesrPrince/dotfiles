@@ -53,6 +53,8 @@ update ()
     SHUFFLE=$(osascript -e 'tell application "Spotify" to get shuffling')
     REPEAT=$(osascript -e 'tell application "Spotify" to get repeating')
     COVER=$(osascript -e 'tell application "Spotify" to get artwork url of current track')
+    NOW_PLAYING="$(echo "$INFO" | jq -r '.Name + (if (.Artist // "") != "" then "  ·  " + .Artist else "" end)' \
+                   | sed 's/\(.\{28\}\).*/\1…/')"
   fi
 
   args=()
@@ -72,9 +74,11 @@ update ()
            --set spotify.repeat icon.highlight=$REPEAT
            --set spotify.cover background.image="/tmp/cover.jpg"
                                background.color=0x00000000
-           --set spotify.anchor drawing=on                      )
+           --set spotify.anchor drawing=on label="$NOW_PLAYING"
+           --set spotify.progress drawing=on                    )
   else
     args+=(--set spotify.anchor drawing=off popup.drawing=off
+           --set spotify.progress drawing=off
            --set spotify.play icon=$SPOTIFY_PLAY                         )
   fi
   sketchybar -m "${args[@]}"
@@ -122,11 +126,21 @@ mouse_clicked () {
 }
 
 popup () {
-  sketchybar --set spotify.anchor popup.drawing=$1
+  "$HOME/.config/sketchybar/plugins/popup.sh" spotify.anchor $1
+}
+
+# Bar progress line; never asks Spotify (which would launch it) unless it runs
+progress() {
+  pgrep -xq Spotify || exit 0
+  read -r POS DUR <<< "$(osascript -e 'tell application "Spotify" to return ((player position as integer) as text) & " " & (((duration of current track) / 1000 as integer) as text)' 2>/dev/null)"
+  [ "${DUR:-0}" -gt 0 ] 2>/dev/null || exit 0
+  sketchybar --animate linear 20 --set spotify.progress slider.percentage=$(( POS * 100 / DUR ))
 }
 
 routine() {
   case "$NAME" in
+    "spotify.progress") progress
+    ;;
     "spotify.state") scroll
     ;;
     *) update

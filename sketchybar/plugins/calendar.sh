@@ -1,6 +1,7 @@
 #!/bin/bash
 
 export PATH="/usr/local/bin:$PATH"
+source "$HOME/.config/sketchybar/plugins/hover.sh"
 
 if [ "$SENDER" = "mouse.exited.global" ]; then
   sketchybar --set $NAME popup.drawing=off

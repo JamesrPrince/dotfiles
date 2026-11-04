@@ -11,9 +11,36 @@ spotify_anchor=(
   popup.height=150
   icon=$SPOTIFY
   icon.font="$FONT:Regular:25.0"
-  label.drawing=off
+  icon.color=$GREEN
+  label.font="$FONT:Semibold:12.0"
+  label.width=170
+  label.y_offset=3
+  label.padding_left=6
   drawing=off
   y_offset=2
+)
+
+# Thin progress line under the track name in the bar. It is added before the
+# anchor with width=0, so it draws under the anchor; padding_left moves it
+# past the icon to line up with the label.
+spotify_progress=(
+  script="$PLUGIN_DIR/spotify.sh"
+  update_freq=2
+  updates=when_shown
+  drawing=off
+  width=0
+  padding_left=40
+  padding_right=0
+  y_offset=-8
+  label.drawing=off
+  icon.drawing=off
+  slider.width=160
+  slider.background.height=3
+  slider.background.corner_radius=2
+  slider.background.color=$BACKGROUND_2
+  slider.highlight_color=$GREEN
+  slider.knob.drawing=off
+  slider.percentage=0
 )
 
 spotify_cover=(
@@ -146,6 +173,8 @@ spotify_controls=(
 )
 
 sketchybar --add event spotify_change $SPOTIFY_EVENT             \
+           --add slider spotify.progress center 160              \
+           --set spotify.progress "${spotify_progress[@]}"       \
            --add item spotify.anchor center                      \
            --set spotify.anchor "${spotify_anchor[@]}"           \
            --subscribe spotify.anchor mouse.entered mouse.exited \
