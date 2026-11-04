@@ -13,6 +13,8 @@ My macOS desktop: an [AeroSpace](https://github.com/nikitabobko/AeroSpace) tilin
 - **Volume**: click for the volume slider. Right-click lists audio outputs so you can switch.
 - **Stats**: click for a popup with CPU temperature, fan speed, disk and uptime.
 - **Privacy**: an orange mic or green camera shows only while one is in use.
+- **Unread badges**: Slack, WhatsApp, Telegram and Outlook show their unread count (from the Dock badge) only while they have one. Click to open the app.
+- **GitHub**: the GitHub icon turns white with a red count when you have unread notifications. Click for the latest 8 (each opens its page), right-click for github.com/notifications. Needs `gh auth login`.
 
 ## Install
 
@@ -26,7 +28,7 @@ git clone https://github.com/JamesrPrince/dotfiles ~/dotfiles
 ### Requirements
 
 ```bash
-brew tap FelixKratz/formulae && brew install sketchybar borders jq
+brew tap FelixKratz/formulae && brew install sketchybar borders jq gh
 brew install --cask nikitabobko/tap/aerospace font-sf-pro
 curl -L https://github.com/kvndrsslr/sketchybar-app-font/releases/latest/download/sketchybar-app-font.ttf -o ~/Library/Fonts/sketchybar-app-font.ttf
 xcode-select --install   # clang and swiftc for the helpers

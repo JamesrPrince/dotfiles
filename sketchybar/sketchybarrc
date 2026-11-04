@@ -67,6 +67,7 @@ source "$ITEM_DIR/spotify.sh"
 # Right, listed right to left
 source "$ITEM_DIR/calendar.sh"
 source "$ITEM_DIR/privacy.sh"
+source "$ITEM_DIR/notifications.sh"
 source "$ITEM_DIR/control.sh"
 source "$ITEM_DIR/keys.sh"
 source "$ITEM_DIR/wifi.sh"

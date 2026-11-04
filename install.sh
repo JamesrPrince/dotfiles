@@ -3,12 +3,12 @@
 # Anything already there is moved to a dated backup first, never deleted.
 set -euo pipefail
 
-need=(sketchybar aerospace jq borders python3)
+need=(sketchybar aerospace jq borders python3 gh)
 missing=(); for c in "${need[@]}"; do command -v "$c" >/dev/null || missing+=("$c"); done
 if [ ${#missing[@]} -gt 0 ]; then
   echo "Missing: ${missing[*]}"
   echo "Install with:"
-  echo "  brew tap FelixKratz/formulae && brew install sketchybar borders jq"
+  echo "  brew tap FelixKratz/formulae && brew install sketchybar borders jq gh"
   echo "  brew install --cask nikitabobko/tap/aerospace font-sf-pro"
   echo "  curl -L https://github.com/kvndrsslr/sketchybar-app-font/releases/latest/download/sketchybar-app-font.ttf -o ~/Library/Fonts/sketchybar-app-font.ttf"
   exit 1
