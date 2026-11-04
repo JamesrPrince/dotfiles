@@ -23,3 +23,8 @@ mode=(
 sketchybar --add item mode left \
            --set mode "${mode[@]}" \
            --subscribe mode aerospace_mode_change
+
+# Hidden item that hides the bar while a window is AeroSpace full screen
+sketchybar --add item fullscreen left \
+           --set fullscreen drawing=off updates=on script="$PLUGIN_DIR/fullscreen.sh" \
+           --subscribe fullscreen aerospace_workspace_change front_app_switched

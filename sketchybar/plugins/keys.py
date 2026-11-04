@@ -98,7 +98,7 @@ def describe(cmds, cache):
         return "Layout", "Tiles / flip direction"
     if c.startswith("layout accordion"):
         return "Layout", "Accordion"
-    if c == "fullscreen":
+    if c.startswith("fullscreen"):
         return "Layout", "Full screen"
     if c == "layout floating tiling":
         return "Service", "Float / tile window"

@@ -14,6 +14,10 @@ My macOS desktop: an [AeroSpace](https://github.com/nikitabobko/AeroSpace) tilin
 - **Stats**: click for a popup with CPU temperature, fan speed, disk and uptime.
 - **Privacy**: an orange mic or green camera shows only while one is in use.
 - **Unread badges**: Slack, WhatsApp, Telegram and Outlook show their unread count (from the Dock badge) only while they have one. Click to open the app.
+- **Weather**: current temperature from [wttr.in](https://wttr.in) (no key; location comes from your IP), refreshed every 15 minutes. Click for the next six 3-hour slots with rain chance.
+- **Focus timer**: click the clock icon for 25 minutes, right-click for 50, click again to stop. A sound and a notification mark the end.
+- **Warnings**: the battery shows below 60%, orange below 40%, red below 20%. A red disk item appears only when the startup disk has under 20 GB free.
+- **Full screen**: the bar hides while a window is AeroSpace full screen (`alt-shift-f`) and comes back when you leave it.
 - **GitHub**: the GitHub icon turns white with a red count when you have unread notifications. Click for the latest 8 (each opens its page), right-click for github.com/notifications. Needs `gh auth login`.
 
 ## Install

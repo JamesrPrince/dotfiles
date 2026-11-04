@@ -66,12 +66,15 @@ source "$ITEM_DIR/spotify.sh"
 
 # Right, listed right to left
 source "$ITEM_DIR/calendar.sh"
+source "$ITEM_DIR/weather.sh"
+source "$ITEM_DIR/timer.sh"
 source "$ITEM_DIR/privacy.sh"
 source "$ITEM_DIR/notifications.sh"
 source "$ITEM_DIR/control.sh"
 source "$ITEM_DIR/keys.sh"
 source "$ITEM_DIR/wifi.sh"
 source "$ITEM_DIR/battery.sh"
+source "$ITEM_DIR/disk.sh"
 source "$ITEM_DIR/volume.sh"
 source "$ITEM_DIR/stats.sh"
 

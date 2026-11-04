@@ -6,7 +6,7 @@ source "$CONFIG_DIR/colors.sh"
 [ -z "$MODE" ] && MODE=$(/usr/local/bin/aerospace list-modes --current 2>/dev/null)
 
 case "$MODE" in
-  service) sketchybar --set "$NAME" drawing=on label="SERVICE" background.color=$ORANGE ;;
-  resize)  sketchybar --set "$NAME" drawing=on label="RESIZE"  background.color=$MAGENTA ;;
+  service) sketchybar --animate tanh 12 --set "$NAME" drawing=on label="SERVICE" background.color=$ORANGE ;;
+  resize)  sketchybar --animate tanh 12 --set "$NAME" drawing=on label="RESIZE"  background.color=$MAGENTA ;;
   *)       sketchybar --set "$NAME" drawing=off ;;
 esac

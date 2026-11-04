@@ -132,7 +132,7 @@ gaps.outer.right =      8
     alt-minus = 'resize smart -50'
     alt-equal = 'resize smart +50'
 
-    alt-shift-f = 'fullscreen'
+    alt-shift-f = ['fullscreen', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_workspace_change']
 
     alt-1 = 'workspace 1'
     alt-2 = 'workspace 2'

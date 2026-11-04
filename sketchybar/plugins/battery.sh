@@ -2,6 +2,7 @@
 
 export PATH="/usr/local/bin:$PATH"
 # Battery shows only when it needs attention: below 60% and not charging.
+# Orange from 20-39%, red below 20%.
 
 source "$HOME/.config/sketchybar/icons.sh"
 source "$HOME/.config/sketchybar/colors.sh"
@@ -18,9 +19,11 @@ case ${PERCENTAGE} in
   ;;
   [6-8][0-9]) ICON=$BATTERY_75; DRAWING=off
   ;;
-  [3-5][0-9]) ICON=$BATTERY_50
+  [4-5][0-9]) ICON=$BATTERY_50
   ;;
-  [1-2][0-9]) ICON=$BATTERY_25; COLOR=$ORANGE
+  [2-3][0-9]) ICON=$BATTERY_25; COLOR=$ORANGE
+  ;;
+  1[0-9]) ICON=$BATTERY_25; COLOR=$RED
   ;;
   *) ICON=$BATTERY_0; COLOR=$RED
 esac
@@ -30,4 +33,4 @@ if [[ $CHARGING != "" ]]; then
   DRAWING=off
 fi
 
-sketchybar --set $NAME drawing=$DRAWING icon="$ICON" icon.color=$COLOR
+sketchybar --animate tanh 15 --set $NAME drawing=$DRAWING icon="$ICON" icon.color=$COLOR
