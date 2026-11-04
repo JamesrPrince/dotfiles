@@ -10,6 +10,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 
 CONFIG = os.path.expanduser("~/.aerospace.toml")
 CACHE = os.path.expanduser("~/.cache/sketchybar-keys-apps.json")
@@ -192,7 +193,25 @@ def build_rows():
     return lines
 
 
+def popup_open():
+    """Read the popup state before any rebuild: right after 56 rows are
+    re-added, a query can come back empty and the popup would never close."""
+    for _ in range(5):
+        out = subprocess.run([SKETCHYBAR, "--query", "keys"], capture_output=True, text=True).stdout
+        try:
+            return json.loads(out)["popup"]["drawing"] == "on"
+        except (ValueError, KeyError):
+            time.sleep(0.05)
+    return False
+
+
 def main():
+    toggle = len(sys.argv) > 1 and sys.argv[1] == "toggle"
+    popup = os.path.expanduser("~/.config/sketchybar/plugins/popup.sh")
+    if toggle and popup_open():
+        subprocess.run([popup, "keys", "off"])
+        return
+    close = popup + " keys off"
     args = [SKETCHYBAR, "--remove", "/keys\\.row\\..*/"]
     for i, (kind, text) in enumerate(build_rows()):
         name = "keys.row.%03d" % i
@@ -203,10 +222,11 @@ def main():
                                           "13.0" if header else "12.0"),
                  "label.color=" + (ACCENT if header else TEXT),
                  "padding_left=6", "padding_right=6",
-                 "label.padding_top=%d" % (6 if header and i else 0)]
+                 "label.padding_top=%d" % (6 if header and i else 0),
+                 "click_script=" + close]
     subprocess.run(args, capture_output=True)
-    if len(sys.argv) > 1 and sys.argv[1] == "toggle":
-        subprocess.run([os.path.expanduser("~/.config/sketchybar/plugins/popup.sh"), "keys"])
+    if toggle:
+        subprocess.run([popup, "keys", "on"])
 
 
 if __name__ == "__main__":
