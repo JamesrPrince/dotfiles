@@ -116,8 +116,9 @@ gaps.outer.right =      8
     run = 'move-node-to-workspace 5'
 
 [mode.main.binding]
-    alt-slash = 'layout tiles horizontal vertical'
-    alt-comma = 'layout accordion horizontal vertical'
+    # The layout pill in the bar follows these
+    alt-slash = ['layout tiles horizontal vertical', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_layout_change']
+    alt-comma = ['layout accordion horizontal vertical', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_layout_change']
 
     alt-h = 'focus left'
     alt-j = 'focus down'
@@ -178,8 +179,8 @@ gaps.outer.right =      8
 
 [mode.service.binding]
     esc = ['reload-config', 'mode main']
-    r = ['flatten-workspace-tree', 'mode main'] # reset layout
-    f = ['layout floating tiling', 'mode main'] # toggle floating/tiling
+    r = ['flatten-workspace-tree', 'mode main', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_layout_change'] # reset layout
+    f = ['layout floating tiling', 'mode main', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_layout_change'] # toggle floating/tiling
     backspace = ['close-all-windows-but-current', 'mode main']
     b = ['balance-sizes', 'mode main'] # equal sizes
 

@@ -59,6 +59,7 @@ sketchybar --default "${defaults[@]}"
 source "$ITEM_DIR/apple.sh"
 source "$ITEM_DIR/spaces.sh"
 source "$ITEM_DIR/mode.sh"
+source "$ITEM_DIR/layout.sh"
 source "$ITEM_DIR/front_app.sh"
 
 # Center
@@ -66,25 +67,28 @@ source "$ITEM_DIR/spotify.sh"
 
 # Right, listed right to left
 source "$ITEM_DIR/calendar.sh"
+source "$ITEM_DIR/next_event.sh"
 source "$ITEM_DIR/weather.sh"
 source "$ITEM_DIR/timer.sh"
+source "$ITEM_DIR/clipboard.sh"
 source "$ITEM_DIR/privacy.sh"
 source "$ITEM_DIR/notifications.sh"
 source "$ITEM_DIR/control.sh"
 source "$ITEM_DIR/keys.sh"
 source "$ITEM_DIR/wifi.sh"
+source "$ITEM_DIR/vpn.sh"
 source "$ITEM_DIR/battery.sh"
 source "$ITEM_DIR/disk.sh"
 source "$ITEM_DIR/volume.sh"
 source "$ITEM_DIR/stats.sh"
 
-# Status group: one pill around the control, keys, Wi-Fi, battery and volume items
+# Status group: one pill around the control, keys, Wi-Fi, VPN, battery and volume items
 status_bracket=(
   background.color=$BACKGROUND_1
   background.border_color=$BACKGROUND_2
   background.border_width=2
 )
-sketchybar --add bracket status control keys wifi battery volume_icon \
+sketchybar --add bracket status control keys wifi vpn battery volume_icon \
            --set status "${status_bracket[@]}"
 
 # Hover highlight on everything you can click. Items with a plugin handle it

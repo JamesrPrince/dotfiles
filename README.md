@@ -6,7 +6,7 @@ My macOS desktop: an [AeroSpace](https://github.com/nikitabobko/AeroSpace) tilin
 
 | Left | Right |
 | --- | --- |
-| Apple menu, AeroSpace workspaces with app icons, front app, Spotify | Calendar, mic/camera indicator, control centre, AeroSpace key cheat sheet, Wi-Fi, battery with percentage, volume, CPU / memory / GPU / network stats |
+| Apple menu, AeroSpace workspaces with app icons, layout pill, front app, Spotify | Calendar with next-event countdown, clipboard history, mic/camera indicator, control centre, AeroSpace key cheat sheet, Wi-Fi, VPN and public IP, battery with percentage, volume, CPU / memory / GPU / network stats |
 
 - **Control centre**: brightness slider, Wi-Fi, Bluetooth, Focus, dark mode and keep-awake toggles, battery charge and health, System Settings.
 - **Calendar**: left-click shows today's and tomorrow's events. Right-click toggles zen mode, which hides the busy items.
@@ -22,6 +22,10 @@ My macOS desktop: an [AeroSpace](https://github.com/nikitabobko/AeroSpace) tilin
 - **Themes**: Catppuccin Macchiato, Tokyo Night and Gruvbox. `alt-shift-t` or the Theme row in the control centre moves to the next one; the window borders follow. The choice is kept in `sketchybar/.theme` (git-ignored).
 - **Hover and popups**: clickable items light up under the pointer, and popups slide in.
 - **Spotify**: the track and artist sit in the bar with a thin progress line under them while music plays. Click for album art and controls.
+- **Next event**: in the hour before your next timed event, its name and a countdown sit left of the clock; orange from 10 minutes, red at the start. Click opens Calendar.
+- **Layout pill**: shows the focused window's layout (`↔ TILES`, `↕ ACCORDION`, `FLOATING`). Click switches tiles and accordion, right-click turns it horizontal or vertical.
+- **VPN and IP**: a green padlock while a VPN is connected, a globe otherwise, with the country your traffic leaves from (from [ifconfig.co](https://ifconfig.co), ipinfo.io as fallback). Click for the public IP (click to copy), city, and a connect/disconnect row for each VPN in System Settings.
+- **Clipboard history**: click the copy icon for the last 10 texts you copied; click one to copy it again. Copies a password manager marks as concealed are never kept. History lives in `~/.cache/sketchybar/clipboard.json` (25 entries, readable only by you).
 - **Disk warning**: a red disk item appears only when the startup disk has under 20 GB free.
 - **Full screen**: the bar hides while a window is AeroSpace full screen (`alt-shift-f`) and comes back when you leave it.
 - **GitHub**: the GitHub icon turns white with a red count when you have unread notifications. Click for the latest 8 (each opens its page), right-click for github.com/notifications. Needs `gh auth login`.
@@ -54,6 +58,7 @@ Small native programs in `sketchybar/helper/`, compiled by `build.sh` (binaries 
 | --- | --- |
 | `smc` | CPU temperature and fan speed |
 | `wifi` | Wi-Fi name and signal |
+| `clip` | clipboard history |
 | `brightness` | read and set display brightness |
 | `audio` | list and switch audio outputs |
 | `camera` | is the camera in use |

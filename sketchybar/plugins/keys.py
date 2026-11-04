@@ -81,7 +81,8 @@ def app_name(bundle_id, cache):
 
 def describe(cmds, cache):
     """Map a binding's commands to (section, description)."""
-    cmds = [c for c in cmds if c != "mode main"]
+    # Bar refresh triggers are plumbing, not what the key does
+    cmds = [c for c in cmds if c != "mode main" and "sketchybar --trigger" not in c]
     c = " ".join(cmds)
     if m := re.match(r"exec-and-forget open -b (\S+)", c):
         return "Open apps", app_name(m.group(1), cache)

@@ -53,3 +53,9 @@ export HEART=􀊵
 export BOLT=􀋦
 export SPEAKER=􀊩
 export FOCUS=􀆺
+
+# Batch E: VPN, countdown, clipboard
+export GLOBE=􀆪
+export LOCK_FILL=􀎡
+export CLOCK=􀐫
+export COPY=􀉁
