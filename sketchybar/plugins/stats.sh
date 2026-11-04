@@ -1,6 +1,6 @@
 #!/bin/bash
 # Feeds the stats items every few seconds: CPU load (graph + %), memory in
-# use, network speed on en0, and the popup's temperature, fan, disk, uptime.
+# use, GPU load, network speed on en0, and the popup's temperature, fan, disk, uptime.
 
 export PATH="/usr/local/bin:$PATH"
 source "$HOME/.config/sketchybar/colors.sh"
@@ -19,6 +19,14 @@ CPU_COLOR=$BLUE
 # Memory: 100 minus the system-wide free percentage
 FREE=$(memory_pressure -Q 2>/dev/null | awk -F': ' '/free percentage/{gsub("%","",$2); print $2}')
 MEM=$(( 100 - ${FREE:-100} ))
+
+# GPU: busiest graphics card (Intel or Radeon), from IOAccelerator stats
+GPU=$(ioreg -r -d 1 -c IOAccelerator | grep -o '"PerformanceStatistics" = {[^}]*}' \
+      | grep -o '"Device Utilization %"=[0-9]*' | cut -d= -f2 | sort -n | tail -1)
+GPU=${GPU:-0}
+GPU_COLOR=$GREEN
+[ "$GPU" -ge 50 ] && GPU_COLOR=$YELLOW
+[ "$GPU" -ge 80 ] && GPU_COLOR=$RED
 
 # Network: bytes per second on en0 since the last run
 human() {
@@ -43,6 +51,7 @@ args=(--push cpu.graph "$(awk -v c="$CPU" 'BEGIN{printf "%.2f", c/100}')"
       --set cpu.percent label="${CPU}%" icon.color=$CPU_COLOR
       --set cpu.graph graph.color=$CPU_COLOR
       --set mem label="${MEM}%"
+      --set gpu label="${GPU}%" icon.color=$GPU_COLOR
       --set net.up label="$NET_UP $UP_LABEL"
       --set net.down label="$NET_DOWN $DOWN_LABEL")
 

@@ -6,7 +6,7 @@ My macOS desktop: an [AeroSpace](https://github.com/nikitabobko/AeroSpace) tilin
 
 | Left | Right |
 | --- | --- |
-| Apple menu, AeroSpace workspaces with app icons, front app, Spotify | Calendar, mic/camera indicator, control centre, AeroSpace key cheat sheet, Wi-Fi, battery, volume, CPU / memory / network stats |
+| Apple menu, AeroSpace workspaces with app icons, front app, Spotify | Calendar, mic/camera indicator, control centre, AeroSpace key cheat sheet, Wi-Fi, battery with percentage, volume, CPU / memory / GPU / network stats |
 
 - **Control centre**: brightness slider, Wi-Fi, Bluetooth, Focus, dark mode and keep-awake toggles, battery charge and health, System Settings.
 - **Calendar**: left-click shows today's and tomorrow's events. Right-click toggles zen mode, which hides the busy items.
@@ -16,7 +16,9 @@ My macOS desktop: an [AeroSpace](https://github.com/nikitabobko/AeroSpace) tilin
 - **Unread badges**: Slack, WhatsApp, Telegram and Outlook show their unread count (from the Dock badge) only while they have one. Click to open the app.
 - **Weather**: current temperature from [wttr.in](https://wttr.in) (no key; location comes from your IP), refreshed every 15 minutes. Click for the next six 3-hour slots with rain chance.
 - **Focus timer**: click the clock icon for 25 minutes, right-click for 50, click again to stop. A sound and a notification mark the end.
-- **Warnings**: the battery shows below 60%, orange below 40%, red below 20%. A red disk item appears only when the startup disk has under 20 GB free.
+- **Battery**: always shown with its percentage. Green while charging, orange below 40%, red below 20%.
+- **GPU**: load of the busiest graphics card (Intel UHD or Radeon), green, yellow from 50%, red from 80%.
+- **Disk warning**: a red disk item appears only when the startup disk has under 20 GB free.
 - **Full screen**: the bar hides while a window is AeroSpace full screen (`alt-shift-f`) and comes back when you leave it.
 - **GitHub**: the GitHub icon turns white with a red count when you have unread notifications. Click for the latest 8 (each opens its page), right-click for github.com/notifications. Needs `gh auth login`.
 
@@ -65,5 +67,5 @@ Small native programs in `sketchybar/helper/`, compiled by `build.sh` (binaries 
 `alt-shift-/` shows the AeroSpace key cheat sheet in the bar. Bindings live in `aerospace/aerospace.toml`.
 
 - **Modes**: `alt-shift-;` service mode, `alt-shift-r` resize mode (h/j/k/l or arrows, `b` equal sizes, esc to leave). A pill next to the workspaces shows which mode is on; click it to go back to normal.
-- **App workspaces**: new windows open on a fixed workspace: 3 Obsidian and Notion, 5 Excel, 6 Outlook, 7 WhatsApp, Telegram and Slack, 8 Spotify. Browsers, terminals and the rest open where you are.
+- **Workspaces**: five (`alt-1` to `alt-5`). New windows open on a fixed one: 3 Obsidian and Notion, 4 Excel and Outlook, 5 WhatsApp, Telegram, Slack and Spotify. Browsers, terminals and the rest open where you are.
 - **Floating**: System Settings, Calculator, Activity Monitor, Archive Utility, Finder's Get Info, System Information, Disk Utility and FaceTime float instead of tiling.

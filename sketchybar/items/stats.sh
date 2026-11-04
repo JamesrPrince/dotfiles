@@ -1,5 +1,5 @@
 #!/bin/bash
-# System stats: CPU graph and load, memory, network speed. Click any of them
+# System stats: CPU graph and load, memory, GPU, network speed. Click any of them
 # for a popup with CPU temperature, fan speed, disk and uptime.
 
 POPUP_TOGGLE="/usr/local/bin/sketchybar --set cpu.percent popup.drawing=toggle; NAME=cpu.percent $PLUGIN_DIR/stats.sh"
@@ -48,6 +48,19 @@ mem=(
   click_script="$POPUP_TOGGLE"
 )
 
+gpu=(
+  icon=GPU
+  icon.color=$GREEN
+  icon.font="$FONT:Heavy:9.0"
+  label="--%"
+  label.font="$FONT:Heavy:12.0"
+  label.width=34
+  label.align=right
+  padding_left=8
+  padding_right=2
+  click_script="$POPUP_TOGGLE"
+)
+
 net=(
   icon.drawing=off
   label.font="$FONT:Heavy:9.0"
@@ -74,6 +87,8 @@ sketchybar --add graph cpu.graph right 100       \
            --subscribe cpu.percent system_woke   \
            --add item mem right                  \
            --set mem "${mem[@]}"                 \
+           --add item gpu right                  \
+           --set gpu "${gpu[@]}"                 \
            --add item net.down right             \
            --set net.down "${net[@]}" y_offset=-5 width=0 \
            --add item net.up right               \
@@ -89,7 +104,7 @@ sketchybar --set stats.temp   icon=$THERMOMETER icon.color=$ORANGE \
            --set stats.disk   icon=$DISK icon.color=$BLUE          \
            --set stats.uptime icon=$ACTIVITY icon.color=$GREEN
 
-sketchybar --add bracket stats cpu.graph cpu.percent mem net.up net.down \
+sketchybar --add bracket stats cpu.graph cpu.percent mem gpu net.up net.down \
            --set stats background.color=$BACKGROUND_1                    \
                        background.border_color=$BACKGROUND_2             \
                        background.border_width=2                         \
