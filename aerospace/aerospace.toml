@@ -1,0 +1,140 @@
+# AeroSpace config (based on the bundled default-config.toml, v0.21.3)
+# Reference: https://nikitabobko.github.io/AeroSpace/guide
+
+config-version = 2
+
+# SketchyBar starts with AeroSpace, so the bar always has a server to query
+after-startup-command = [
+    'exec-and-forget /usr/local/bin/sketchybar',
+    # Highlight border on the focused window (JankyBorders)
+    'exec-and-forget /usr/local/bin/borders active_color=0xff8aadf4 inactive_color=0x00000000 width=5.0 style=round hidpi=on'
+]
+
+# Tell SketchyBar which workspace is focused
+exec-on-workspace-change = ['/bin/bash', '-c',
+    '/usr/local/bin/sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE'
+]
+
+# Refresh the workspace app icons when windows open, close or move
+on-focus-changed = ['exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_workspace_change']
+
+start-at-login = true
+auto-reload-config = true
+
+enable-normalization-flatten-containers = true
+enable-normalization-opposite-orientation-for-nested-containers = true
+
+accordion-padding = 30
+default-root-container-layout = 'tiles'
+default-root-container-orientation = 'auto'
+
+on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
+automatically-unhide-macos-hidden-apps = false
+
+# Numbered workspaces only: alt-<letter> stays free for typing accents and symbols
+persistent-workspaces = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+
+on-mode-changed = []
+focus-follows-mouse.enabled = false
+key-mapping.preset = 'qwerty'
+
+# outer.top leaves room for the 39px SketchyBar (10px y_offset) at the top
+gaps.inner.horizontal = 8
+gaps.inner.vertical =   8
+gaps.outer.left =       8
+gaps.outer.bottom =     8
+gaps.outer.top =        57
+gaps.outer.right =      8
+
+# Windows that should float instead of tiling
+[[on-window-detected]]
+    if.app-id = 'com.apple.systempreferences'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-id = 'com.apple.calculator'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-id = 'com.apple.ActivityMonitor'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-id = 'com.apple.archiveutility'
+    run = 'layout floating'
+
+[mode.main.binding]
+    alt-slash = 'layout tiles horizontal vertical'
+    alt-comma = 'layout accordion horizontal vertical'
+
+    alt-h = 'focus left'
+    alt-j = 'focus down'
+    alt-k = 'focus up'
+    alt-l = 'focus right'
+
+    alt-shift-h = 'move left'
+    alt-shift-j = 'move down'
+    alt-shift-k = 'move up'
+    alt-shift-l = 'move right'
+
+    alt-minus = 'resize smart -50'
+    alt-equal = 'resize smart +50'
+
+    alt-shift-f = 'fullscreen'
+
+    alt-1 = 'workspace 1'
+    alt-2 = 'workspace 2'
+    alt-3 = 'workspace 3'
+    alt-4 = 'workspace 4'
+    alt-5 = 'workspace 5'
+    alt-6 = 'workspace 6'
+    alt-7 = 'workspace 7'
+    alt-8 = 'workspace 8'
+    alt-9 = 'workspace 9'
+
+    alt-shift-1 = 'move-node-to-workspace 1'
+    alt-shift-2 = 'move-node-to-workspace 2'
+    alt-shift-3 = 'move-node-to-workspace 3'
+    alt-shift-4 = 'move-node-to-workspace 4'
+    alt-shift-5 = 'move-node-to-workspace 5'
+    alt-shift-6 = 'move-node-to-workspace 6'
+    alt-shift-7 = 'move-node-to-workspace 7'
+    alt-shift-8 = 'move-node-to-workspace 8'
+    alt-shift-9 = 'move-node-to-workspace 9'
+
+    # Cycle through the windows in this workspace, wrapping at the end
+    alt-backtick = 'focus --boundaries-action wrap-around-the-workspace dfs-next'
+    alt-shift-backtick = 'focus --boundaries-action wrap-around-the-workspace dfs-prev'
+
+    alt-tab = 'workspace-back-and-forth'
+    alt-shift-tab = 'move-workspace-to-monitor --wrap-around next'
+
+    alt-shift-semicolon = 'mode service'
+
+    # Key-binding cheat sheet (SketchyBar popup, built from this file)
+    alt-shift-slash = 'exec-and-forget /usr/bin/python3 ~/.config/sketchybar/plugins/keys.py toggle'
+
+    # App launchers: ctrl-alt-<letter> opens or focuses the app (by bundle id)
+    ctrl-alt-b = 'exec-and-forget open -b com.brave.Browser'
+    ctrl-alt-s = 'exec-and-forget open -b com.apple.Safari'
+    ctrl-alt-o = 'exec-and-forget open -b md.obsidian'
+    ctrl-alt-t = 'exec-and-forget open -b com.mitchellh.ghostty'
+    ctrl-alt-w = 'exec-and-forget open -b dev.warp.Warp-Stable'
+    ctrl-alt-c = 'exec-and-forget open -b com.microsoft.VSCodeInsiders'
+    ctrl-alt-a = 'exec-and-forget open -b com.anthropic.claudefordesktop'
+    ctrl-alt-x = 'exec-and-forget open -b com.microsoft.Excel'
+    ctrl-alt-e = 'exec-and-forget open -b com.microsoft.Outlook'
+    ctrl-alt-h = 'exec-and-forget open -b net.whatsapp.WhatsApp'
+    ctrl-alt-g = 'exec-and-forget open -b ru.keepcoder.Telegram'
+    ctrl-alt-m = 'exec-and-forget open -b com.spotify.client'
+
+[mode.service.binding]
+    esc = ['reload-config', 'mode main']
+    r = ['flatten-workspace-tree', 'mode main'] # reset layout
+    f = ['layout floating tiling', 'mode main'] # toggle floating/tiling
+    backspace = ['close-all-windows-but-current', 'mode main']
+
+    alt-shift-h = ['join-with left', 'mode main']
+    alt-shift-j = ['join-with down', 'mode main']
+    alt-shift-k = ['join-with up', 'mode main']
+    alt-shift-l = ['join-with right', 'mode main']

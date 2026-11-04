@@ -1,0 +1,85 @@
+#!/bin/bash
+# SketchyBar config, paired with AeroSpace (~/.aerospace.toml)
+# Styled after FelixKratz/dotfiles (e6288b3), with yabai swapped for AeroSpace
+
+export PATH="/usr/local/bin:$PATH"
+
+source "$HOME/.config/sketchybar/colors.sh"
+source "$HOME/.config/sketchybar/icons.sh"
+
+ITEM_DIR="$HOME/.config/sketchybar/items"
+PLUGIN_DIR="$HOME/.config/sketchybar/plugins"
+
+FONT="SF Pro" # Needs Regular, Bold, Semibold, Heavy and Black
+PADDINGS=3
+
+bar=(
+  height=39
+  color=$BAR_COLOR
+  shadow=on
+  position=top
+  sticky=on
+  topmost=window
+  padding_right=10
+  padding_left=10
+  corner_radius=9
+  y_offset=10
+  margin=10
+  blur_radius=20
+  notch_width=0
+)
+
+sketchybar --bar "${bar[@]}"
+
+defaults=(
+  updates=when_shown
+  icon.font="$FONT:Bold:14.0"
+  icon.color=$ICON_COLOR
+  icon.padding_left=$PADDINGS
+  icon.padding_right=$PADDINGS
+  label.font="$FONT:Semibold:13.0"
+  label.color=$LABEL_COLOR
+  label.padding_left=$PADDINGS
+  label.padding_right=$PADDINGS
+  padding_right=$PADDINGS
+  padding_left=$PADDINGS
+  background.height=30
+  background.corner_radius=9
+  popup.background.border_width=2
+  popup.background.corner_radius=9
+  popup.background.border_color=$POPUP_BORDER_COLOR
+  popup.background.color=$POPUP_BACKGROUND_COLOR
+  popup.blur_radius=20
+  popup.background.shadow.drawing=on
+)
+
+sketchybar --default "${defaults[@]}"
+
+# Left
+source "$ITEM_DIR/apple.sh"
+source "$ITEM_DIR/spaces.sh"
+source "$ITEM_DIR/front_app.sh"
+
+# Center
+source "$ITEM_DIR/spotify.sh"
+
+# Right, listed right to left
+source "$ITEM_DIR/calendar.sh"
+source "$ITEM_DIR/privacy.sh"
+source "$ITEM_DIR/control.sh"
+source "$ITEM_DIR/keys.sh"
+source "$ITEM_DIR/wifi.sh"
+source "$ITEM_DIR/battery.sh"
+source "$ITEM_DIR/volume.sh"
+source "$ITEM_DIR/stats.sh"
+
+# Status group: one pill around the control, keys, Wi-Fi, battery and volume items
+status_bracket=(
+  background.color=$BACKGROUND_1
+  background.border_color=$BACKGROUND_2
+  background.border_width=2
+)
+sketchybar --add bracket status control keys wifi battery volume_icon \
+           --set status "${status_bracket[@]}"
+
+sketchybar --update

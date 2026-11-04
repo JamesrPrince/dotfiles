@@ -1,0 +1,10 @@
+# Compiled helpers (built by sketchybar/helper/build.sh)
+sketchybar/helper/smc
+sketchybar/helper/brightness
+sketchybar/helper/audio
+sketchybar/helper/camera
+sketchybar/helper/wifi
+sketchybar/helper/SketchyBarCal.app/Contents/MacOS/
+sketchybar/helper/SketchyBarCal.app/Contents/_CodeSignature/
+*.bak-*
+.DS_Store
