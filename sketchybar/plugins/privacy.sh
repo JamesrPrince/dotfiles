@@ -9,5 +9,5 @@ M=off; C=off
 DRAW=off
 [ $M = on ] || [ $C = on ] && DRAW=on
 # Hidden while zen mode hides the clock icon.
-[ "$(sketchybar --query calendar | jq -r '.icon.drawing')" = "off" ] && DRAW=off
+[ -f "${TMPDIR:-/tmp}/sketchybar_zen" ] && DRAW=off
 sketchybar --set $NAME drawing=$DRAW icon.drawing=$M label.drawing=$C

@@ -2,9 +2,17 @@
 
 export PATH="/usr/local/bin:$PATH"
 # Click the clock: hide everything but the workspaces and the time, or bring it back.
+# The flag file tells the items that show themselves (privacy, badges, layout) to stay hidden.
+ZEN="${TMPDIR:-/tmp}/sketchybar_zen"
 
 zen_on() {
+  touch "$ZEN"
   sketchybar --set apple.logo drawing=off \
+             --set layout drawing=off \
+             --set gpu drawing=off \
+             --set vpn drawing=off \
+             --set clipboard drawing=off \
+             --set '/badge\..*/' drawing=off \
              --set separator drawing=off \
              --set front_app drawing=off \
              --set calendar icon.drawing=off \
@@ -24,7 +32,12 @@ zen_on() {
 }
 
 zen_off() {
+  rm -f "$ZEN"
   sketchybar --set apple.logo drawing=on \
+             --set gpu drawing=on \
+             --set vpn drawing=on \
+             --set clipboard drawing=on \
+             --trigger aerospace_layout_change \
              --set separator drawing=on \
              --set front_app drawing=on \
              --set calendar icon.drawing=on \
@@ -46,7 +59,7 @@ if [ "$1" = "on" ]; then
 elif [ "$1" = "off" ]; then
   zen_off
 else
-  if [ "$(sketchybar --query apple.logo | jq -r ".geometry.drawing")" = "on" ]; then
+  if [ ! -f "$ZEN" ]; then
     zen_on
   else
     zen_off

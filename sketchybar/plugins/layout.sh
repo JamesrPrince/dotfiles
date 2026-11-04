@@ -9,6 +9,9 @@ if [ "$SENDER" = "mouse.clicked" ]; then
   else aerospace layout tiles accordion; fi
 fi
 
+# Zen mode hides the pill
+[ -f "${TMPDIR:-/tmp}/sketchybar_zen" ] && { sketchybar --set "$NAME" drawing=off; exit 0; }
+
 L=$(aerospace list-windows --focused --format '%{window-parent-container-layout}' 2>/dev/null)
 case "$L" in
   h_tiles)     LABEL="↔ TILES" ;;

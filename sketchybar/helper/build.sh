@@ -5,6 +5,7 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 clang -O2 -framework IOKit -o smc smc.c
+clang -O2 -o cpu cpu.c
 clang -O2 -F /System/Library/PrivateFrameworks -framework DisplayServices -framework CoreGraphics -o brightness brightness.c
 clang -O2 -framework CoreAudio -framework CoreFoundation -o audio audio.c
 clang -O2 -framework CoreMediaIO -framework CoreFoundation -o camera camera.c
@@ -16,4 +17,4 @@ mkdir -p SketchyBarCal.app/Contents/MacOS
 clang -O2 -framework EventKit -framework Foundation -o SketchyBarCal.app/Contents/MacOS/cal cal.m
 codesign -s - --force SketchyBarCal.app
 
-echo "Helpers built: smc brightness audio camera wifi clip SketchyBarCal.app"
+echo "Helpers built: smc cpu brightness audio camera wifi clip SketchyBarCal.app"

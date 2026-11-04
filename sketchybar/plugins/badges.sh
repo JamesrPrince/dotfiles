@@ -9,11 +9,10 @@ badge_label() { sed -n 's/.*"label"="\([^"]*\)".*/\1/p' <<<"$1"; }
 args=()
 for pair in $BADGE_APPS; do
   id=${pair%%:*}; name=badge.${pair##*:}
-  asn=$(lsappinfo find bundleid="$id" 2>/dev/null | head -1)
-  count=""
-  [ -n "$asn" ] && count=$(badge_label "$(lsappinfo info -only StatusLabel "$asn")")
+  count=$(badge_label "$(lsappinfo info -only StatusLabel -app "$id" 2>/dev/null)")
+  [ -f "${TMPDIR:-/tmp}/sketchybar_zen" ] && count=""
   if [ -n "$count" ]; then
-    __icon_map "$(lsappinfo info -only name "$asn" | sed -n 's/.*"LSDisplayName"="\(.*\)".*/\1/p')"
+    __icon_map "$(lsappinfo info -only name -app "$id" | sed -n 's/.*"LSDisplayName"="\(.*\)".*/\1/p')"
     args+=(--set "$name" drawing=on icon="$icon_result" label="$count")
   else
     args+=(--set "$name" drawing=off)

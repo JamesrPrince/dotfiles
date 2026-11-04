@@ -57,6 +57,7 @@ Small native programs in `sketchybar/helper/`, compiled by `build.sh` (binaries 
 | Helper | Does |
 | --- | --- |
 | `smc` | CPU temperature and fan speed |
+| `cpu` | CPU load since the last read, without the one-second wait of iostat |
 | `wifi` | Wi-Fi name and signal |
 | `clip` | clipboard history |
 | `brightness` | read and set display brightness |

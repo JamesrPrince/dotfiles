@@ -10,9 +10,9 @@ source "$HOME/.config/sketchybar/icons.sh"
 HELPER="$HOME/.config/sketchybar/helper"
 STATE="${TMPDIR:-/tmp}/sketchybar_net"
 
-# CPU: one-second iostat sample, user + system
-read -r US SY ID <<< "$(iostat -n0 -c2 -w1 | tail -1 | awk '{print $1, $2, $3}')"
-CPU=$(( ${US:-0} + ${SY:-0} ))
+# CPU: user + system load since the last run (the helper keeps the tick counts)
+CPU=$("$HELPER/cpu" "${TMPDIR:-/tmp}/sketchybar_cpu" 2>/dev/null)
+CPU=${CPU:-0}
 CPU_COLOR=$BLUE
 [ "$CPU" -ge 50 ] && CPU_COLOR=$YELLOW
 [ "$CPU" -ge 80 ] && CPU_COLOR=$RED

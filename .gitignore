@@ -1,5 +1,6 @@
 # Compiled helpers (built by sketchybar/helper/build.sh)
 sketchybar/helper/smc
+sketchybar/helper/cpu
 sketchybar/helper/brightness
 sketchybar/helper/audio
 sketchybar/helper/camera

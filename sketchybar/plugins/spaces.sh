@@ -9,14 +9,17 @@ source "$HOME/.config/sketchybar/colors.sh"
 
 FOCUSED="${FOCUSED_WORKSPACE:-$(aerospace list-workspaces --focused)}"
 
+# One AeroSpace call for every window, instead of one per workspace
+WINDOWS=$(aerospace list-windows --all --format '%{workspace}|%{app-name}' | sort -u)
+
 args=()
 for sid in $(aerospace list-workspaces --all); do
   icons=""
-  while IFS= read -r app; do
-    [ -n "$app" ] || continue
+  while IFS='|' read -r ws app; do
+    [ "$ws" = "$sid" ] && [ -n "$app" ] || continue
     __icon_map "$app"
     icons+="$icon_result "
-  done <<< "$(aerospace list-windows --workspace "$sid" --format '%{app-name}' | sort -u)"
+  done <<< "$WINDOWS"
 
   selected=off
   width=dynamic
