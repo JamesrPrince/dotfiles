@@ -69,6 +69,18 @@ gaps.outer.right =      8
     if.window-title-regex-substring = ' Info$'
     run = 'layout floating'
 
+# Finder transient dialogs: copy/move progress, Connect to Server, alerts.
+# First match wins, so these sit above the tiling rule.
+[[on-window-detected]]
+    if.app-id = 'com.apple.finder'
+    if.window-title-regex-substring = '^(Copy|Move|Connect to Server|Delete|Empty Trash|Alias|Compress|Duplicate|Verifying|Preparing|Connecting)'
+    run = 'layout floating'
+
+# Everything else in Finder (browser windows) tiles
+[[on-window-detected]]
+    if.app-id = 'com.apple.finder'
+    run = 'layout tiling'
+
 [[on-window-detected]]
     if.app-id = 'com.apple.SystemProfiler'
     run = 'layout floating'
