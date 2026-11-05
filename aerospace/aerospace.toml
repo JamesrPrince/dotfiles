@@ -171,6 +171,9 @@ gaps.outer.right =      8
     alt-minus = 'resize smart -50'
     alt-equal = 'resize smart +50'
 
+    # Toggle the focused window between floating and tiling
+    alt-shift-space = ['layout floating tiling', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_layout_change']
+
     alt-shift-f = ['fullscreen', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_workspace_change']
 
     alt-1 = 'workspace 1'
