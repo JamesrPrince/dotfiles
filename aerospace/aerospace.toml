@@ -120,7 +120,19 @@ gaps.outer.right =      8
     run = 'layout floating'
 
 # Apps that always open on their own workspace (new windows only)
-# 3 notes, 4 work (spreadsheets, mail), 5 chat and music
+# 1 browser, 2 terminal and Claude, 3 notes, 4 work (spreadsheets, mail), 5 chat and music
+[[on-window-detected]]
+    if.app-id = 'com.brave.Browser'
+    run = 'move-node-to-workspace 1'
+
+[[on-window-detected]]
+    if.app-id = 'com.mitchellh.ghostty'
+    run = 'move-node-to-workspace 2'
+
+[[on-window-detected]]
+    if.app-id = 'com.anthropic.claudefordesktop'
+    run = 'move-node-to-workspace 2'
+
 [[on-window-detected]]
     if.app-id = 'md.obsidian'
     run = 'move-node-to-workspace 3'
