@@ -37,7 +37,7 @@ git clone https://github.com/JamesrPrince/dotfiles ~/dotfiles
 ~/dotfiles/install.sh
 ```
 
-`install.sh` checks the tools are installed, moves any existing `~/.config/sketchybar` and `~/.aerospace.toml` to a dated `.bak-` copy, symlinks the repo into place and compiles the helpers. On Apple Silicon it rewrites `/usr/local/bin` to `/opt/homebrew/bin` in the configs.
+`install.sh` checks the tools are installed, moves any existing `~/.config/sketchybar`, `~/.aerospace.toml` and `~/.config/ghostty` to a dated `.bak-` copy, symlinks the repo into place and compiles the helpers. On Apple Silicon it rewrites `/usr/local/bin` to `/opt/homebrew/bin` in the configs.
 
 ### Requirements
 

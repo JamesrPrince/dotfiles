@@ -1,5 +1,5 @@
 #!/bin/bash
-# Links this repo's SketchyBar and AeroSpace config into place and builds the helpers.
+# Links this repo's SketchyBar, AeroSpace and Ghostty config into place and builds the helpers.
 # Anything already there is moved to a dated backup first, never deleted.
 set -euo pipefail
 
@@ -37,6 +37,7 @@ fi
 
 link sketchybar "$HOME/.config/sketchybar"
 link aerospace/aerospace.toml "$HOME/.aerospace.toml"
+link ghostty "$HOME/.config/ghostty"
 
 chmod +x "$DOT"/sketchybar/sketchybarrc "$DOT"/sketchybar/items/*.sh "$DOT"/sketchybar/plugins/*
 "$DOT/sketchybar/helper/build.sh"
