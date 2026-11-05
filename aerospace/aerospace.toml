@@ -76,6 +76,13 @@ gaps.outer.right =      8
     if.window-title-regex-substring = '^(Copy|Move|Connect to Server|Delete|Empty Trash|Alias|Compress|Duplicate|Verifying|Preparing|Connecting)'
     run = 'layout floating'
 
+# Quick Look (Space bar) is a Finder window titled "Quick Look" (checked 2026-11-06);
+# without this the tiling rule below catches it and reflows the workspace
+[[on-window-detected]]
+    if.app-id = 'com.apple.finder'
+    if.window-title-regex-substring = '^(Quick Look|Finder Settings)$'
+    run = 'layout floating'  # macOS centres the panel itself once it floats
+
 # Everything else in Finder (browser windows) tiles
 [[on-window-detected]]
     if.app-id = 'com.apple.finder'
@@ -91,6 +98,25 @@ gaps.outer.right =      8
 
 [[on-window-detected]]
     if.app-id = 'com.apple.FaceTime'
+    run = 'layout floating'
+
+# Picture in Picture: the system PiP (Safari, TV, FaceTime) and browser PiP windows
+[[on-window-detected]]
+    if.app-id = 'com.apple.PIPAgent'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.window-title-regex-substring = '(?i)^picture[- ]in[- ]picture$'
+    run = 'layout floating'
+
+# Screenshot toolbar (cmd-shift-5)
+[[on-window-detected]]
+    if.app-id = 'com.apple.screencaptureui'
+    run = 'layout floating'
+
+# 1Password: Quick Access popup and the vault window both float
+[[on-window-detected]]
+    if.app-id = 'com.1password.1password'
     run = 'layout floating'
 
 # Apps that always open on their own workspace (new windows only)
