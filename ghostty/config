@@ -10,7 +10,10 @@ window-padding-y = 8
 window-decoration = true
 
 # --- Colors & Theme ---
-theme = light:INKLINE Paper,dark:INKLINE Ink
+theme = light:Gruvbox Light,dark:Gruvbox Dark
+# 1 is solid; lower shows more of what is behind. Needs a full Ghostty restart (Cmd+Q, reopen).
+background-opacity = 0.9
+background-blur = true
 
 # --- Cursor ---
 cursor-style = block
