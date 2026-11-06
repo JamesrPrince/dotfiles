@@ -42,11 +42,13 @@ keybind = cmd+opt+up=goto_split:up
 keybind = cmd+opt+down=goto_split:down
 
 # --- Drop-down terminal (quick terminal) ---
-# Ctrl+` from any app slides a terminal down from the top; it hides when it loses focus.
+# Ctrl+` from any app opens a terminal in the middle of the screen; it hides when it loses focus.
 # Global keys need Ghostty in System Settings > Privacy & Security > Accessibility.
+# Position changes need a full Ghostty restart (Cmd+Q, reopen).
 keybind = global:ctrl+grave_accent=toggle_quick_terminal
-quick-terminal-position = top
-quick-terminal-size = 45%
+quick-terminal-position = center
+# Centred on a landscape screen the order is height, then width
+quick-terminal-size = 45%,50%
 quick-terminal-screen = mouse
 quick-terminal-autohide = true
 quick-terminal-animation-duration = 0.15
