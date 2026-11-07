@@ -10,7 +10,11 @@ window-padding-y = 8
 window-decoration = true
 
 # --- Colors & Theme ---
-theme = light:Gruvbox Light,dark:Gruvbox Dark
+# ctrl+` quick terminal shares this palette; Ghostty has no per-surface theme.
+# macos-titlebar-style=transparent otherwise derives window-theme from background
+# luminosity, which kept the popup on Gruvbox Light (#fbf1c7).
+window-theme = dark
+theme = Gruvbox Dark
 # 1 is solid; lower shows more of what is behind. Needs a full Ghostty restart (Cmd+Q, reopen).
 background-opacity = 0.9
 background-blur = true

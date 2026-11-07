@@ -83,10 +83,24 @@ gaps.outer.right =      8
     if.window-title-regex-substring = '^(Quick Look|Finder Settings)$'
     run = 'layout floating'  # macOS centres the panel itself once it floats
 
-# Everything else in Finder (browser windows) tiles
+# Quick Look helpers (Space-bar preview is often the filename, not "Quick Look").
+# First-match-wins: these must sit before the Finder catch-all.
 [[on-window-detected]]
-    if.app-id = 'com.apple.finder'
-    run = 'layout tiling'
+    if = 'test %{app-bundle-id} = com.apple.quicklook.ui.helper'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if = 'test %{app-bundle-id} = com.apple.QuickLookDaemon'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if = 'test %{app-bundle-id} = com.apple.quicklook.qlmanage'
+    run = 'layout floating'
+
+# Finder browser windows tile; QL/dialogs float via helper (filename titles).
+[[on-window-detected]]
+    if = 'test %{app-bundle-id} = com.apple.finder'
+    run = 'exec-and-forget ~/dotfiles/aerospace/finder-on-detect.sh'
 
 [[on-window-detected]]
     if.app-id = 'com.apple.SystemProfiler'
@@ -119,18 +133,49 @@ gaps.outer.right =      8
     if.app-id = 'com.1password.1password'
     run = 'layout floating'
 
+[[on-window-detected]]
+    if = 'test %{app-bundle-id} = com.wiheads.paste'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if = 'test %{app-bundle-id} = io.tailscale.ipn.macsys'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if = 'test %{app-bundle-id} = com.electron.ollama'
+    run = 'layout floating'
+
 # Apps that always open on their own workspace (new windows only)
 # 1 browser, 2 terminal and Claude, 3 notes, 4 work (spreadsheets, mail), 5 chat and music
 [[on-window-detected]]
     if.app-id = 'com.brave.Browser'
     run = 'move-node-to-workspace 1'
 
+# Ghostty native tabs are extra AX windows (AeroSpace #68; ghostty.org/docs/help/macos-tiling-wms).
+# Primary tiles on workspace 2; extra tabs float. The quick terminal is floated in place
+# (not moved to 2); if size/dialog detection misses it, extras still float on the current workspace.
 [[on-window-detected]]
-    if.app-id = 'com.mitchellh.ghostty'
-    run = 'move-node-to-workspace 2'
+    if = 'test %{app-bundle-id} = com.mitchellh.ghostty || test %{app-name} = Ghostty'
+    run = 'exec-and-forget ~/dotfiles/aerospace/ghostty-on-detect.sh'
 
 [[on-window-detected]]
     if.app-id = 'com.anthropic.claudefordesktop'
+    run = 'move-node-to-workspace 2'
+
+[[on-window-detected]]
+    if = 'test %{app-bundle-id} = app.clarity.mac'
+    run = 'move-node-to-workspace 2'
+
+[[on-window-detected]]
+    if = 'test %{app-bundle-id} = online.omniroute.desktop'
+    run = 'move-node-to-workspace 2'
+
+[[on-window-detected]]
+    if = 'test %{app-bundle-id} = com.microsoft.VSCodeInsiders'
+    run = 'move-node-to-workspace 2'
+
+[[on-window-detected]]
+    if = 'test %{app-bundle-id} = dev.warp.Warp-Stable'
     run = 'move-node-to-workspace 2'
 
 [[on-window-detected]]
@@ -142,11 +187,27 @@ gaps.outer.right =      8
     run = 'move-node-to-workspace 3'
 
 [[on-window-detected]]
+    if = 'test %{app-bundle-id} = com.apple.TextEdit'
+    run = 'move-node-to-workspace 3'
+
+[[on-window-detected]]
     if.app-id = 'com.microsoft.Excel'
     run = 'move-node-to-workspace 4'
 
 [[on-window-detected]]
     if.app-id = 'com.microsoft.Outlook'
+    run = 'move-node-to-workspace 4'
+
+[[on-window-detected]]
+    if = 'test %{app-bundle-id} = com.apple.mail'
+    run = 'move-node-to-workspace 4'
+
+[[on-window-detected]]
+    if = 'test %{app-bundle-id} = org.libreoffice.script'
+    run = 'move-node-to-workspace 4'
+
+[[on-window-detected]]
+    if = 'test %{app-bundle-id} = com.apple.Preview'
     run = 'move-node-to-workspace 4'
 
 [[on-window-detected]]
@@ -163,6 +224,10 @@ gaps.outer.right =      8
 
 [[on-window-detected]]
     if.app-id = 'com.spotify.client'
+    run = 'move-node-to-workspace 5'
+
+[[on-window-detected]]
+    if = 'test %{app-bundle-id} = com.colliderli.iina'
     run = 'move-node-to-workspace 5'
 
 [mode.main.binding]
