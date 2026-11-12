@@ -9,6 +9,7 @@ fi
 source "$HOME/.config/sketchybar/colors.sh"
 source "$HOME/.config/sketchybar/icons.sh"
 FONT="SF Pro"
+TEXT_FONT="Nunito"
 
 if [ "$(sketchybar --query calendar | jq -r '.popup.drawing')" = "on" ]; then
   sketchybar --set calendar popup.drawing=off
@@ -21,8 +22,8 @@ OUT="${TMPDIR:-/tmp}/sketchybar_cal"
 : > "$OUT"
 open -g -W --stdout "$OUT" "$HOME/.config/sketchybar/helper/SketchyBarCal.app" --args 2
 
-row=(icon.font="$FONT:Bold:12.0" icon.width=90 icon.color=$BLUE
-     label.font="$FONT:Semibold:13.0" label.max_chars=40
+row=(icon.font="$TEXT_FONT:Bold:12.0" icon.width=90 icon.color=$BLUE
+     label.font="$TEXT_FONT:SemiBold:13.0" label.max_chars=40
      padding_left=8 padding_right=14)
 args=(--remove '/calendar\.event\..*/')
 N=0

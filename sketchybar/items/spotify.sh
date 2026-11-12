@@ -12,7 +12,7 @@ spotify_anchor=(
   icon=$SPOTIFY
   icon.font="$FONT:Regular:25.0"
   icon.color=$GREEN
-  label.font="$FONT:Semibold:12.0"
+  label.font="$TEXT_FONT:SemiBold:12.0"
   label.width=170
   label.y_offset=3
   label.padding_left=6
@@ -60,7 +60,7 @@ spotify_title=(
   padding_left=0
   padding_right=0
   width=0
-  label.font="$FONT:Heavy:15.0"
+  label.font="$TEXT_FONT:ExtraBold:15.0"
   y_offset=55
 )
 
@@ -86,7 +86,7 @@ spotify_state=(
   icon.width=35
   icon="00:00"
   label.drawing=on
-  label.font="$FONT:Light Italic:10.0"
+  label.font="$TEXT_FONT:Light Italic:10.0"
   label.width=35
   label="00:00"
   padding_left=0

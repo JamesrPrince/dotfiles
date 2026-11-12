@@ -7,7 +7,7 @@ front_app=(
   icon.padding_right=6
   padding_left=0
   label.color=$WHITE
-  label.font="$FONT:Black:12.0"
+  label.font="$TEXT_FONT:Black:12.0"
   associated_display=active
 )
 

@@ -7,6 +7,7 @@ source "$HOME/.config/sketchybar/plugins/hover.sh"
 source "$HOME/.config/sketchybar/colors.sh"
 source "$HOME/.config/sketchybar/icons.sh"
 FONT="SF Pro"
+TEXT_FONT="Nunito"
 PLUGIN_DIR="$HOME/.config/sketchybar/plugins"
 
 if [ "$SENDER" = "mouse.exited.global" ]; then
@@ -47,13 +48,13 @@ fi
 [ "$SENDER" = "click" ] || exit 0
 
 # Popup: status, public IP (click copies), place, then one row per VPN service
-row=(icon.font="$FONT:Regular:14.0" icon.width=26 label.font="$FONT:Semibold:13.0"
+row=(icon.font="$FONT:Regular:14.0" icon.width=26 label.font="$TEXT_FONT:SemiBold:13.0"
      padding_left=8 padding_right=12)
 args=(--remove '/vpn\.row\..*/')
 add() { args+=(--add item vpn.row.$1 popup.vpn --set vpn.row.$1 "${row[@]}" "${@:2}"); }
 
-if [ -n "$VPN" ]; then add status icon=$LOCK_FILL icon.color=$GREEN label="Connected: $VPN" label.font="$FONT:Bold:13.0"
-else                    add status icon=$GLOBE icon.color=$GREY label="No VPN" label.font="$FONT:Bold:13.0"; fi
+if [ -n "$VPN" ]; then add status icon=$LOCK_FILL icon.color=$GREEN label="Connected: $VPN" label.font="$TEXT_FONT:Bold:13.0"
+else                    add status icon=$GLOBE icon.color=$GREY label="No VPN" label.font="$TEXT_FONT:Bold:13.0"; fi
 add ip icon=$COPY icon.color=$GREY label="${IP:-No public IP}" \
        click_script="printf %s '$IP' | pbcopy; sketchybar --set vpn popup.drawing=off"
 [ -n "$CITY$CC" ] && add place icon=$GLOBE icon.color=$GREY label="${CITY:+$CITY, }$CC"

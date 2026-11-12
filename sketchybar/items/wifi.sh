@@ -18,7 +18,7 @@ wifi=(
 popup_row=(
   icon.font="$FONT:Regular:14.0"
   icon.width=26
-  label.font="$FONT:Semibold:13.0"
+  label.font="$TEXT_FONT:SemiBold:13.0"
   padding_left=8
   padding_right=12
 )
@@ -32,7 +32,7 @@ for row in ssid ip router signal toggle; do
              --set wifi.$row "${popup_row[@]}"
 done
 
-sketchybar --set wifi.ssid   icon=$WIFI icon.color=$BLUE label.font="$FONT:Bold:13.0" \
+sketchybar --set wifi.ssid   icon=$WIFI icon.color=$BLUE label.font="$TEXT_FONT:Bold:13.0" \
            --set wifi.ip     icon=$NET_UP icon.color=$GREY                            \
            --set wifi.router icon=$ROUTER icon.color=$GREY                            \
            --set wifi.signal icon=$ACTIVITY icon.color=$GREY                          \

@@ -15,7 +15,7 @@ import time
 CONFIG = os.path.expanduser("~/.aerospace.toml")
 CACHE = os.path.expanduser("~/.cache/sketchybar-keys-apps.json")
 SKETCHYBAR = "/usr/local/bin/sketchybar"
-FONT = "SF Pro"
+FONT = "Nunito"
 def theme_colors():
     """Accent, text and dim colours of the active bar theme (colors.sh)."""
     try:
@@ -99,6 +99,8 @@ def describe(cmds, cache):
         return "Switch", "Last workspace"
     if m := re.match(r"move (\w+)$", c):
         return "Rearrange", "Move window " + m.group(1)
+    if m := re.match(r"move-node-to-workspace --focus-follows-window (\w+)$", c):
+        return "Rearrange", "Take window to " + m.group(1)
     if m := re.match(r"move-node-to-workspace (\w+)$", c):
         return "Rearrange", "Send window to " + m.group(1)
     if c.startswith("move-workspace-to-monitor"):
@@ -172,7 +174,8 @@ def build_rows():
     grouped = {s: [] for s in SECTIONS}
     for key, cmds in modes.get("main", []):
         section, desc = describe(cmds, cache)
-        grouped[section].append((pretty_key(key), desc))
+        # A service-mode command bound in main mode (⌥⇧Space float toggle) lists under Layout
+        grouped[section if section in grouped else "Layout"].append((pretty_key(key), desc))
     for key, cmds in modes.get("service", []):
         grouped[SECTIONS[-2]].append((pretty_key(key), describe(cmds, cache)[1]))
     # Resize mode: the arrows repeat h/j/k/l, so list the letters only

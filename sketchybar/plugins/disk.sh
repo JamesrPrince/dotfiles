@@ -2,6 +2,8 @@
 # Shows free space only when it drops below LIMIT_GB.
 export PATH="/usr/local/bin:$PATH"
 source "$HOME/.config/sketchybar/plugins/hover.sh"
+# Zen mode keeps it hidden
+[ -f "${TMPDIR:-/tmp}/sketchybar_zen" ] && { sketchybar --set "$NAME" drawing=off; exit 0; }
 LIMIT_GB=${LIMIT_GB:-20}
 free_gb=$(df -g / | awk 'NR==2{print $4}')
 if [ "$free_gb" -lt "$LIMIT_GB" ]; then

@@ -27,7 +27,7 @@ volume_icon=(
   label=$VOLUME_100
   label.width=25
   label.align=left
-  label.font="$FONT:Regular:14.0"
+  label.font="$TEXT_FONT:Regular:14.0"
 )
 
 

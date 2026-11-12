@@ -34,7 +34,7 @@ sketchybar --remove '/weather\.row\..*/' >/dev/null 2>&1
 now=$(date +%H%M | sed 's/^0*//'); now=${now:-0}
 place=$(jq -r '.nearest_area[0].areaName[0].value' "$CACHE")
 args=(--add item weather.row.h popup.$NAME
-      --set weather.row.h icon.drawing=off label="$place · $desc" label.font="SF Pro:Bold:12.0"
+      --set weather.row.h icon.drawing=off label="$place · $desc" label.font="Nunito:Bold:12.0"
             label.color=$BLUE padding_left=10 padding_right=14)
 i=0
 while IFS=$'\t' read -r day time code temp rain; do
@@ -44,7 +44,7 @@ while IFS=$'\t' read -r day time code temp rain; do
   [ "$day" = 1 ] && hh="tmrw $hh"
   args+=(--add item weather.row.$i popup.$NAME
          --set weather.row.$i icon="$(emoji "$code")" icon.width=26 label="$hh   ${temp}°   rain ${rain}%"
-               label.font="SF Pro:Regular:12.0" padding_left=10 padding_right=14)
+               label.font="Nunito:Regular:12.0" padding_left=10 padding_right=14)
   i=$((i+1))
 done < <(jq -r '.weather[0:2] | to_entries[] | .key as $d | .value.hourly[] |
                 [$d, .time, .weatherCode, .tempC, .chanceofrain] | @tsv' "$CACHE")

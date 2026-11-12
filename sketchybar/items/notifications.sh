@@ -11,7 +11,7 @@ github=(
   icon.font="sketchybar-app-font:Regular:15.0"
   icon.color=$GREY
   label.drawing=off
-  label.font="$FONT:Bold:12.0"
+  label.font="$TEXT_FONT:Bold:12.0"
   label.color=$RED
   padding_left=6
   padding_right=6
@@ -30,7 +30,7 @@ for pair in $BADGE_APPS; do
   sketchybar --add item $name right \
              --set $name drawing=off \
                          icon.font="sketchybar-app-font:Regular:15.0" \
-                         label.font="$FONT:Bold:12.0" \
+                         label.font="$TEXT_FONT:Bold:12.0" \
                          label.color=$RED \
                          padding_left=4 padding_right=4 \
                          click_script="open -b $id"

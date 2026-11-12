@@ -3,9 +3,15 @@
 # apps on that workspace (sketchybar-app-font). The focused one sits in an
 # accent pill, empty ones fade to grey, and hovering highlights the rest.
 
-sketchybar --add event aerospace_workspace_change
+sketchybar --add event aerospace_workspace_change \
+           --add event aerospace_focus_change
 
-for sid in $(aerospace list-workspaces --all); do
+# The workspace list is fixed at load; spaces.sh reads it from here instead of
+# asking AeroSpace on every refresh
+SPACE_IDS=$(aerospace list-workspaces --all)
+echo $SPACE_IDS > "${TMPDIR:-/tmp}/sketchybar_spaces"
+
+for sid in $SPACE_IDS; do
   space=(
     icon="$sid"
     icon.padding_left=10
@@ -14,7 +20,7 @@ for sid in $(aerospace list-workspaces --all); do
     padding_right=2
     label.padding_right=20
     icon.highlight_color=$ACCENT
-    icon.font="$FONT:Heavy:14.0"
+    icon.font="$TEXT_FONT:ExtraBold:14.0"
     background.height=26
     background.corner_radius=8
     background.color=$TRANSPARENT
@@ -40,7 +46,7 @@ sketchybar --add item aerospace left                              \
            --set aerospace drawing=off updates=on                 \
                            script="$PLUGIN_DIR/spaces.sh"         \
            --subscribe aerospace aerospace_workspace_change       \
-                                 front_app_switched               \
+                                 aerospace_focus_change           \
                                  space_windows_change system_woke
 
 spaces=(

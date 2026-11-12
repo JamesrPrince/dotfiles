@@ -18,7 +18,7 @@ control=(
 popup_row=(
   icon.font="$FONT:Regular:15.0"
   icon.width=28
-  label.font="$FONT:Semibold:13.0"
+  label.font="$TEXT_FONT:SemiBold:13.0"
   padding_left=8
   padding_right=14
 )

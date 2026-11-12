@@ -2,7 +2,8 @@
 
 export PATH="/usr/local/bin:$PATH"
 # Click the clock: hide everything but the workspaces and the time, or bring it back.
-# The flag file tells the items that show themselves (privacy, badges, layout) to stay hidden.
+# The flag file tells the items that show themselves (privacy, badges, layout,
+# disk, next event) to stay hidden.
 ZEN="${TMPDIR:-/tmp}/sketchybar_zen"
 
 zen_on() {
@@ -11,7 +12,11 @@ zen_on() {
              --set layout drawing=off \
              --set gpu drawing=off \
              --set vpn drawing=off \
-             --set clipboard drawing=off \
+             --set github drawing=off \
+             --set weather drawing=off \
+             --set timer drawing=off \
+             --set disk drawing=off \
+             --set next_event drawing=off \
              --set '/badge\..*/' drawing=off \
              --set separator drawing=off \
              --set front_app drawing=off \
@@ -36,7 +41,9 @@ zen_off() {
   sketchybar --set apple.logo drawing=on \
              --set gpu drawing=on \
              --set vpn drawing=on \
-             --set clipboard drawing=on \
+             --set github drawing=on \
+             --set weather drawing=on \
+             --set timer drawing=on \
              --trigger aerospace_layout_change \
              --set separator drawing=on \
              --set front_app drawing=on \
@@ -52,6 +59,10 @@ zen_off() {
              --set net.down drawing=on \
              --set spotify.play updates=on \
              --trigger power_source_change
+  # Disk and next event show only when they have something to say: let their
+  # scripts decide
+  NAME=disk "$HOME/.config/sketchybar/plugins/disk.sh" &
+  NAME=next_event "$HOME/.config/sketchybar/plugins/next_event.sh" &
 }
 
 if [ "$1" = "on" ]; then

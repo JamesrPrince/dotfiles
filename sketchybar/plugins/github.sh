@@ -3,6 +3,7 @@
 export PATH="/usr/local/bin:$PATH"
 source "$HOME/.config/sketchybar/plugins/hover.sh"
 source "$CONFIG_DIR/colors.sh"
+TEXT_FONT="Nunito"
 NAME=github
 
 if [ "$SENDER" = "mouse.exited.global" ]; then
@@ -32,7 +33,7 @@ else
   i=0
   while IFS=$'\t' read -r repo title url; do
     rows+=(--add item github.row.$i popup.$NAME
-           --set github.row.$i icon="${repo#*/}" icon.color=$BLUE icon.font="$FONT:Bold:12.0"
+           --set github.row.$i icon="${repo#*/}" icon.color=$BLUE icon.font="$TEXT_FONT:Bold:12.0"
                  label="$title" label.max_chars=50 padding_left=10 padding_right=14
                  click_script="open '$url'; sketchybar --set $NAME popup.drawing=off")
     i=$((i+1))

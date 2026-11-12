@@ -10,10 +10,11 @@ source "$HOME/.config/sketchybar/icons.sh"
 ITEM_DIR="$HOME/.config/sketchybar/items"
 PLUGIN_DIR="$HOME/.config/sketchybar/plugins"
 
-# A fresh bar starts out of zen mode
-rm -f "${TMPDIR:-/tmp}/sketchybar_zen"
+# A fresh bar starts out of zen mode, and redraws the workspaces from scratch
+rm -f "${TMPDIR:-/tmp}/sketchybar_zen" "${TMPDIR:-/tmp}/sketchybar_spaces_state"
 
 FONT="SF Pro" # Needs Regular, Bold, Semibold, Heavy and Black
+TEXT_FONT="Nunito" # labels and text; glyph icons stay on SF Pro (SF Symbols)
 PADDINGS=3
 
 bar=(
@@ -40,7 +41,7 @@ defaults=(
   icon.color=$ICON_COLOR
   icon.padding_left=$PADDINGS
   icon.padding_right=$PADDINGS
-  label.font="$FONT:Semibold:13.0"
+  label.font="$TEXT_FONT:SemiBold:13.0"
   label.color=$LABEL_COLOR
   label.padding_left=$PADDINGS
   label.padding_right=$PADDINGS
@@ -73,7 +74,6 @@ source "$ITEM_DIR/calendar.sh"
 source "$ITEM_DIR/next_event.sh"
 source "$ITEM_DIR/weather.sh"
 source "$ITEM_DIR/timer.sh"
-source "$ITEM_DIR/clipboard.sh"
 source "$ITEM_DIR/privacy.sh"
 source "$ITEM_DIR/notifications.sh"
 source "$ITEM_DIR/control.sh"
@@ -108,5 +108,7 @@ done
 
 # Window border follows the theme accent (updates a running JankyBorders)
 pgrep -xq borders && "$PLUGIN_DIR/theme.sh" borders
+# Ghostty follows the bar theme (rewrites its theme file only when it changes)
+"$PLUGIN_DIR/theme.sh" ghostty
 
 sketchybar --update

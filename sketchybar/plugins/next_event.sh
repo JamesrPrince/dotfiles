@@ -7,6 +7,9 @@ export PATH="/usr/local/bin:$PATH"
 source "$HOME/.config/sketchybar/plugins/hover.sh"
 source "$HOME/.config/sketchybar/colors.sh"
 
+# Zen mode keeps it hidden
+[ -f "${TMPDIR:-/tmp}/sketchybar_zen" ] && { sketchybar --set "$NAME" drawing=off; exit 0; }
+
 CACHE="${TMPDIR:-/tmp}/sketchybar_next"
 APP="$HOME/.config/sketchybar/helper/SketchyBarCal.app"
 
