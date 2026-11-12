@@ -11,3 +11,4 @@ sketchybar/helper/SketchyBarCal.app/Contents/_CodeSignature/
 *.bak-*
 .DS_Store
 sketchybar/.theme
+ghostty/theme.conf
