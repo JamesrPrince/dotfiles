@@ -30,6 +30,18 @@ cursor-style-blink = false
 shell-integration = zsh
 shell-integration-features = cursor,sudo,title
 
+# --- Notifications ---
+# Needs shell integration (zsh above) so Ghostty sees command start and end.
+# Desktop notification when a command runs 10s or longer while Ghostty is not the active app.
+notify-on-command-finish = unfocused
+notify-on-command-finish-after = 10s
+
+# --- Input / session ---
+# Left Option acts as Alt; right Option keeps typing special characters.
+macos-option-as-alt = left
+# Always restore windows, tabs and splits on next launch.
+window-save-state = always
+
 # --- Image Protocol (critical for yazi previews) ---
 # Ghostty supports the Kitty Graphics Protocol natively — yazi auto-detects this.
 # No extra config needed; just ensure this file is present so Ghostty loads cleanly.
@@ -50,6 +62,13 @@ keybind = cmd+opt+left=goto_split:left
 keybind = cmd+opt+right=goto_split:right
 keybind = cmd+opt+up=goto_split:up
 keybind = cmd+opt+down=goto_split:down
+# Zoom the focused split to fill the window (same key again to restore)
+keybind = cmd+shift+enter=toggle_split_zoom
+# Make all splits equal size
+keybind = cmd+ctrl+equal=equalize_splits
+# Jump between shell prompts (needs shell integration)
+keybind = cmd+shift+up=jump_to_prompt:-1
+keybind = cmd+shift+down=jump_to_prompt:1
 
 # --- Drop-down terminal (quick terminal) ---
 # Ctrl+` from any app slides a terminal down from the top, centred left to right; it hides when it loses focus.

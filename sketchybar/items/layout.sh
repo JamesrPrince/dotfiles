@@ -11,7 +11,7 @@ layout=(
   label.padding_left=8
   label.padding_right=8
   padding_left=0
-  padding_right=6
+  padding_right=4
   updates=on
   script="$PLUGIN_DIR/layout.sh"
 )

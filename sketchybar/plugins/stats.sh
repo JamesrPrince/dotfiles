@@ -1,9 +1,15 @@
 #!/bin/bash
 # Feeds the stats items every few seconds: CPU load (graph + %), memory in
-# use, GPU load, network speed on en0, and the popup's temperature, fan, disk, uptime.
+# use, GPU load, network speed on en0. Also keeps today's network totals and peak speeds
+# in ~/.cache/sketchybar-net-today for the network popup (plugins/stat_net.sh). The popups
+# themselves are filled by stat_net.sh, stat_cpu.sh and stat_mem.sh, only while open.
 
 export PATH="/usr/local/bin:$PATH"
 source "$HOME/.config/sketchybar/plugins/hover.sh"
+if [ "$SENDER" = "mouse.exited.global" ]; then
+  "$HOME/.config/sketchybar/plugins/popup.sh" "$NAME" off
+  exit 0
+fi
 source "$HOME/.config/sketchybar/colors.sh"
 source "$HOME/.config/sketchybar/icons.sh"
 
@@ -48,6 +54,26 @@ if [ -f "$STATE" ]; then
 fi
 echo "$NOW $IN $OUT" > "$STATE"
 
+# Today's data: bytes since the first look of the day, carried across a reboot (the counters
+# restart at zero, so what was counted before is added to the carry), and the peak speeds.
+# Fields: day baseIn baseOut lastIn lastOut carryIn carryOut peakDown peakUp
+TODAY="$HOME/.cache/sketchybar-net-today"
+if [ -n "$IN" ] && [ -n "$OUT" ]; then
+  DAY=$(date +%F)
+  read -r TDAY BIN BOUT LIN LOUT AIN AOUT PD PU < "$TODAY" 2>/dev/null
+  if [ "$TDAY" != "$DAY" ]; then
+    BIN=$IN; BOUT=$OUT; AIN=0; AOUT=0; PD=0; PU=0
+  elif [ "$IN" -lt "${LIN:-0}" ]; then   # counters restarted: reboot
+    AIN=$(( AIN + LIN - BIN )); AOUT=$(( AOUT + LOUT - BOUT )); BIN=0; BOUT=0
+  fi
+  D_NOW=0; U_NOW=0
+  if [ -n "$PIN" ] && [ "$IN" -ge "$PIN" ]; then D_NOW=$(( (IN - PIN) / DT )); U_NOW=$(( (OUT - POUT) / DT )); fi
+  [ "$D_NOW" -gt "${PD:-0}" ] && PD=$D_NOW
+  [ "$U_NOW" -gt "${PU:-0}" ] && PU=$U_NOW
+  mkdir -p "$HOME/.cache"
+  echo "$DAY $BIN $BOUT $IN $OUT ${AIN:-0} ${AOUT:-0} ${PD:-0} ${PU:-0}" > "$TODAY"
+fi
+
 args=(--push cpu.graph "$(awk -v c="$CPU" 'BEGIN{printf "%.2f", c/100}')"
       --set cpu.percent label="${CPU}%" icon.color=$CPU_COLOR
       --set cpu.graph graph.color=$CPU_COLOR
@@ -55,22 +81,5 @@ args=(--push cpu.graph "$(awk -v c="$CPU" 'BEGIN{printf "%.2f", c/100}')"
       --set gpu label="${GPU}%" icon.color=$GPU_COLOR
       --set net.up label="$NET_UP $UP_LABEL"
       --set net.down label="$NET_DOWN $DOWN_LABEL")
-
-# Popup rows only while the popup is open
-if [ "$(sketchybar --query cpu.percent | jq -r '.popup.drawing')" = "on" ]; then
-  read -r TEMP FAN <<< "$("$HELPER/smc" 2>/dev/null)"
-  TEMP_INT=${TEMP%.*}
-  TEMP_COLOR=$GREEN
-  [ "${TEMP_INT:-0}" -ge 80 ] && TEMP_COLOR=$ORANGE
-  [ "${TEMP_INT:-0}" -ge 95 ] && TEMP_COLOR=$RED
-  if [ -n "$TEMP" ] && [ "$TEMP_INT" -gt 0 ]; then TEMP_LABEL="CPU ${TEMP}°C"; else TEMP_LABEL="CPU temperature unavailable"; fi
-  if [ -n "$FAN" ] && [ "${FAN%.*}" -ge 0 ] 2>/dev/null; then FAN_LABEL="Fan ${FAN} rpm"; else FAN_LABEL="Fan unavailable"; fi
-  DISK_LABEL=$(df -H / | awk 'NR==2{print $4 " free of " $2}')
-  UPTIME_LABEL="Up $(uptime | sed -E 's/.*up ([^,]*(, *[0-9]+:[0-9]+)?).*/\1/; s/^ +//')"
-  args+=(--set stats.temp label="$TEMP_LABEL" icon.color=$TEMP_COLOR
-         --set stats.fan label="$FAN_LABEL"
-         --set stats.disk label="Disk $DISK_LABEL"
-         --set stats.uptime label="$UPTIME_LABEL")
-fi
 
 sketchybar "${args[@]}"

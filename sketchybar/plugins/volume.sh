@@ -2,7 +2,7 @@
 
 export PATH="/usr/local/bin:$PATH"
 
-WIDTH=100
+WIDTH=70
 
 volume_change() {
   source "$HOME/.config/sketchybar/icons.sh"

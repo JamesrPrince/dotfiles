@@ -2,7 +2,7 @@
 
 export PATH="/usr/local/bin:$PATH"
 
-WIDTH=100
+WIDTH=70
 
 detail_on() {
   sketchybar --animate tanh 30 --set volume slider.width=$WIDTH

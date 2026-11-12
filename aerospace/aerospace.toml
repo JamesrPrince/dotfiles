@@ -17,7 +17,12 @@ exec-on-workspace-change = ['/bin/bash', '-c',
 
 # Refresh the workspace app icons and the layout pill when windows open, close or move.
 # Its own event, so a workspace switch is not counted twice (spaces.sh skips unchanged states)
-on-focus-changed = ['exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_focus_change']
+# The pointer follows keyboard focus; window-lazy-center only moves it when it is outside
+# the newly focused window, so clicking a window never makes it jump.
+on-focus-changed = [
+    'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_focus_change',
+    'move-mouse window-lazy-center'
+]
 
 start-at-login = true
 auto-reload-config = true
@@ -29,7 +34,6 @@ accordion-padding = 30
 default-root-container-layout = 'tiles'
 default-root-container-orientation = 'auto'
 
-on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
 automatically-unhide-macos-hidden-apps = false
 
 # Numbered workspaces only: alt-<letter> stays free for typing accents and symbols
@@ -149,16 +153,27 @@ gaps.outer.right =      8
 
 # Apps that always open on their own workspace (new windows only)
 # 1 browser, 2 terminal and Claude, 3 notes, 4 work (spreadsheets, mail), 5 chat and music
-[[on-window-detected]]
-    if.app-id = 'com.brave.Browser'
-    run = 'move-node-to-workspace 1'
-
 # Ghostty native tabs are extra AX windows (AeroSpace #68; ghostty.org/docs/help/macos-tiling-wms).
 # Primary tiles on workspace 2; extra tabs float. The quick terminal is floated in place
 # (not moved to 2); if size/dialog detection misses it, extras still float on the current workspace.
 [[on-window-detected]]
     if.app-id = 'com.mitchellh.ghostty'
     run = ['layout floating', 'exec-and-forget ~/dotfiles/aerospace/ghostty-on-detect.sh']
+
+# Settings and Preferences windows float. Placed after the Finder and Ghostty rules above
+# (first match wins: those need their own handling), and before the workspace rules below,
+# so a Settings window opens floating where you are instead of being moved and tiled.
+[[on-window-detected]]
+    if.window-title-regex-substring = '(?i)(settings|preferences)$'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-id = 'com.brave.Browser'
+    run = 'move-node-to-workspace 1'
+
+[[on-window-detected]]
+    if.app-id = 'com.apple.Safari'
+    run = 'move-node-to-workspace 1'
 
 [[on-window-detected]]
     if.app-id = 'com.anthropic.claudefordesktop'
@@ -179,10 +194,6 @@ gaps.outer.right =      8
 [[on-window-detected]]
     if.app-id = 'dev.warp.Warp-Stable'
     run = 'move-node-to-workspace 2'
-
-[[on-window-detected]]
-    if.app-id = 'md.obsidian'
-    run = 'move-node-to-workspace 3'
 
 [[on-window-detected]]
     if.app-id = 'notion.id'
@@ -247,6 +258,16 @@ gaps.outer.right =      8
     alt-shift-k = 'move up'
     alt-shift-l = 'move right'
 
+    # Swap the focused window with its neighbour
+    ctrl-alt-shift-h = ['swap left', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_layout_change'] # swap left
+    ctrl-alt-shift-j = ['swap down', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_layout_change'] # swap down
+    ctrl-alt-shift-k = ['swap up', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_layout_change'] # swap up
+    ctrl-alt-shift-l = ['swap right', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_layout_change'] # swap right
+
+    # Scratchpad: hidden workspace S
+    alt-shift-minus = 'exec-and-forget ~/dotfiles/aerospace/scratchpad.sh send' # send window to scratchpad
+    alt-shift-equal = 'exec-and-forget ~/dotfiles/aerospace/scratchpad.sh bring' # bring back last scratchpad window, floating
+
     alt-minus = 'resize smart -50'
     alt-equal = 'resize smart +50'
 
@@ -281,7 +302,6 @@ gaps.outer.right =      8
     alt-shift-backtick = 'focus --boundaries-action wrap-around-the-workspace dfs-prev'
 
     alt-tab = 'workspace-back-and-forth'
-    alt-shift-tab = 'move-workspace-to-monitor --wrap-around next'
 
     alt-shift-semicolon = 'mode service'
     alt-shift-r = 'mode resize'
@@ -295,7 +315,7 @@ gaps.outer.right =      8
     # App launchers: ctrl-alt-<letter> opens or focuses the app (by bundle id)
     ctrl-alt-b = 'exec-and-forget open -b com.brave.Browser'
     ctrl-alt-s = 'exec-and-forget open -b com.apple.Safari'
-    ctrl-alt-o = 'exec-and-forget open -b md.obsidian'
+    ctrl-alt-o = 'exec-and-forget open -b app.clarity.mac' # Clarity (replaces Obsidian)
     ctrl-alt-t = 'exec-and-forget open -b com.mitchellh.ghostty'
     ctrl-alt-w = 'exec-and-forget open -b dev.warp.Warp-Stable'
     ctrl-alt-c = 'exec-and-forget open -b com.microsoft.VSCodeInsiders'
@@ -305,6 +325,7 @@ gaps.outer.right =      8
     ctrl-alt-h = 'exec-and-forget open -b net.whatsapp.WhatsApp'
     ctrl-alt-g = 'exec-and-forget open -b ru.keepcoder.Telegram'
     ctrl-alt-m = 'exec-and-forget open -b com.spotify.client'
+    ctrl-alt-k = 'exec-and-forget open -b com.tinyspeck.slackmacgap' # Slack
 
 [mode.service.binding]
     esc = ['reload-config', 'mode main']

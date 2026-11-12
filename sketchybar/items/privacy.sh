@@ -17,6 +17,6 @@ privacy=(
   script="$PLUGIN_DIR/privacy.sh"
 )
 
-sketchybar --add item privacy right        \
+sketchybar --add item privacy left         \
            --set privacy "${privacy[@]}"   \
            --subscribe privacy system_woke

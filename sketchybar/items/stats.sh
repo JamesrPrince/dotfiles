@@ -1,8 +1,10 @@
 #!/bin/bash
-# System stats: CPU graph and load, memory, GPU, network speed. Click any of them
-# for a popup with CPU temperature, fan speed, disk and uptime.
+# System stats: CPU graph and load, memory, network speed. Each has its own popup
+# (items/stat_popups.sh): net.up/net.down, cpu.percent/cpu.graph, mem.
 
-POPUP_TOGGLE="$PLUGIN_DIR/popup.sh cpu.percent; NAME=cpu.percent $PLUGIN_DIR/stats.sh"
+CPU_TOGGLE="$PLUGIN_DIR/stat_popup.sh cpu.percent cpu"
+MEM_TOGGLE="$PLUGIN_DIR/stat_popup.sh mem mem"
+NET_TOGGLE="$PLUGIN_DIR/stat_popup.sh net.up net"
 
 cpu_graph=(
   graph.color=$BLUE
@@ -15,7 +17,7 @@ cpu_graph=(
   width=48
   padding_left=0
   padding_right=4
-  click_script="$POPUP_TOGGLE"
+  click_script="$CPU_TOGGLE"
 )
 
 cpu_percent=(
@@ -30,9 +32,10 @@ cpu_percent=(
   padding_right=0
   update_freq=3
   updates=on
-  popup.align=right
+  popup.align=left
+  popup.height=24
   script="$PLUGIN_DIR/stats.sh"
-  click_script="$POPUP_TOGGLE"
+  click_script="$CPU_TOGGLE"
 )
 
 mem=(
@@ -45,20 +48,10 @@ mem=(
   label.align=right
   padding_left=8
   padding_right=2
-  click_script="$POPUP_TOGGLE"
-)
-
-gpu=(
-  icon=GPU
-  icon.color=$GREEN
-  icon.font="$TEXT_FONT:ExtraBold:9.0"
-  label="--%"
-  label.font="$TEXT_FONT:ExtraBold:12.0"
-  label.width=34
-  label.align=right
-  padding_left=8
-  padding_right=2
-  click_script="$POPUP_TOGGLE"
+  popup.align=left
+  popup.height=24
+  script="$PLUGIN_DIR/stat_item.sh"
+  click_script="$MEM_TOGGLE"
 )
 
 net=(
@@ -69,7 +62,7 @@ net=(
   y_offset=6
   padding_left=8
   padding_right=0
-  click_script="$POPUP_TOGGLE"
+  click_script="$NET_TOGGLE"
 )
 
 popup_row=(
@@ -80,32 +73,25 @@ popup_row=(
   padding_right=12
 )
 
-sketchybar --add graph cpu.graph right 100       \
-           --set cpu.graph "${cpu_graph[@]}"     \
-           --add item cpu.percent right          \
-           --set cpu.percent "${cpu_percent[@]}" \
-           --subscribe cpu.percent system_woke   \
-           --add item mem right                  \
-           --set mem "${mem[@]}"                 \
-           --add item gpu right                  \
-           --set gpu "${gpu[@]}"                 \
-           --add item net.down right             \
+# net.down is added first: it is zero-width, and its text then lines up under net.up's
+sketchybar --add item net.down left              \
            --set net.down "${net[@]}" y_offset=-5 width=0 \
-           --add item net.up right               \
-           --set net.up "${net[@]}"
+           --add item net.up left                \
+           --set net.up "${net[@]}" popup.align=left popup.height=24 script="$PLUGIN_DIR/stat_item.sh" \
+           --subscribe net.up mouse.exited.global \
+           --add item mem left                   \
+           --set mem "${mem[@]}"                 \
+           --subscribe mem mouse.exited.global   \
+           --add item cpu.percent left           \
+           --set cpu.percent "${cpu_percent[@]}" \
+           --subscribe cpu.percent system_woke mouse.exited.global \
+           --add graph cpu.graph left 100        \
+           --set cpu.graph "${cpu_graph[@]}"
 
-for row in temp fan disk uptime; do
-  sketchybar --add item stats.$row popup.cpu.percent \
-             --set stats.$row "${popup_row[@]}"
-done
-
-sketchybar --set stats.temp   icon=$THERMOMETER icon.color=$ORANGE \
-           --set stats.fan    icon=$GEAR icon.color=$GREY          \
-           --set stats.disk   icon=$DISK icon.color=$BLUE          \
-           --set stats.uptime icon=$ACTIVITY icon.color=$GREEN
-
-sketchybar --add bracket stats cpu.graph cpu.percent mem gpu net.up net.down \
+sketchybar --add bracket stats net.down net.up mem cpu.percent cpu.graph \
            --set stats background.color=$BACKGROUND_1                    \
                        background.border_color=$BACKGROUND_2             \
                        background.border_width=2                         \
                        background.drawing=on
+
+source "$ITEM_DIR/stat_popups.sh"

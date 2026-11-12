@@ -59,3 +59,16 @@ export GLOBE=􀆪
 export LOCK_FILL=􀎡
 export CLOCK=􀐫
 export COPY=􀉁
+
+# Bluetooth (SF Symbols has no Bluetooth glyph, so the bar icon comes from MesloLGS NF)
+export BLUETOOTH_ICON=󰂯     # Nerd Font glyphs (MesloLGS NF): bluetooth
+export BLUETOOTH_OFF=󰂲      # bluetooth_off
+export BLUETOOTH_CONNECTED=󰂱 # bluetooth_connect
+export BT_CONNECTED=􀁣
+export BT_DEVICE=􀀀
+export BT_POWER=􀆨
+export BT_WARNING=􀇿
+
+# The "more" item and its popup
+export MORE=􀍠
+export TIMER_ICON=􀐫

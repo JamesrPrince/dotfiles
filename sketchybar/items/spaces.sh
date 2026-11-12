@@ -1,19 +1,23 @@
 #!/bin/bash
-# One item per AeroSpace workspace. Click to focus it. The label lists the
+# One item per AeroSpace workspace. Click to focus it, right-click for a popup
+# of its windows. The label lists the
 # apps on that workspace (sketchybar-app-font). The focused one sits in an
 # accent pill, empty ones fade to grey, and hovering highlights the rest.
 
 sketchybar --add event aerospace_workspace_change \
            --add event aerospace_focus_change
 
+# Names and the hidden scratchpad workspace live in workspaces.conf
+source "$HOME/.config/sketchybar/workspaces.conf"
+
 # The workspace list is fixed at load; spaces.sh reads it from here instead of
-# asking AeroSpace on every refresh
-SPACE_IDS=$(aerospace list-workspaces --all)
+# asking AeroSpace on every refresh. Hidden workspaces (the scratchpad) are left out.
+SPACE_IDS=$(visible_workspaces)
 echo $SPACE_IDS > "${TMPDIR:-/tmp}/sketchybar_spaces"
 
 for sid in $SPACE_IDS; do
   space=(
-    icon="$sid"
+    icon="$(workspace_label $sid)"
     icon.padding_left=10
     icon.padding_right=15
     padding_left=2
@@ -32,17 +36,19 @@ for sid in $SPACE_IDS; do
     label.background.color=$BACKGROUND_2
     label.background.corner_radius=8
     label.drawing=off
-    click_script="/usr/local/bin/aerospace workspace $sid"
-    script="$PLUGIN_DIR/hover.sh"
+    popup.align=left
+    popup.height=28
+    click_script="$PLUGIN_DIR/space_click.sh $sid"
+    script="$PLUGIN_DIR/space_item.sh"
   )
 
-  sketchybar --add item space.$sid left    \
+  sketchybar --add item space.$sid center  \
              --set space.$sid "${space[@]}" \
-             --subscribe space.$sid mouse.entered mouse.exited
+             --subscribe space.$sid mouse.entered mouse.exited mouse.exited.global
 done
 
 # Hidden item that refreshes every workspace in one pass
-sketchybar --add item aerospace left                              \
+sketchybar --add item aerospace center                            \
            --set aerospace drawing=off updates=on                 \
                            script="$PLUGIN_DIR/spaces.sh"         \
            --subscribe aerospace aerospace_workspace_change       \
@@ -56,18 +62,5 @@ spaces=(
   background.drawing=on
 )
 
-separator=(
-  icon=$SEPARATOR
-  icon.font="$FONT:Heavy:16.0"
-  padding_left=15
-  padding_right=15
-  label.drawing=off
-  associated_display=active
-  icon.color=$WHITE
-)
-
 sketchybar --add bracket spaces '/space\..*/' \
-           --set spaces "${spaces[@]}"        \
-                                              \
-           --add item separator left          \
-           --set separator "${separator[@]}"
+           --set spaces "${spaces[@]}"

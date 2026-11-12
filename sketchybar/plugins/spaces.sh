@@ -37,10 +37,11 @@ printf '%s' "$STATE" > "$STATE_FILE"
 
 source "$HOME/.config/sketchybar/plugins/icon_map.sh"
 source "$HOME/.config/sketchybar/colors.sh"
+source "$HOME/.config/sketchybar/workspaces.conf"
 
 # Written by items/spaces.sh when the bar loads
 SPACE_IDS=$(cat "${TMPDIR:-/tmp}/sketchybar_spaces" 2>/dev/null)
-[ -n "$SPACE_IDS" ] || SPACE_IDS=$(aerospace list-workspaces --all)
+[ -n "$SPACE_IDS" ] || SPACE_IDS=$(visible_workspaces)
 
 args=()
 for sid in $SPACE_IDS; do

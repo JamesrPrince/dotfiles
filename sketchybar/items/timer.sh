@@ -1,7 +1,9 @@
 #!/bin/bash
 # Focus timer: click for 25 minutes, right-click for 50, click again to stop.
+# The item is hidden: its row lives in the "more" popup (items/more.sh), this one runs the countdown.
 # Plays a sound and posts a notification when time is up.
 timer=(
+  drawing=off
   icon=":clock:"
   icon.font="sketchybar-app-font:Regular:15.0"
   icon.color=$GREY

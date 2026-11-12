@@ -14,6 +14,7 @@ stop() {
 if [ "$SENDER" = "mouse.clicked" ]; then
   if [ -f "$STATE" ]; then stop; exit 0; fi
   mins=25; [ "$BUTTON" = "right" ] && mins=50
+  rm -f "${TMPDIR:-/tmp}/sketchybar_timer_done"
   echo $(( $(date +%s) + mins * 60 )) > "$STATE"
   sketchybar --set $NAME update_freq=1 icon.color=$YELLOW label.drawing=on
 fi
@@ -23,6 +24,7 @@ fi
 left=$(( $(cat "$STATE") - $(date +%s) ))
 if [ "$left" -le 0 ]; then
   stop
+  touch "${TMPDIR:-/tmp}/sketchybar_timer_done"   # the "more" dot stays red until it is cleared
   afplay /System/Library/Sounds/Glass.aiff &
   osascript -e 'display notification "Time for a break." with title "Focus timer done"'
   exit 0

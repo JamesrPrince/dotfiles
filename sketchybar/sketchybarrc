@@ -59,50 +59,60 @@ defaults=(
 
 sketchybar --default "${defaults[@]}"
 
-# Left
+# The layout, "Centre Stage": the workspaces alone in the centre, the machine on the left, you on the right.
+
+# Left wing, "the machine": Apple, weather, mic/camera when active, the mode / front app /
+# layout pill, music, the stats pill
 source "$ITEM_DIR/apple.sh"
-source "$ITEM_DIR/spaces.sh"
-source "$ITEM_DIR/mode.sh"
-source "$ITEM_DIR/layout.sh"
-source "$ITEM_DIR/front_app.sh"
-
-# Center
-source "$ITEM_DIR/spotify.sh"
-
-# Right, listed right to left
-source "$ITEM_DIR/calendar.sh"
-source "$ITEM_DIR/next_event.sh"
 source "$ITEM_DIR/weather.sh"
-source "$ITEM_DIR/timer.sh"
 source "$ITEM_DIR/privacy.sh"
-source "$ITEM_DIR/notifications.sh"
-source "$ITEM_DIR/control.sh"
-source "$ITEM_DIR/keys.sh"
-source "$ITEM_DIR/wifi.sh"
-source "$ITEM_DIR/vpn.sh"
-source "$ITEM_DIR/battery.sh"
-source "$ITEM_DIR/disk.sh"
-source "$ITEM_DIR/volume.sh"
+source "$ITEM_DIR/mode.sh"
+source "$ITEM_DIR/front_app.sh"
+source "$ITEM_DIR/layout.sh"
+source "$ITEM_DIR/spotify.sh"
 source "$ITEM_DIR/stats.sh"
 
-# Status group: one pill around the control, keys, Wi-Fi, VPN, battery and volume items
-status_bracket=(
+# Centre: the workspaces, and nothing else, so nothing can push them off centre
+source "$ITEM_DIR/spaces.sh"
+
+# Right wing, "you", listed right to left: more, the (invisible) shortcut-sheet anchors,
+# date and time, the status pill, next event, badges
+source "$ITEM_DIR/more.sh"
+source "$ITEM_DIR/keys.sh"
+source "$ITEM_DIR/calendar.sh"
+source "$ITEM_DIR/control.sh"
+source "$ITEM_DIR/wifi.sh"
+source "$ITEM_DIR/bluetooth.sh"
+source "$ITEM_DIR/vpn.sh"
+source "$ITEM_DIR/battery.sh"
+source "$ITEM_DIR/brightness.sh"
+source "$ITEM_DIR/volume.sh"
+source "$ITEM_DIR/next_event.sh"
+source "$ITEM_DIR/notifications.sh"
+source "$ITEM_DIR/timer.sh"   # hidden: runs the countdown shown in the "more" popup
+
+# Status pill: volume, brightness, battery, VPN, Bluetooth, Wi-Fi and the control centre
+pill=(
   background.color=$BACKGROUND_1
   background.border_color=$BACKGROUND_2
   background.border_width=2
 )
-sketchybar --add bracket status control keys wifi vpn battery volume_icon \
-           --set status "${status_bracket[@]}"
+sketchybar --add bracket status volume_icon brightness_icon battery vpn bluetooth wifi control \
+           --set status "${pill[@]}"
+
+# Front pill: mode (RESIZE / SERVICE while active), front app and layout
+sketchybar --add bracket front mode front_app layout \
+           --set front "${pill[@]}"
 
 # Hover highlight on everything you can click. Items with a plugin handle it
 # there (plugins/hover.sh is sourced first); the rest use hover.sh directly.
-for item in apple.logo badge.slack badge.whatsapp badge.telegram badge.outlook keys \
-            mem gpu volume_icon; do
+for item in apple.logo badge.slack badge.whatsapp badge.telegram badge.outlook badge.more \
+            gpu volume_icon brightness_icon; do
   sketchybar --set $item script="$PLUGIN_DIR/hover.sh"
 done
-for item in apple.logo calendar weather timer github badge.slack badge.whatsapp \
-            badge.telegram badge.outlook control keys wifi disk volume_icon \
-            cpu.percent mem gpu; do
+for item in apple.logo calendar weather badge.slack badge.whatsapp \
+            badge.telegram badge.outlook badge.more control wifi bluetooth volume_icon \
+            cpu.percent mem brightness_icon; do
   sketchybar --subscribe $item mouse.entered mouse.exited
 done
 

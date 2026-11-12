@@ -8,6 +8,8 @@ front_app=(
   padding_left=0
   label.color=$WHITE
   label.font="$TEXT_FONT:Black:12.0"
+  label.max_chars=16
+  padding_right=2
   associated_display=active
 )
 

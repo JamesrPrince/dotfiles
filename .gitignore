@@ -8,7 +8,11 @@ sketchybar/helper/wifi
 sketchybar/helper/clip
 sketchybar/helper/SketchyBarCal.app/Contents/MacOS/
 sketchybar/helper/SketchyBarCal.app/Contents/_CodeSignature/
+sketchybar/helper/SketchyBarWiFi.app/Contents/MacOS/
+sketchybar/helper/SketchyBarWiFi.app/Contents/_CodeSignature/
 *.bak-*
 .DS_Store
 sketchybar/.theme
 ghostty/theme.conf
+sketchybar/helper/SketchyBarBluetooth.app/Contents/MacOS/
+sketchybar/helper/SketchyBarBluetooth.app/Contents/_CodeSignature/

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>CFBundleIdentifier</key><string>com.sketchybar.bluetooth</string>
+<key>CFBundleName</key><string>SketchyBar Bluetooth</string>
+<key>CFBundleExecutable</key><string>btctl</string>
+<key>CFBundlePackageType</key><string>APPL</string>
+<key>LSUIElement</key><true/>
+<key>LSMinimumSystemVersion</key><string>15.0</string>
+<key>NSBluetoothAlwaysUsageDescription</key><string>Lists your paired Bluetooth devices in the menu bar, and connects, disconnects and switches Bluetooth on or off.</string>
+<key>NSBluetoothPeripheralUsageDescription</key><string>Lists your paired Bluetooth devices in the menu bar, and connects, disconnects and switches Bluetooth on or off.</string>
+</dict></plist>

@@ -13,11 +13,17 @@ spotify_anchor=(
   icon.font="$FONT:Regular:25.0"
   icon.color=$GREEN
   label.font="$TEXT_FONT:SemiBold:12.0"
-  label.width=170
+  label.width=130
+  background.color=$BACKGROUND_1
+  background.border_color=$BACKGROUND_2
+  background.border_width=2
+  background.height=30
+  background.corner_radius=9
+  padding_left=6
   label.y_offset=3
   label.padding_left=6
   drawing=off
-  y_offset=2
+  y_offset=0
 )
 
 # Thin progress line under the track name in the bar. It is added before the
@@ -34,7 +40,7 @@ spotify_progress=(
   y_offset=-8
   label.drawing=off
   icon.drawing=off
-  slider.width=160
+  slider.width=120
   slider.background.height=3
   slider.background.corner_radius=2
   slider.background.color=$BACKGROUND_2
@@ -173,9 +179,9 @@ spotify_controls=(
 )
 
 sketchybar --add event spotify_change $SPOTIFY_EVENT             \
-           --add slider spotify.progress center 160              \
+           --add slider spotify.progress left 120                \
            --set spotify.progress "${spotify_progress[@]}"       \
-           --add item spotify.anchor center                      \
+           --add item spotify.anchor left                        \
            --set spotify.anchor "${spotify_anchor[@]}"           \
            --subscribe spotify.anchor mouse.entered mouse.exited \
                                       mouse.exited.global        \
