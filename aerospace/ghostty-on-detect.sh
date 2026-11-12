@@ -1,6 +1,8 @@
 #!/bin/bash
 # First real Ghostty window tiles on workspace 2. Extra native-tab AX windows
 # (AeroSpace #68) and the quick terminal float in place and are not moved.
+# The aerospace.toml rule floats every new Ghostty window first, so a tab or
+# the quick terminal never enters the tiling tree and nothing reflows.
 set -u
 
 PATH="/usr/local/bin:/opt/homebrew/bin:/opt/homebrew/sbin:${PATH:-/usr/bin:/bin:/usr/sbin:/sbin}"
@@ -33,13 +35,17 @@ is_quick_terminal() {
     dump="$("$AERO" debug-windows --window-id "$wid" 2>/dev/null || true)"
     [ -n "$dump" ] || return 1
     printf '%s\n' "$dump" | grep -q 'Aero.AxUiElementWindowType_isDialogHeuristic" : true' && return 0
-    if printf '%s\n' "$dump" | grep -q '"Aero.windowLevel"'; then
+    # Only a real non-normal level means the quick terminal; the level often
+    # reads null on an ordinary window, which falls through to the size check
+    if printf '%s\n' "$dump" | grep -q '"Aero.windowLevel" : "'; then
         printf '%s\n' "$dump" | grep -q '"Aero.windowLevel" : "normalWindow"' || return 0
     fi
     h="$(printf '%s\n' "$dump" | sed -n 's/.*"AXSize" : "<AXValue[^"]*{value = w:[0-9.]* h:\([0-9.]*\).*/\1/p' | head -1)"
     [ -n "$h" ] || return 1
-    desk_h="$(osascript -e 'tell application "Finder" to get item 4 of (bounds of window of desktop)' 2>/dev/null || true)"
-    [ -n "$desk_h" ] || return 1
+    # Screen height in points from SketchyBar (same units as AXSize; no Finder
+    # round trip). 1600 is the built-in display, for when the bar is not up yet.
+    desk_h="$(/usr/local/bin/sketchybar --query displays 2>/dev/null | sed -n 's/.*"h":\([0-9.]*\).*/\1/p' | head -1)"
+    [ -n "$desk_h" ] || desk_h=1600
     awk -v h="$h" -v s="$desk_h" 'BEGIN { exit !(s > 0 && h < 0.75 * s) }'
 }
 

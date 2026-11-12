@@ -14,7 +14,10 @@ window-decoration = true
 # macos-titlebar-style=transparent otherwise derives window-theme from background
 # luminosity, which kept the popup on Gruvbox Light (#fbf1c7).
 window-theme = dark
+# Fallback only: theme.conf (written by the bar's ⌥⇧T theme switcher, not in
+# git) loads after this file and sets the theme to match the bar.
 theme = Gruvbox Dark
+config-file = ?theme.conf
 # 1 is solid; lower shows more of what is behind. Needs a full Ghostty restart (Cmd+Q, reopen).
 background-opacity = 0.9
 background-blur = true

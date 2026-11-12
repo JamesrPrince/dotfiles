@@ -15,8 +15,9 @@ exec-on-workspace-change = ['/bin/bash', '-c',
     '/usr/local/bin/sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE'
 ]
 
-# Refresh the workspace app icons when windows open, close or move
-on-focus-changed = ['exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_workspace_change']
+# Refresh the workspace app icons and the layout pill when windows open, close or move.
+# Its own event, so a workspace switch is not counted twice (spaces.sh skips unchanged states)
+on-focus-changed = ['exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_focus_change']
 
 start-at-login = true
 auto-reload-config = true
@@ -86,21 +87,22 @@ gaps.outer.right =      8
 # Quick Look helpers (Space-bar preview is often the filename, not "Quick Look").
 # First-match-wins: these must sit before the Finder catch-all.
 [[on-window-detected]]
-    if = 'test %{app-bundle-id} = com.apple.quicklook.ui.helper'
+    if.app-id = 'com.apple.quicklook.ui.helper'
     run = 'layout floating'
 
 [[on-window-detected]]
-    if = 'test %{app-bundle-id} = com.apple.QuickLookDaemon'
+    if.app-id = 'com.apple.QuickLookDaemon'
     run = 'layout floating'
 
 [[on-window-detected]]
-    if = 'test %{app-bundle-id} = com.apple.quicklook.qlmanage'
+    if.app-id = 'com.apple.quicklook.qlmanage'
     run = 'layout floating'
 
-# Finder browser windows tile; QL/dialogs float via helper (filename titles).
+# Every other Finder window floats first; the helper tiles only the browser windows,
+# so a Quick Look titled with the filename never reflows the workspace.
 [[on-window-detected]]
-    if = 'test %{app-bundle-id} = com.apple.finder'
-    run = 'exec-and-forget ~/dotfiles/aerospace/finder-on-detect.sh'
+    if.app-id = 'com.apple.finder'
+    run = ['layout floating', 'exec-and-forget ~/dotfiles/aerospace/finder-on-detect.sh']
 
 [[on-window-detected]]
     if.app-id = 'com.apple.SystemProfiler'
@@ -134,15 +136,15 @@ gaps.outer.right =      8
     run = 'layout floating'
 
 [[on-window-detected]]
-    if = 'test %{app-bundle-id} = com.wiheads.paste'
+    if.app-id = 'com.wiheads.paste'
     run = 'layout floating'
 
 [[on-window-detected]]
-    if = 'test %{app-bundle-id} = io.tailscale.ipn.macsys'
+    if.app-id = 'io.tailscale.ipn.macsys'
     run = 'layout floating'
 
 [[on-window-detected]]
-    if = 'test %{app-bundle-id} = com.electron.ollama'
+    if.app-id = 'com.electron.ollama'
     run = 'layout floating'
 
 # Apps that always open on their own workspace (new windows only)
@@ -155,27 +157,27 @@ gaps.outer.right =      8
 # Primary tiles on workspace 2; extra tabs float. The quick terminal is floated in place
 # (not moved to 2); if size/dialog detection misses it, extras still float on the current workspace.
 [[on-window-detected]]
-    if = 'test %{app-bundle-id} = com.mitchellh.ghostty || test %{app-name} = Ghostty'
-    run = 'exec-and-forget ~/dotfiles/aerospace/ghostty-on-detect.sh'
+    if.app-id = 'com.mitchellh.ghostty'
+    run = ['layout floating', 'exec-and-forget ~/dotfiles/aerospace/ghostty-on-detect.sh']
 
 [[on-window-detected]]
     if.app-id = 'com.anthropic.claudefordesktop'
     run = 'move-node-to-workspace 2'
 
 [[on-window-detected]]
-    if = 'test %{app-bundle-id} = app.clarity.mac'
+    if.app-id = 'app.clarity.mac'
     run = 'move-node-to-workspace 2'
 
 [[on-window-detected]]
-    if = 'test %{app-bundle-id} = online.omniroute.desktop'
+    if.app-id = 'online.omniroute.desktop'
     run = 'move-node-to-workspace 2'
 
 [[on-window-detected]]
-    if = 'test %{app-bundle-id} = com.microsoft.VSCodeInsiders'
+    if.app-id = 'com.microsoft.VSCodeInsiders'
     run = 'move-node-to-workspace 2'
 
 [[on-window-detected]]
-    if = 'test %{app-bundle-id} = dev.warp.Warp-Stable'
+    if.app-id = 'dev.warp.Warp-Stable'
     run = 'move-node-to-workspace 2'
 
 [[on-window-detected]]
@@ -187,7 +189,7 @@ gaps.outer.right =      8
     run = 'move-node-to-workspace 3'
 
 [[on-window-detected]]
-    if = 'test %{app-bundle-id} = com.apple.TextEdit'
+    if.app-id = 'com.apple.TextEdit'
     run = 'move-node-to-workspace 3'
 
 [[on-window-detected]]
@@ -199,15 +201,15 @@ gaps.outer.right =      8
     run = 'move-node-to-workspace 4'
 
 [[on-window-detected]]
-    if = 'test %{app-bundle-id} = com.apple.mail'
+    if.app-id = 'com.apple.mail'
     run = 'move-node-to-workspace 4'
 
 [[on-window-detected]]
-    if = 'test %{app-bundle-id} = org.libreoffice.script'
+    if.app-id = 'org.libreoffice.script'
     run = 'move-node-to-workspace 4'
 
 [[on-window-detected]]
-    if = 'test %{app-bundle-id} = com.apple.Preview'
+    if.app-id = 'com.apple.Preview'
     run = 'move-node-to-workspace 4'
 
 [[on-window-detected]]
@@ -227,7 +229,7 @@ gaps.outer.right =      8
     run = 'move-node-to-workspace 5'
 
 [[on-window-detected]]
-    if = 'test %{app-bundle-id} = com.colliderli.iina'
+    if.app-id = 'com.colliderli.iina'
     run = 'move-node-to-workspace 5'
 
 [mode.main.binding]
@@ -251,7 +253,8 @@ gaps.outer.right =      8
     # Toggle the focused window between floating and tiling
     alt-shift-space = ['layout floating tiling', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_layout_change']
 
-    alt-shift-f = ['fullscreen', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_workspace_change']
+    # The layout pill's script also hides the bar while a window is full screen
+    alt-shift-f = ['fullscreen', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_layout_change']
 
     alt-1 = 'workspace 1'
     alt-2 = 'workspace 2'
@@ -259,11 +262,19 @@ gaps.outer.right =      8
     alt-4 = 'workspace 4'
     alt-5 = 'workspace 5'
 
-    alt-shift-1 = 'move-node-to-workspace 1'
-    alt-shift-2 = 'move-node-to-workspace 2'
-    alt-shift-3 = 'move-node-to-workspace 3'
-    alt-shift-4 = 'move-node-to-workspace 4'
-    alt-shift-5 = 'move-node-to-workspace 5'
+    # The trigger refreshes the icons even when the move leaves no window to focus
+    alt-shift-1 = ['move-node-to-workspace 1', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_focus_change']
+    alt-shift-2 = ['move-node-to-workspace 2', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_focus_change']
+    alt-shift-3 = ['move-node-to-workspace 3', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_focus_change']
+    alt-shift-4 = ['move-node-to-workspace 4', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_focus_change']
+    alt-shift-5 = ['move-node-to-workspace 5', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_focus_change']
+
+    # Take the window along: move it and follow to that workspace
+    ctrl-alt-shift-1 = 'move-node-to-workspace --focus-follows-window 1'
+    ctrl-alt-shift-2 = 'move-node-to-workspace --focus-follows-window 2'
+    ctrl-alt-shift-3 = 'move-node-to-workspace --focus-follows-window 3'
+    ctrl-alt-shift-4 = 'move-node-to-workspace --focus-follows-window 4'
+    ctrl-alt-shift-5 = 'move-node-to-workspace --focus-follows-window 5'
 
     # Cycle through the windows in this workspace, wrapping at the end
     alt-backtick = 'focus --boundaries-action wrap-around-the-workspace dfs-next'
@@ -299,7 +310,8 @@ gaps.outer.right =      8
     esc = ['reload-config', 'mode main']
     r = ['flatten-workspace-tree', 'mode main', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_layout_change'] # reset layout
     f = ['layout floating tiling', 'mode main', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_layout_change'] # toggle floating/tiling
-    backspace = ['close-all-windows-but-current', 'mode main']
+    # Shift guards the one destructive key against a stray backspace
+    shift-backspace = ['close-all-windows-but-current', 'mode main']
     b = ['balance-sizes', 'mode main'] # equal sizes
 
     alt-shift-h = ['join-with left', 'mode main']

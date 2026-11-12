@@ -1,6 +1,8 @@
 #!/bin/bash
 # Finder browser windows tile. Quick Look and dialogs float.
 # Space-bar QL is a Finder window titled with the filename, not "Quick Look".
+# The aerospace.toml rule floats every new Finder window first, so this only
+# tiles the browser windows: a preview or dialog never reflows the workspace.
 set -u
 
 PATH="/usr/local/bin:/opt/homebrew/bin:/opt/homebrew/sbin:${PATH:-/usr/bin:/bin:/usr/sbin:/sbin}"
