@@ -2,7 +2,7 @@
 
 # --- Font ---
 font-size = 13
-font-family = "MesloLGS NF"          # Powerlevel10k's recommended font; already on your system
+font-family = "Maple Mono NF"          # rounded monospace, Nunito-like; was "MesloLGS NF"
 
 # --- Window ---
 window-padding-x = 8
