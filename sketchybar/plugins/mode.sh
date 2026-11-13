@@ -10,6 +10,7 @@ if [ "$BAR_STYLE" = flat ]; then   # coloured text, no pill
   case "$MODE" in
     service) sketchybar --set "$NAME" drawing=on label="SERVICE" label.color=$ORANGE ;;
     resize)  sketchybar --set "$NAME" drawing=on label="RESIZE"  label.color=$MAGENTA ;;
+    launch)  sketchybar --set "$NAME" drawing=on label="LAUNCH"  label.color=$BLUE ;;
     *)       sketchybar --set "$NAME" drawing=off ;;
   esac
   exit 0
@@ -18,5 +19,6 @@ fi
 case "$MODE" in
   service) sketchybar --animate tanh 12 --set "$NAME" drawing=on label="SERVICE" background.color=$ORANGE ;;
   resize)  sketchybar --animate tanh 12 --set "$NAME" drawing=on label="RESIZE"  background.color=$MAGENTA ;;
+  launch)  sketchybar --animate tanh 12 --set "$NAME" drawing=on label="LAUNCH"  background.color=$BLUE ;;
   *)       sketchybar --set "$NAME" drawing=off ;;
 esac

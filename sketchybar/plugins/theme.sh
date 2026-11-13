@@ -4,9 +4,9 @@
 #   theme.sh set <name>    a named theme (see list)
 #   theme.sh list [--plain]  every theme; --plain is "id<TAB>name" for scripts
 #   theme.sh current       the active theme id
-#   theme.sh borders|ghostty|nvim|wall   re-apply one part only
+#   theme.sh borders|ghostty|nvim|wall|alfred   re-apply one part only
 # A switch sets: the bar (colors.sh), window borders, the Ghostty palette, the Neovim
-# colourscheme, the wallpaper. btop, bat, fzf, lazygit, yazi and Starship use the
+# colourscheme, the wallpaper, the Alfred window theme. btop, bat, fzf, lazygit, yazi and Starship use the
 # terminal's own ANSI colours, so they follow Ghostty with no files of their own.
 # All parts are safe to run at any time.
 
@@ -66,6 +66,16 @@ wall_on() {
   "$tool" "$img" >/dev/null 2>&1
 }
 
+alfred_on() {
+  # One Alfred theme per bar theme ("Om <name>", alfred/themes/). Alfred's own AppleScript switches it
+  # live. Off until alfred/import.sh has imported the themes and made the marker file; the first call
+  # then asks once for Automation permission (Alfred must be running: never started or restarted here).
+  [ -f "$CONF/.alfred-themes" ] || return 0
+  pgrep -xq Alfred || return 0
+  osascript -e "tell application id \"com.runningwithcrayons.Alfred\" to set theme \"Om $THEME_NAME\"" \
+    >/dev/null 2>&1 &
+}
+
 apply() { # apply <id>
   echo "$1" > "$CONF/.theme"
   source "$CONF/colors.sh"
@@ -73,6 +83,7 @@ apply() { # apply <id>
   ghostty_on
   nvim_on
   wall_on
+  alfred_on
   sketchybar --reload
 }
 
@@ -104,5 +115,6 @@ case "$1" in
   ghostty) ghostty_on ;;
   nvim)    nvim_on ;;
   wall)    wall_on ;;
-  *) echo "usage: theme.sh next | set <name> | list [--plain] | current | borders | ghostty | nvim | wall" >&2; exit 2 ;;
+  alfred)  alfred_on ;;
+  *) echo "usage: theme.sh next | set <name> | list [--plain] | current | borders | ghostty | nvim | wall | alfred" >&2; exit 2 ;;
 esac

@@ -3,6 +3,12 @@
 # use, GPU load, network speed on en0. Also keeps today's network totals and peak speeds
 # in ~/.cache/sketchybar-net-today for the network popup (plugins/stat_net.sh). The popups
 # themselves are filled by stat_net.sh, stat_cpu.sh and stat_mem.sh, only while open.
+#
+# One run is this script, `cat` (the theme colours), helper/statsample and one `sketchybar`
+# call. statsample reads CPU, memory pressure, GPU and the en0 counters in a single process;
+# it used to be memory_pressure, sysctl, ioreg, netstat, awk, date and friends (20 programs).
+# Build it with: clang -O2 -o helper/statsample helper/statsample.c -framework IOKit -framework CoreFoundation
+# Without the binary the old tool chain below still gives the same numbers, only slower.
 
 export PATH="/usr/local/bin:$PATH"
 source "$HOME/.config/sketchybar/plugins/hover.sh"
@@ -12,14 +18,31 @@ if [ "$SENDER" = "mouse.exited.global" ]; then
 fi
 source "$HOME/.config/sketchybar/colors.sh"
 source "$HOME/.config/sketchybar/icons.sh"
-source "$HOME/.config/sketchybar/plugins/style.sh"
+# The style, read with the shell's own `read` (plugins/style.sh would start a `cat`)
+BAR_STYLE=; [ -r "$HOME/.config/sketchybar/.barstyle" ] && read -r BAR_STYLE < "$HOME/.config/sketchybar/.barstyle"
 
 HELPER="$HOME/.config/sketchybar/helper"
 STATE="${TMPDIR:-/tmp}/sketchybar_net"
 
-# CPU: user + system load since the last run (the helper keeps the tick counts)
-CPU=$("$HELPER/cpu" "${TMPDIR:-/tmp}/sketchybar_cpu" 2>/dev/null)
-CPU=${CPU:-0}
+# sample  ->  CPU MEMFREE LEVEL GPU EPOCH DAY IN OUT   (see helper/statsample.c)
+sample() {
+  if [ -x "$HELPER/statsample" ]; then
+    "$HELPER/statsample" "${TMPDIR:-/tmp}/sketchybar_statsample" 2>/dev/null && return
+  fi
+  local cpu free level gpu in out
+  cpu=$("$HELPER/cpu" "${TMPDIR:-/tmp}/sketchybar_cpu" 2>/dev/null)
+  free=$(memory_pressure -Q 2>/dev/null | awk -F': ' '/free percentage/{gsub("%","",$2); print $2}')
+  level=$(sysctl -n kern.memorystatus_vm_pressure_level 2>/dev/null)
+  gpu=$(ioreg -r -d 1 -c IOAccelerator | grep -o '"PerformanceStatistics" = {[^}]*}' \
+        | grep -o '"Device Utilization %"=[0-9]*' | cut -d= -f2 | sort -n | tail -1)
+  read -r in out <<< "$(netstat -ibn -I en0 | awk 'NR==2{print $7, $10}')"
+  echo "${cpu:-0} ${free:-100} ${level:-1} ${gpu:-0} $(date +%s) $(date +%F) ${in:-0} ${out:-0}"
+}
+read -r CPU FREE LEVEL GPU NOW DAY IN OUT <<< "$(sample)"
+CPU=${CPU:-0}; GPU=${GPU:-0}; NOW=${NOW:-0}
+[ "$IN" = 0 ] && [ "$OUT" = 0 ] && IN= OUT=   # no en0
+
+# CPU: user + system load since the last run
 CPU_COLOR=$BLUE
 [ "$CPU" -ge 50 ] && CPU_COLOR=$YELLOW
 [ "$CPU" -ge 80 ] && CPU_COLOR=$RED
@@ -27,37 +50,36 @@ CPU_COLOR=$BLUE
 # Memory pressure: 100 minus the system-wide free percentage that memory_pressure reports
 # (not "memory used"), coloured by the kernel's pressure level, as Activity Monitor's graph is
 # (1 normal, 2 warning, 4 critical)
-FREE=$(memory_pressure -Q 2>/dev/null | awk -F': ' '/free percentage/{gsub("%","",$2); print $2}')
 MEM=$(( 100 - ${FREE:-100} ))
-case $(sysctl -n kern.memorystatus_vm_pressure_level 2>/dev/null) in
+case $LEVEL in
   4) MEM_COLOR=$RED ;;
   2) MEM_COLOR=$YELLOW ;;
   *) MEM_COLOR=$GREEN ;;
 esac
 
-# GPU: busiest graphics card (Intel or Radeon), from IOAccelerator stats
-GPU=$(ioreg -r -d 1 -c IOAccelerator | grep -o '"PerformanceStatistics" = {[^}]*}' \
-      | grep -o '"Device Utilization %"=[0-9]*' | cut -d= -f2 | sort -n | tail -1)
-GPU=${GPU:-0}
+# GPU: busiest graphics card (Intel or Radeon)
 GPU_COLOR=$GREEN
 [ "$GPU" -ge 50 ] && GPU_COLOR=$YELLOW
 [ "$GPU" -ge 80 ] && GPU_COLOR=$RED
 
-# Network: bytes per second on en0 since the last run
+# Network: bytes per second on en0 since the last run, as "1.2 MB/s", "340 KB/s" or "12 B/s" (into $RATE)
 human() {
-  awk -v b="$1" 'BEGIN{ if (b>=1048576) printf "%.1f MB/s", b/1048576;
-                        else if (b>=1024) printf "%.0f KB/s", b/1024;
-                        else printf "%d B/s", b }'
+  local b=$1 t
+  if [ "$b" -ge 1048576 ]; then
+    t=$(( (b * 20 + 1048576) / 2097152 )); RATE="$((t / 10)).$((t % 10)) MB/s"
+  elif [ "$b" -ge 1024 ]; then
+    RATE="$(( (b * 2 + 1024) / 2048 )) KB/s"
+  else
+    RATE="$b B/s"
+  fi
 }
-NOW=$(date +%s)
-read -r IN OUT <<< "$(netstat -ibn -I en0 | awk 'NR==2{print $7, $10}')"
 UP_LABEL="0 B/s"; DOWN_LABEL="0 B/s"
 if [ -f "$STATE" ]; then
   read -r PNOW PIN POUT < "$STATE"
   DT=$(( NOW - PNOW )); [ "$DT" -lt 1 ] && DT=1
   if [ -n "$IN" ] && [ -n "$PIN" ] && [ "$IN" -ge "$PIN" ]; then
-    DOWN_LABEL=$(human $(( (IN - PIN) / DT )))
-    UP_LABEL=$(human $(( (OUT - POUT) / DT )))
+    human $(( (IN - PIN) / DT )); DOWN_LABEL=$RATE
+    human $(( (OUT - POUT) / DT )); UP_LABEL=$RATE
   fi
 fi
 echo "$NOW $IN $OUT" > "$STATE"
@@ -67,7 +89,6 @@ echo "$NOW $IN $OUT" > "$STATE"
 # Fields: day baseIn baseOut lastIn lastOut carryIn carryOut peakDown peakUp
 TODAY="$HOME/.cache/sketchybar-net-today"
 if [ -n "$IN" ] && [ -n "$OUT" ]; then
-  DAY=$(date +%F)
   read -r TDAY BIN BOUT LIN LOUT AIN AOUT PD PU < "$TODAY" 2>/dev/null
   if [ "$TDAY" != "$DAY" ]; then
     BIN=$IN; BOUT=$OUT; AIN=0; AOUT=0; PD=0; PU=0
@@ -78,11 +99,12 @@ if [ -n "$IN" ] && [ -n "$OUT" ]; then
   if [ -n "$PIN" ] && [ "$IN" -ge "$PIN" ]; then D_NOW=$(( (IN - PIN) / DT )); U_NOW=$(( (OUT - POUT) / DT )); fi
   [ "$D_NOW" -gt "${PD:-0}" ] && PD=$D_NOW
   [ "$U_NOW" -gt "${PU:-0}" ] && PU=$U_NOW
-  mkdir -p "$HOME/.cache"
+  [ -d "$HOME/.cache" ] || mkdir -p "$HOME/.cache"
   echo "$DAY $BIN $BOUT $IN $OUT ${AIN:-0} ${AOUT:-0} ${PD:-0} ${PU:-0}" > "$TODAY"
 fi
 
-args=(--push cpu.graph "$(awk -v c="$CPU" 'BEGIN{printf "%.2f", c/100}')"
+printf -v GRAPH '%d.%02d' $(( CPU / 100 )) $(( CPU % 100 ))   # 0.00 to 1.00
+args=(--push cpu.graph "$GRAPH"
       --set cpu.percent label="${CPU}%" icon.color=$CPU_COLOR
       --set cpu.graph graph.color=$CPU_COLOR
       --set mem label="${MEM}%" icon.color=$MEM_COLOR

@@ -303,6 +303,9 @@ gaps.outer.right =      8
 
     alt-tab = 'workspace-back-and-forth'
 
+    # Caps Lock is F18 (launchd/dev.dotfiles.capslock-f18.plist): tap it, then a letter (mode launch below)
+    f18 = 'mode launch'
+
     alt-shift-semicolon = 'mode service'
     alt-shift-r = 'mode resize'
 
@@ -329,6 +332,27 @@ gaps.outer.right =      8
     ctrl-alt-g = 'exec-and-forget open -b ru.keepcoder.Telegram'
     ctrl-alt-m = 'exec-and-forget open -b com.spotify.client'
     ctrl-alt-k = 'exec-and-forget open -b com.tinyspeck.slackmacgap' # Slack
+
+[mode.launch.binding]
+    # Leader key: tap Caps Lock (remapped to F18 by launchd/), then one letter. Esc or Caps Lock again cancels.
+    b = ['exec-and-forget ~/dotfiles/aerospace/launch.sh browser', 'mode main']
+    t = ['exec-and-forget ~/dotfiles/aerospace/launch.sh ghostty', 'mode main']
+    n = ['exec-and-forget ~/dotfiles/aerospace/launch.sh new', 'mode main']
+    f = ['exec-and-forget ~/dotfiles/aerospace/launch.sh finder', 'mode main']
+    c = ['exec-and-forget ~/dotfiles/aerospace/launch.sh code', 'mode main']
+    m = ['exec-and-forget ~/dotfiles/aerospace/launch.sh btop', 'mode main']
+    l = ['exec-and-forget ~/dotfiles/aerospace/launch.sh lazygit', 'mode main']
+    d = ['exec-and-forget ~/dotfiles/aerospace/launch.sh lazydocker', 'mode main']
+    y = ['exec-and-forget ~/dotfiles/aerospace/launch.sh yazi', 'mode main']
+    s = ['exec-and-forget ~/dotfiles/aerospace/launch.sh slack', 'mode main']
+    w = ['exec-and-forget ~/dotfiles/aerospace/launch.sh whatsapp', 'mode main']
+    o = ['exec-and-forget ~/dotfiles/aerospace/launch.sh notion', 'mode main']
+    a = ['exec-and-forget ~/dotfiles/aerospace/launch.sh claude', 'mode main']
+    e = ['exec-and-forget ~/dotfiles/aerospace/launch.sh outlook', 'mode main']
+    x = ['exec-and-forget ~/dotfiles/aerospace/launch.sh excel', 'mode main']
+    p = ['exec-and-forget ~/dotfiles/aerospace/launch.sh spotify', 'mode main']
+    esc = 'mode main'
+    f18 = 'mode main'
 
 [mode.service.binding]
     esc = ['reload-config', 'mode main']

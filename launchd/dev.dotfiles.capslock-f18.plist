@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Caps Lock becomes F18 (the AeroSpace leader key). hidutil is macOS's own tool: no sudo, no Karabiner.
+	     0x700000039 = Caps Lock, 0x70000006D = F18 (HID usage page 7). Runs at every login. -->
+	<key>Label</key>
+	<string>dev.dotfiles.capslock-f18</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/usr/bin/hidutil</string>
+		<string>property</string>
+		<string>--set</string>
+		<string>{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":0x700000039,"HIDKeyboardModifierMappingDst":0x70000006D}]}</string>
+	</array>
+	<key>RunAtLoad</key>
+	<true/>
+</dict>
+</plist>

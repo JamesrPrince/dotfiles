@@ -66,7 +66,8 @@ KEYS = {"backtick": "`", "slash": "/", "comma": ",", "minus": "-", "equal": "=",
         "left": "←", "right": "→", "up": "↑", "down": "↓"}
 
 # The tabs, in order. Each is a section of the sheet.
-TABS = ["Switch", "Rearrange", "Layout", "Apps", "Modes"]
+TABS = ["Switch", "Rearrange", "Layout", "Apps", "Launch", "Modes"]
+LAUNCH = HOME + "/dotfiles/aerospace/launch.sh"   # `launch.sh list` names every launch action
 HIDDEN_WORKSPACE = "S"   # the scratchpad workspace (see workspaces.conf)
 
 
@@ -109,6 +110,22 @@ def app_name(bundle_id, cache):
 
 def ws(name):
     return "scratchpad" if name == HIDDEN_WORKSPACE else name
+
+
+_LAUNCH_NAMES = {}
+
+
+def launch_names():
+    """{action: description} from `launch.sh list`, read once."""
+    if not _LAUNCH_NAMES:
+        try:
+            out = subprocess.run(["/bin/bash", LAUNCH, "list"], capture_output=True, text=True, timeout=3).stdout
+            for line in out.splitlines():
+                name, _, text = line.partition("|")
+                _LAUNCH_NAMES[name] = text
+        except Exception:
+            pass
+    return _LAUNCH_NAMES
 
 
 def describe(cmds, cache):
@@ -162,6 +179,10 @@ def describe(cmds, cache):
         return "Service", "Close other windows"
     if c == "reload-config":
         return "Service", "Reload config, exit"
+    if c == "mode launch":
+        return "Launch", "Launch mode (Caps Lock)"
+    if m := re.search(r"launch\.sh (\w+)$", c):
+        return "Launch", launch_names().get(m.group(1), m.group(1))
     if m := re.match(r"mode (\w+)$", c):
         return "Layout", m.group(1).capitalize() + " mode"
     if m := re.match(r"resize (width|height) ([+-])", c):
@@ -249,7 +270,7 @@ def build_sections():
 
     sections = {}
     for tab in TABS:
-        if tab == "Modes":
+        if tab in ("Modes", "Launch"):
             continue
         rows = collapse_numbers(grouped[tab])
         if rows:
@@ -261,6 +282,14 @@ def build_sections():
         if mode == "main" or not bindings:
             continue
         rows = [(pretty_key(k), describe(c, cache)[1]) for k, c in bindings]
+        if mode == "launch":   # its own tab, after the Caps Lock row
+            rows = [(k, "Cancel" if d == "Done" else d) for k, d in rows]
+            launch = [(k, d) for k, d in merge_same(rows)]
+            launch.sort(key=lambda r: (r[1] == "Cancel", r[0]))
+            sections["Launch"] = [("h", "", "Launch (tap Caps Lock, then a letter)", "Launch")] + \
+                [("r", pretty_key(k), d, "Launch") for k, d in grouped["Launch"]] + \
+                [("r", k, d, "Launch") for k, d in launch]
+            continue
         title = "%s mode" % mode.capitalize()
         if mode in entry_key:
             title += " (%s then)" % entry_key[mode]

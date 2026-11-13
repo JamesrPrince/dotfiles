@@ -1,0 +1,64 @@
+{
+  "alfredtheme": {
+    "name": "Om Tokyo Night",
+    "credit": "dotfiles, from themes/tokyonight/colors.toml",
+    "result": {
+      "textSpacing": 5,
+      "roundness": 6,
+      "paddingVertical": 4,
+      "iconSize": 36,
+      "iconPaddingHorizontal": 6,
+      "backgroundSelected": "#292e42ff",
+      "text": {
+        "size": 18,
+        "font": "System",
+        "color": "#c0caf5ff",
+        "colorSelected": "#c0caf5ff"
+      },
+      "subtext": {
+        "size": 12,
+        "font": "System",
+        "color": "#565f89ff",
+        "colorSelected": "#b4bee6ff"
+      },
+      "shortcut": {
+        "size": 16,
+        "font": "System",
+        "color": "#565f89ff",
+        "colorSelected": "#c0caf5ff"
+      }
+    },
+    "search": {
+      "background": "#0e0e14ff",
+      "backgroundSelected": "#292e42ff",
+      "roundness": 6,
+      "paddingHorizontal": 8,
+      "paddingVertical": 6,
+      "spacing": 8,
+      "text": {
+        "size": 32,
+        "font": "System Light",
+        "color": "#c0caf5ff",
+        "colorSelected": "#c0caf5ff"
+      }
+    },
+    "window": {
+      "color": "#1a1b26ff",
+      "borderColor": "#7aa2f7ff",
+      "borderPadding": 2,
+      "blur": 0,
+      "roundness": 8,
+      "width": 600,
+      "paddingHorizontal": 10,
+      "paddingVertical": 10
+    },
+    "separator": {
+      "color": "#414868ff",
+      "thickness": 1
+    },
+    "scrollbar": {
+      "color": "#414868ff",
+      "thickness": 2
+    }
+  }
+}

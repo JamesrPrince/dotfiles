@@ -15,7 +15,7 @@ poll() {
   local b last
   b=$("$HELPER" 2>/dev/null) || exit 0
   [ -n "$b" ] && [ "$b" -ge 0 ] 2>/dev/null || exit 0
-  last=$(cat "$LAST" 2>/dev/null)
+  last=; [ -r "$LAST" ] && read -r last < "$LAST"   # builtin read: no cat process
   [ "$b" = "$last" ] && exit 0
   echo "$b" > "$LAST"
   # first look after a (re)load only records the value: no slide-out at startup

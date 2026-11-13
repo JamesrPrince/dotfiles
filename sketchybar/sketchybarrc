@@ -4,6 +4,28 @@
 
 export PATH="/usr/local/bin:$PATH"
 
+# Batching: every `sketchybar ...` call in this file and in items/*.sh is collected here and
+# sent in as few messages as possible (one process and one round trip per ~24 KB instead of one
+# per call: the config makes about 170 calls). The order of the commands is kept. A message
+# of over about 300 KB is dropped by SketchyBar, hence the limit. Nothing in the config
+# queries the bar while loading; sk_flush sends what is pending (needed before a script
+# that talks to the bar itself runs).
+SK_BUF=()
+SK_LEN=0
+AFTER_LOAD=()   # commands items/*.sh want run once the batch is in (they need the items to exist)
+sk_flush() {
+  [ "${#SK_BUF[@]}" -gt 0 ] && command sketchybar "${SK_BUF[@]}"
+  SK_BUF=(); SK_LEN=0
+  return 0
+}
+sketchybar() {
+  SK_BUF+=("$@")
+  local s="$*"
+  SK_LEN=$(( SK_LEN + ${#s} + $# ))
+  [ "$SK_LEN" -gt 24000 ] && sk_flush
+  return 0
+}
+
 source "$HOME/.config/sketchybar/colors.sh"
 source "$HOME/.config/sketchybar/icons.sh"
 
@@ -144,9 +166,17 @@ for item in apple.logo calendar weather badge.slack badge.whatsapp \
   sketchybar --subscribe $item mouse.entered mouse.exited
 done
 
-# Window border follows the theme accent (updates a running JankyBorders)
-pgrep -xq borders && "$PLUGIN_DIR/theme.sh" borders
-# Ghostty follows the bar theme (rewrites its theme file only when it changes)
-"$PLUGIN_DIR/theme.sh" ghostty
+# Everything above went in as a few batched messages; send what is left, then let the bar draw
+sk_flush
 
-sketchybar --update
+# The forced update first: it starts every item's script once, so the popup rows that keys.py adds
+# below (each runs `keys.py scroll` on a forced update) must not exist yet.
+command sketchybar --update
+
+# What needs the finished bar, and the theme's side effects on other programs (JankyBorders, Ghostty's
+# theme file), run in the background so the load does not wait for them.
+(
+  pgrep -xq borders && "$PLUGIN_DIR/theme.sh" borders   # a running JankyBorders takes new colours
+  "$PLUGIN_DIR/theme.sh" ghostty                         # rewrites its theme file only when it changes
+  for cmd in "${AFTER_LOAD[@]}"; do eval "$cmd"; done   # items/keys.sh: the shortcut sheet's popups
+) >/dev/null 2>&1 &

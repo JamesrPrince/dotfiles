@@ -9,11 +9,8 @@ need=(sketchybar aerospace jq borders python3 gh)
 missing=(); for c in "${need[@]}"; do command -v "$c" >/dev/null || missing+=("$c"); done
 if [ ${#missing[@]} -gt 0 ]; then
   echo "Missing: ${missing[*]}"
-  echo "Install with:"
-  echo "  brew tap FelixKratz/formulae && brew install sketchybar borders jq gh"
-  echo "  brew install --cask nikitabobko/tap/aerospace font-sf-pro"
-  echo "Also wanted: brew install starship neovim fastfetch lazydocker btop bat fzf lazygit yazi"
-  echo "  curl -L https://github.com/kvndrsslr/sketchybar-app-font/releases/latest/download/sketchybar-app-font.ttf -o ~/Library/Fonts/sketchybar-app-font.ttf"
+  echo "Install everything with:  brew bundle --file ~/dotfiles/Brewfile   (see the fastfetch note in it)"
+  echo "Also: xcode-select --install   (clang and swiftc for the helpers)"
   exit 1
 fi
 
@@ -48,6 +45,7 @@ link btop/btop.conf "$HOME/.config/btop/btop.conf"  # TTY theme: follows the ter
 link bat/config "$HOME/.config/bat/config"          # ansi theme
 link lazygit/config.yml "$HOME/Library/Application Support/lazygit/config.yml"
 link zsh/ansi-tools.zsh "$HOME/.config/zsh/ansi-tools.zsh"   # fzf follows the terminal colours
+link launchd/dev.dotfiles.capslock-f18.plist "$HOME/Library/LaunchAgents/dev.dotfiles.capslock-f18.plist"  # Caps Lock -> F18 (the launch-mode leader key)
 
 # ~/.zshrc: Starship as the prompt (keep it last) and the fzf colours. Each added once; the file is backed up first.
 if [ -f "$HOME/.zshrc" ]; then
@@ -57,8 +55,18 @@ if [ -f "$HOME/.zshrc" ]; then
 fi
 
 chmod +x "$DOT"/sketchybar/sketchybarrc "$DOT"/sketchybar/items/*.sh "$DOT"/sketchybar/plugins/* \
-  "$DOT"/themes/*.sh "$DOT"/themes/*.py
+  "$DOT"/themes/*.sh "$DOT"/themes/*.py "$DOT"/aerospace/*.sh "$DOT"/check.sh
+
+# Caps Lock -> F18 now (hidutil, no sudo); the LaunchAgent repeats it at every login.
+LA=dev.dotfiles.capslock-f18
+/usr/bin/hidutil property --set '{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":0x700000039,"HIDKeyboardModifierMappingDst":0x70000006D}]}' >/dev/null \
+  && echo "keys    Caps Lock is now F18"
+launchctl print "gui/$(id -u)/$LA" >/dev/null 2>&1 || launchctl bootstrap "gui/$(id -u)" "$HOME/Library/LaunchAgents/$LA.plist" 2>/dev/null || true
 if [ "${SKIP_HELPERS:-}" = 1 ]; then echo "helpers skipped (SKIP_HELPERS=1)"; else "$DOT/sketchybar/helper/build.sh"; fi
+# The bar's stats sampler: a plain binary, no signing and no permissions, so it is always built.
+# Without it plugins/stats.sh falls back to the slower tool chain.
+clang -O2 -o "$DOT/sketchybar/helper/statsample" "$DOT/sketchybar/helper/statsample.c" -framework IOKit -framework CoreFoundation \
+  && echo "helpers statsample built"
 
 # Alfred "om" menu (keyword om): copied, not linked, into Alfred's workflows folder. Alfred picks it up without a restart.
 AW="$HOME/Library/Application Support/Alfred/Alfred.alfredpreferences/workflows"
@@ -71,5 +79,9 @@ else echo "alfred  not found, skipped the om workflow"; fi
 [ -x "$DOT/themes/setwall" ] || swiftc -O "$DOT/themes/setwall.swift" -o "$DOT/themes/setwall" || echo "setwall: needs swiftc (xcode-select --install)"
 /bin/bash "$DOT/sketchybar/plugins/theme.sh" set "$(/bin/bash "$DOT/sketchybar/plugins/theme.sh" current)" || true
 
+# Bar style last: a fresh install has no .barstyle and starts in centre (top gap 57), while the committed
+# aerospace.toml carries the flat gap (36). `set` writes the matching gap and reloads AeroSpace and the bar.
+/bin/bash "$DOT/sketchybar/plugins/barstyle.sh" set "$(/bin/bash "$DOT/sketchybar/plugins/barstyle.sh" get)" || true
+
 echo
-echo "Done. Reload with: sketchybar --reload  (and aerospace reload-config)"
+echo "Done. Verify with: ~/dotfiles/check.sh"

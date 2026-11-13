@@ -130,4 +130,4 @@ sketchybar --add item control.keys popup.control                 \
            --move control.keys before control.settings
 
 # --- Everything else is defined but not drawn ------------------------------------------------------
-"$PLUGIN_DIR/flat_hide.sh"
+source "$PLUGIN_DIR/flat_hide.sh"   # sourced, so its calls join the load-time batch

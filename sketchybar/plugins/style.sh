@@ -5,7 +5,8 @@
 # The choice lives in ~/.config/sketchybar/.barstyle (git-ignored); a missing or unknown value
 # means centre. Change it with plugins/barstyle.sh, never by editing this file.
 
-BAR_STYLE=$(cat "$HOME/.config/sketchybar/.barstyle" 2>/dev/null)
+# `read` is the shell's own: a $(cat ...) here would start a process for every plugin run
+BAR_STYLE=; [ -r "$HOME/.config/sketchybar/.barstyle" ] && read -r BAR_STYLE < "$HOME/.config/sketchybar/.barstyle"
 [ "$BAR_STYLE" = flat ] || BAR_STYLE=centre
 
 if [ "$BAR_STYLE" = flat ]; then

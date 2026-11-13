@@ -32,4 +32,7 @@ sketchybar --add item keys.tabs right    \
            --add item keys right         \
            --set keys "${keys[@]}"
 
-/usr/bin/python3 "$PLUGIN_DIR/keys.py"
+# keys.py (about a second of Python start-up and `aerospace`/`launch.sh` reads) fills the popups
+# through the bar, so it runs once sketchybarrc has sent the batch, in the background, instead of
+# holding up the load: the sheet is ready a moment after the bar is.
+AFTER_LOAD+=("/usr/bin/python3 $PLUGIN_DIR/keys.py")

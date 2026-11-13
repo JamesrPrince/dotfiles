@@ -1,0 +1,64 @@
+{
+  "alfredtheme": {
+    "name": "Om Rose Pine",
+    "credit": "dotfiles, from themes/rosepine/colors.toml",
+    "result": {
+      "textSpacing": 5,
+      "roundness": 6,
+      "paddingVertical": 4,
+      "iconSize": 36,
+      "iconPaddingHorizontal": 6,
+      "backgroundSelected": "#dfdad9ff",
+      "text": {
+        "size": 18,
+        "font": "System",
+        "color": "#575279ff",
+        "colorSelected": "#575279ff"
+      },
+      "subtext": {
+        "size": 12,
+        "font": "System",
+        "color": "#9893a5ff",
+        "colorSelected": "#6e6a86ff"
+      },
+      "shortcut": {
+        "size": 16,
+        "font": "System",
+        "color": "#9893a5ff",
+        "colorSelected": "#575279ff"
+      }
+    },
+    "search": {
+      "background": "#e1dbd5ff",
+      "backgroundSelected": "#dfdad9ff",
+      "roundness": 6,
+      "paddingHorizontal": 8,
+      "paddingVertical": 6,
+      "spacing": 8,
+      "text": {
+        "size": 32,
+        "font": "System Light",
+        "color": "#575279ff",
+        "colorSelected": "#575279ff"
+      }
+    },
+    "window": {
+      "color": "#faf4edff",
+      "borderColor": "#56949fff",
+      "borderPadding": 2,
+      "blur": 0,
+      "roundness": 8,
+      "width": 600,
+      "paddingHorizontal": 10,
+      "paddingVertical": 10
+    },
+    "separator": {
+      "color": "#cecacdff",
+      "thickness": 1
+    },
+    "scrollbar": {
+      "color": "#cecacdff",
+      "thickness": 2
+    }
+  }
+}

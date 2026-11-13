@@ -6,6 +6,7 @@ sketchybar/helper/audio
 sketchybar/helper/camera
 sketchybar/helper/wifi
 sketchybar/helper/clip
+sketchybar/helper/statsample
 sketchybar/helper/SketchyBarCal.app/Contents/MacOS/
 sketchybar/helper/SketchyBarCal.app/Contents/_CodeSignature/
 sketchybar/helper/SketchyBarWiFi.app/Contents/MacOS/
@@ -21,3 +22,4 @@ themes/backgrounds/
 nvim/lua/plugins/theme.lua
 themes/setwall
 sketchybar/.barstyle
+sketchybar/.alfred-themes
