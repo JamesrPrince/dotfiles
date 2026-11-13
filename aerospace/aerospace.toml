@@ -154,8 +154,9 @@ gaps.outer.right =      8
 # Apps that always open on their own workspace (new windows only)
 # 1 browser, 2 terminal and Claude, 3 notes, 4 work (spreadsheets, mail), 5 chat and music
 # Ghostty native tabs are extra AX windows (AeroSpace #68; ghostty.org/docs/help/macos-tiling-wms).
-# Primary tiles on workspace 2; extra tabs float. The quick terminal is floated in place
-# (not moved to 2); if size/dialog detection misses it, extras still float on the current workspace.
+# Every real Ghostty window tiles (alt-hjkl and alt-shift-hjkl need a tiled window): the first
+# on workspace 2, later ones where they open. Only the quick terminal and native tabs float,
+# in place; ghostty-on-detect.sh tells them apart (--dry-run prints its verdict).
 [[on-window-detected]]
     if.app-id = 'com.mitchellh.ghostty'
     run = ['layout floating', 'exec-and-forget ~/dotfiles/aerospace/ghostty-on-detect.sh']
