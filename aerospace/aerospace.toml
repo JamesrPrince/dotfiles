@@ -49,7 +49,7 @@ gaps.inner.horizontal = 8
 gaps.inner.vertical =   8
 gaps.outer.left =       8
 gaps.outer.bottom =     8
-gaps.outer.top =        57
+gaps.outer.top =        36
 gaps.outer.right =      8
 
 # Windows that should float instead of tiling
@@ -309,8 +309,11 @@ gaps.outer.right =      8
     # Key-binding cheat sheet (SketchyBar popup, built from this file)
     alt-shift-slash = 'exec-and-forget /usr/bin/python3 ~/.config/sketchybar/plugins/keys.py toggle'
 
-    # Next bar and border theme (Macchiato, Tokyo Night, Gruvbox)
+    # Next theme: bar, borders, Ghostty, Neovim and wallpaper switch together (theme.sh set <name> picks one)
     alt-shift-t = 'exec-and-forget /bin/bash ~/.config/sketchybar/plugins/theme.sh next'
+
+    # Next bar style (barstyle.sh, flat or floating)
+    alt-shift-b = 'exec-and-forget /bin/bash ~/.config/sketchybar/plugins/barstyle.sh next'
 
     # App launchers: ctrl-alt-<letter> opens or focuses the app (by bundle id)
     ctrl-alt-b = 'exec-and-forget open -b com.brave.Browser'

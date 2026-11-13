@@ -12,6 +12,7 @@ if [ "$SENDER" = "mouse.exited.global" ]; then
 fi
 source "$HOME/.config/sketchybar/colors.sh"
 source "$HOME/.config/sketchybar/icons.sh"
+source "$HOME/.config/sketchybar/plugins/style.sh"
 
 HELPER="$HOME/.config/sketchybar/helper"
 STATE="${TMPDIR:-/tmp}/sketchybar_net"
@@ -81,5 +82,12 @@ args=(--push cpu.graph "$(awk -v c="$CPU" 'BEGIN{printf "%.2f", c/100}')"
       --set gpu label="${GPU}%" icon.color=$GPU_COLOR
       --set net.up label="$NET_UP $UP_LABEL"
       --set net.down label="$NET_DOWN $DOWN_LABEL")
+
+# The flat bar shows the GPU in its own item and both network rates on one line
+if [ "$BAR_STYLE" = flat ]; then
+  args+=(--set gpu.bar label="${GPU}%" icon.color=$GPU_COLOR
+         --set net.up label="$NET_DOWN $DOWN_LABEL  $NET_UP $UP_LABEL"
+         --set net.down label="")
+fi
 
 sketchybar "${args[@]}"

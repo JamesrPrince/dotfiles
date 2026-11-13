@@ -9,7 +9,7 @@ fi
 source "$HOME/.config/sketchybar/colors.sh"
 source "$HOME/.config/sketchybar/icons.sh"
 FONT="SF Pro"
-TEXT_FONT="Nunito"
+source "$HOME/.config/sketchybar/plugins/style.sh"   # TEXT_FONT: Nunito, or Maple Mono NF in the flat style
 
 if [ "$(sketchybar --query calendar | jq -r '.popup.drawing')" = "on" ]; then
   sketchybar --set calendar popup.drawing=off
@@ -20,7 +20,12 @@ fi
 # collects its output. Each line is "time<TAB>title".
 OUT="${TMPDIR:-/tmp}/sketchybar_cal"
 : > "$OUT"
-open -g -W --stdout "$OUT" "$HOME/.config/sketchybar/helper/SketchyBarCal.app" --args 2
+# "open -W" prints "Unable to block on application" when the helper exits before open can wait
+# on it. That is harmless, but its exit code is not reliable, so ignore both and wait for the
+# helper to finish writing.
+open -g -W --stdout "$OUT" "$HOME/.config/sketchybar/helper/SketchyBarCal.app" --args 2 2>/dev/null
+sleep 0.1
+for _ in $(seq 40); do pgrep -qx cal || break; sleep 0.1; done
 
 row=(icon.font="$TEXT_FONT:Bold:12.0" icon.width=90 icon.color=$BLUE
      label.font="$TEXT_FONT:SemiBold:13.0" label.max_chars=40

@@ -1,0 +1,14 @@
+# lazygit: named ANSI colours only, so the panel colours follow the terminal theme.
+gui:
+  theme:
+    activeBorderColor: [cyan, bold]
+    inactiveBorderColor: [default]
+    searchingActiveBorderColor: [yellow, bold]
+    optionsTextColor: [blue]
+    selectedLineBgColor: [reverse]
+    inactiveViewSelectedLineBgColor: [bold]
+    cherryPickedCommitFgColor: [blue]
+    cherryPickedCommitBgColor: [cyan]
+    markedBaseCommitFgColor: [blue]
+    unstagedChangesColor: [red]
+    defaultFgColor: [default]

@@ -16,3 +16,8 @@ sketchybar/.theme
 ghostty/theme.conf
 sketchybar/helper/SketchyBarBluetooth.app/Contents/MacOS/
 sketchybar/helper/SketchyBarBluetooth.app/Contents/_CodeSignature/
+
+themes/backgrounds/
+nvim/lua/plugins/theme.lua
+themes/setwall
+sketchybar/.barstyle

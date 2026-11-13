@@ -17,7 +17,7 @@ source "$HOME/.config/sketchybar/colors.sh"
 source "$HOME/.config/sketchybar/icons.sh"
 
 FONT="SF Pro"          # glyph icons (SF Symbols)
-TEXT_FONT="Nunito"     # text
+source "$HOME/.config/sketchybar/plugins/style.sh"   # TEXT_FONT: Nunito, or Maple Mono NF in the flat style
 BT_FONT="MesloLGS NF"  # Bluetooth glyphs (Nerd Font)
 BT_APP="${BT_APP:-$HOME/.config/sketchybar/helper/SketchyBarBluetooth.app}"   # override only to test the fallback
 STATE="${TMPDIR:-/tmp}/sketchybar_bluetooth_state"

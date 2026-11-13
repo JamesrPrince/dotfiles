@@ -11,6 +11,13 @@ esac
 export PATH="/usr/local/bin:$PATH"
 source "$HOME/.config/sketchybar/colors.sh"
 
+# The flat bar has no hover pills: icons and numbers on the bar stay as they are
+if [ "$(cat "$HOME/.config/sketchybar/.barstyle" 2>/dev/null)" = flat ]; then
+  case "$NAME" in
+    space.*|apple.logo|calendar|control|wifi|bluetooth|volume_icon|cpu.percent|mem|net.up|net.down|gpu.bar|more) exit 0 ;;
+  esac
+fi
+
 if [[ $NAME == space.* ]] && \
    [ "$(sketchybar --query "$NAME" | jq -r '.icon.highlight')" = "on" ]; then
   exit 0

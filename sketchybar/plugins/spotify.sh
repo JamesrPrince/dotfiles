@@ -2,6 +2,7 @@
 
 export PATH="/usr/local/bin:$PATH"
 source "$HOME/.config/sketchybar/icons.sh"
+source "$HOME/.config/sketchybar/plugins/style.sh"
 
 next ()
 {
@@ -81,6 +82,8 @@ update ()
            --set spotify.progress drawing=off
            --set spotify.play icon=$SPOTIFY_PLAY                         )
   fi
+  # The flat bar has no music pill
+  [ "$BAR_STYLE" = flat ] && args+=(--set spotify.anchor drawing=off --set spotify.progress drawing=off)
   sketchybar -m "${args[@]}"
 }
 

@@ -31,7 +31,8 @@ brightness_change() {
 
   # Check whether the brightness was changed again while sleeping
   FINAL_PERCENTAGE=$(sketchybar --query $NAME | jq -r ".slider.percentage")
-  if [ "$FINAL_PERCENTAGE" -eq "$INFO" ]; then
+  # An empty answer (the bar was busy) also collapses it, so the slider can never stay stuck open
+  if [ -z "$FINAL_PERCENTAGE" ] || [ "$FINAL_PERCENTAGE" -eq "$INFO" ]; then
     sketchybar --animate tanh 30 --set $NAME slider.width=0
   fi
 }

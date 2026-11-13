@@ -2,6 +2,9 @@
 # Reads each app's Dock badge with lsappinfo and shows it in the bar.
 # Telegram and Outlook are folded into one "+N" badge (badge.more).
 export PATH="/usr/local/bin:$PATH"
+source "$HOME/.config/sketchybar/plugins/style.sh"
+# The flat bar shows no badges
+[ "$BAR_STYLE" = flat ] && exit 0
 source "$HOME/.config/sketchybar/plugins/icon_map.sh"
 
 # badge_label "<lsappinfo output>" -> the badge text, empty if none

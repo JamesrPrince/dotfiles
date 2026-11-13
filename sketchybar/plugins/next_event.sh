@@ -7,8 +7,9 @@ export PATH="/usr/local/bin:$PATH"
 source "$HOME/.config/sketchybar/plugins/hover.sh"
 source "$HOME/.config/sketchybar/colors.sh"
 
-# Zen mode keeps it hidden
-[ -f "${TMPDIR:-/tmp}/sketchybar_zen" ] && { sketchybar --set "$NAME" drawing=off; exit 0; }
+# Zen mode keeps it hidden, and so does the flat style
+source "$HOME/.config/sketchybar/plugins/style.sh"
+[ -f "${TMPDIR:-/tmp}/sketchybar_zen" ] || [ "$BAR_STYLE" = flat ] && { sketchybar --set "$NAME" drawing=off; exit 0; }
 
 CACHE="${TMPDIR:-/tmp}/sketchybar_next"
 APP="$HOME/.config/sketchybar/helper/SketchyBarCal.app"
@@ -16,7 +17,12 @@ APP="$HOME/.config/sketchybar/helper/SketchyBarCal.app"
 if [ "$SENDER" = "system_woke" ] || [ "$SENDER" = "forced" ] || \
    [ -z "$(find "$CACHE" -mmin -5 2>/dev/null)" ]; then
   : > "$CACHE.tmp"
-  open -g -W --stdout "$CACHE.tmp" "$APP" --args 1 2>/dev/null && mv "$CACHE.tmp" "$CACHE"
+  # open -W can fail with "Unable to block on application" when the helper has already finished,
+  # so do not depend on its exit code: wait for the helper, then keep what it wrote.
+  open -g -W --stdout "$CACHE.tmp" "$APP" --args 1 2>/dev/null
+  sleep 0.1
+  for _ in $(seq 40); do pgrep -qx cal || break; sleep 0.1; done
+  mv "$CACHE.tmp" "$CACHE"
 fi
 
 NOW=$(date +%s); TODAY=$(date +%Y-%m-%d)

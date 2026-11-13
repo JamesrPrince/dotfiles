@@ -5,6 +5,7 @@
 
 export PATH="/usr/local/bin:$PATH"
 source "$HOME/.config/sketchybar/plugins/hover.sh"
+source "$HOME/.config/sketchybar/plugins/style.sh"
 
 if [ "$SENDER" = "mouse.clicked" ]; then
   if [ "$BUTTON" = "right" ]; then aerospace layout horizontal vertical
@@ -28,4 +29,7 @@ case "$L" in
   floating)    LABEL="FLOATING" ;;
   *)           sketchybar --bar hidden=$HIDDEN --set "$NAME" drawing=off; exit 0 ;;
 esac
-sketchybar --bar hidden=$HIDDEN --set "$NAME" drawing=on label="$LABEL"
+# The flat bar has no layout pill
+SHOW=on
+[ "$BAR_STYLE" = flat ] && SHOW=off
+sketchybar --bar hidden=$HIDDEN --set "$NAME" drawing=$SHOW label="$LABEL"

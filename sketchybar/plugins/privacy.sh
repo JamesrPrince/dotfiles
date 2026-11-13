@@ -10,4 +10,7 @@ DRAW=off
 [ $M = on ] || [ $C = on ] && DRAW=on
 # Hidden while zen mode hides the clock icon.
 [ -f "${TMPDIR:-/tmp}/sketchybar_zen" ] && DRAW=off
+# The flat bar has no room for it.
+source "$HOME/.config/sketchybar/plugins/style.sh"
+[ "$BAR_STYLE" = flat ] && DRAW=off
 sketchybar --set $NAME drawing=$DRAW icon.drawing=$M label.drawing=$C

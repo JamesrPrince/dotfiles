@@ -7,7 +7,7 @@ source "$HOME/.config/sketchybar/plugins/hover.sh"
 source "$HOME/.config/sketchybar/colors.sh"
 source "$HOME/.config/sketchybar/icons.sh"
 FONT="SF Pro"
-TEXT_FONT="Nunito"
+source "$HOME/.config/sketchybar/plugins/style.sh"   # TEXT_FONT: Nunito, or Maple Mono NF in the flat style
 PLUGIN_DIR="$HOME/.config/sketchybar/plugins"
 
 if [ "$SENDER" = "mouse.exited.global" ]; then

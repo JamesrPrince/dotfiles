@@ -3,7 +3,7 @@
 export PATH="/usr/local/bin:$PATH"
 source "$HOME/.config/sketchybar/plugins/hover.sh"
 source "$CONFIG_DIR/colors.sh"
-TEXT_FONT="Nunito"
+source "$HOME/.config/sketchybar/plugins/style.sh"   # TEXT_FONT: Nunito, or Maple Mono NF in the flat style
 NAME=github
 
 if [ "$SENDER" = "mouse.exited.global" ]; then

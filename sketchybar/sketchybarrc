@@ -14,7 +14,9 @@ PLUGIN_DIR="$HOME/.config/sketchybar/plugins"
 rm -f "${TMPDIR:-/tmp}/sketchybar_zen" "${TMPDIR:-/tmp}/sketchybar_spaces_state"
 
 FONT="SF Pro" # Needs Regular, Bold, Semibold, Heavy and Black
-TEXT_FONT="Nunito" # labels and text; glyph icons stay on SF Pro (SF Symbols)
+# BAR_STYLE ("centre" or "flat") and TEXT_FONT (Nunito, or Maple Mono NF in flat) come from here;
+# the style is switched with plugins/barstyle.sh. Glyph icons stay on SF Pro (SF Symbols).
+source "$PLUGIN_DIR/style.sh"
 PADDINGS=3
 
 bar=(
@@ -32,6 +34,26 @@ bar=(
   blur_radius=20
   notch_width=0
 )
+
+if [ "$BAR_STYLE" = flat ]; then
+  # Flat: edge to edge and thin, after Omarchy's Waybar (height 26, 8px side margins, no
+  # rounding). The colour still comes from the theme.
+  bar=(
+    height=$FLAT_BAR_HEIGHT
+    color=$BAR_COLOR
+    shadow=off
+    position=top
+    sticky=on
+    topmost=window
+    padding_right=8
+    padding_left=8
+    corner_radius=0
+    y_offset=0
+    margin=0
+    blur_radius=20
+    notch_width=0
+  )
+fi
 
 sketchybar --bar "${bar[@]}"
 
@@ -56,6 +78,9 @@ defaults=(
   popup.blur_radius=20
   popup.background.shadow.drawing=on
 )
+
+# Flat: no pills, so only the focused workspace marker and the popup rows use a background
+[ "$BAR_STYLE" = flat ] && defaults+=(background.height=20 background.corner_radius=4)
 
 sketchybar --default "${defaults[@]}"
 
@@ -103,6 +128,9 @@ sketchybar --add bracket status volume_icon brightness_icon battery vpn bluetoot
 # Front pill: mode (RESIZE / SERVICE while active), front app and layout
 sketchybar --add bracket front mode front_app layout \
            --set front "${pill[@]}"
+
+# Flat style: workspaces on the left, the clock in the middle, six icons on the right
+[ "$BAR_STYLE" = flat ] && source "$ITEM_DIR/flat.sh"
 
 # Hover highlight on everything you can click. Items with a plugin handle it
 # there (plugins/hover.sh is sourced first); the rest use hover.sh directly.

@@ -37,6 +37,7 @@ printf '%s' "$STATE" > "$STATE_FILE"
 
 source "$HOME/.config/sketchybar/plugins/icon_map.sh"
 source "$HOME/.config/sketchybar/colors.sh"
+source "$HOME/.config/sketchybar/plugins/style.sh"
 source "$HOME/.config/sketchybar/workspaces.conf"
 
 # Written by items/spaces.sh when the bar loads
@@ -69,6 +70,12 @@ for sid in $SPACE_IDS; do
     color=$GREY
   fi
 
+  if [ "$BAR_STYLE" = flat ]; then
+    # Plain numbers: the focused one in the accent (highlight) on a faint marker, empty ones grey
+    args+=(--set space.$sid icon.highlight=$selected icon.color=$color label.drawing=off
+                            background.color=$pill background.border_width=0 background.height=18)
+    continue
+  fi
   args+=(--set space.$sid icon.highlight=$selected icon.color=$color label="${icons% }"
                           label.drawing=$drawing label.width=$width
                           background.color=$pill background.border_color=$ACCENT

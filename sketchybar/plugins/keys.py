@@ -32,7 +32,10 @@ PAGES_FILE = CACHE_DIR + "/sketchybar-keys-pages.json"   # the built pages
 STATE_FILE = CACHE_DIR + "/sketchybar-keys-state.json"   # page offset + last scroll time
 SELF = HOME + "/.config/sketchybar/plugins/keys.py"
 SKETCHYBAR = "/usr/local/bin/sketchybar"
-FONT = "Nunito"
+try:   # Maple Mono NF in the flat bar style, Nunito otherwise
+    FONT = "Maple Mono NF" if open(HOME + "/.config/sketchybar/.barstyle").read().strip() == "flat" else "Nunito"
+except OSError:
+    FONT = "Nunito"
 
 PAGE_LINES = 20          # rows per page (headers count); small enough that tabs get their own pages
 KEY_WIDTH = 104          # fixed width of the key column, so descriptions line up
@@ -42,10 +45,10 @@ SCROLL_GAP = 0.25        # seconds of quiet that separate two swipes
 
 
 def theme_colors():
-    """Accent, text, dim, tab and active-tab colours of the active bar theme (colors.sh)."""
+    """Accent, text, dim, tab and active-tab colours of the active theme (colors.sh)."""
     try:
         out = subprocess.run(
-            ["/bin/bash", "-c", 'source "$HOME/.config/sketchybar/colors.sh"; echo $BLUE $WHITE $GREY $BACKGROUND_2 $ACCENT_FILL'],
+            ["/bin/bash", "-c", 'source "$HOME/.config/sketchybar/colors.sh"; echo $ACCENT $WHITE $GREY $BACKGROUND_2 $ACCENT_FILL'],
             capture_output=True, text=True, timeout=2).stdout.split()
         if len(out) == 5:
             return out
@@ -173,7 +176,9 @@ def describe(cmds, cache):
         return "Rearrange", {"send": "Send window to scratchpad", "bring": "Bring scratchpad window back",
                              "toggle": "Toggle scratchpad"}[m.group(1)]
     if "theme.sh next" in c:
-        return "Layout", "Next bar theme"
+        return "Layout", "Next theme"
+    if "barstyle.sh next" in c:
+        return "Layout", "Next bar style"
     if "cheat sheet" in c or "keys.py" in c:
         return "Layout", "This cheat sheet"
     # Unknown command: file it by its first word and show it as written
@@ -240,6 +245,7 @@ def build_sections():
             if (m := re.match(r"mode (\w+)$", c)) and m.group(1) != "main":
                 entry_key[m.group(1)] = pretty_key(key)
     grouped["Apps"].sort(key=lambda r: r[0])
+    grouped["Layout"].append(("om", "Omarchy menu, in Alfred"))   # not an AeroSpace binding
 
     sections = {}
     for tab in TABS:

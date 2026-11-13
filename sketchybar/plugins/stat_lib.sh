@@ -5,7 +5,7 @@ source "$HOME/.config/sketchybar/colors.sh"
 source "$HOME/.config/sketchybar/icons.sh"
 
 FONT="SF Pro"          # glyph icons (SF Symbols)
-TEXT_FONT="Nunito"     # text
+source "$HOME/.config/sketchybar/plugins/style.sh"   # TEXT_FONT: Nunito, or Maple Mono NF in the flat style
 APP_FONT="sketchybar-app-font:Regular:15.0"
 CACHE="$HOME/.cache"
 mkdir -p "$CACHE"

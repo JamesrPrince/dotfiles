@@ -13,7 +13,7 @@ export PATH="/usr/local/bin:$PATH"
 source "$HOME/.config/sketchybar/plugins/hover.sh"
 source "$HOME/.config/sketchybar/colors.sh"
 FONT="SF Pro"
-TEXT_FONT="Nunito"
+source "$HOME/.config/sketchybar/plugins/style.sh"   # TEXT_FONT: Nunito, or Maple Mono NF in the flat style
 NAME=${NAME:-weather}
 CACHE="${TMPDIR:-/tmp}/sketchybar_weather.json"
 AQ_CACHE="${TMPDIR:-/tmp}/sketchybar_weather_aqi.json"

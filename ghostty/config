@@ -8,18 +8,22 @@ font-family = "Maple Mono NF"          # rounded monospace, Nunito-like; was "Me
 window-padding-x = 8
 window-padding-y = 8
 window-decoration = true
+# No title bar, like Omarchy. Needs a full Ghostty restart. Check afterwards that the window still
+# tiles on workspace 2 (ghostty-on-detect.sh reads AeroSpace's dialog flag and the window height);
+# if not, comment this line out. Drag the window with Option held.
+macos-titlebar-style = hidden
 
 # --- Colors & Theme ---
 # ctrl+` quick terminal shares this palette; Ghostty has no per-surface theme.
-# macos-titlebar-style=transparent otherwise derives window-theme from background
-# luminosity, which kept the popup on Gruvbox Light (#fbf1c7).
+# window-theme otherwise derives from background luminosity, which kept the popup on
+# Gruvbox Light (#fbf1c7). Light themes still work: the palette comes from theme.conf.
 window-theme = dark
 # Fallback only: theme.conf (written by the bar's ⌥⇧T theme switcher, not in
 # git) loads after this file and sets the theme to match the bar.
 theme = Gruvbox Dark
 config-file = ?theme.conf
 # 1 is solid; lower shows more of what is behind. Needs a full Ghostty restart (Cmd+Q, reopen).
-background-opacity = 0.9
+background-opacity = 0.97
 background-blur = true
 
 # --- Cursor ---

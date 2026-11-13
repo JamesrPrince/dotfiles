@@ -5,9 +5,11 @@ export PATH="/usr/local/bin:$PATH"
 # The flag file tells the items that show themselves (privacy, badges, layout,
 # disk, next event) to stay hidden.
 ZEN="${TMPDIR:-/tmp}/sketchybar_zen"
+source "$HOME/.config/sketchybar/plugins/style.sh"
 
 zen_on() {
   touch "$ZEN"
+  [ "$BAR_STYLE" = flat ] && sketchybar --set gpu.bar drawing=off   # the flat bar's own GPU item
   sketchybar --set apple.logo drawing=off \
              --set layout drawing=off \
              --set vpn drawing=off \
@@ -54,6 +56,9 @@ zen_off() {
              --set net.down drawing=on \
              --set spotify.play updates=on \
              --trigger power_source_change
+  # The flat style hides most of these for good, and shows its GPU item
+  [ "$BAR_STYLE" = flat ] && sketchybar --set gpu.bar drawing=on
+  "$HOME/.config/sketchybar/plugins/flat_hide.sh"
   # The next event shows only when it has something to say: let its script decide
   NAME=next_event "$HOME/.config/sketchybar/plugins/next_event.sh" &
 }
