@@ -46,10 +46,10 @@ sketchybar --set apple.logo icon.color=$ICON_COLOR icon.font="$FONT:Bold:14.0" \
                             padding_left=4 padding_right=4
 
 # --- Right, left to right: live stats, then the tray icons ------------------------------------------
-#   network (down and up rates on one line), CPU (percentage and graph), GPU, memory   |   bluetooth, Wi-Fi, volume, battery, control
+#   network (up over down, stacked), CPU (percentage and graph), GPU, memory   |   bluetooth, Wi-Fi, volume, battery, control
 # The stats are Centre Stage's own items, refreshed by plugins/stats.sh; they just move here with
 # their labels showing, in fixed-width labels so a changing value never shifts its neighbours.
-# plugins/stats.sh also feeds gpu.bar, and puts both network rates in net.up's label.
+# plugins/stats.sh also feeds gpu.bar.
 stat=(
   padding_left=4
   padding_right=4
@@ -63,15 +63,22 @@ sketchybar --add item gpu.bar right                                   \
                          icon=GPU icon.font="$TEXT_FONT:Bold:9.0" icon.color=$GREEN \
                          label="--%" label.font="$TEXT_FONT:ExtraBold:12.0" \
                          label.width=34 label.align=right
-sketchybar --set net.up position=right "${stat[@]}"                   \
-                        y_offset=0                                    \
-                        label.font="$TEXT_FONT:SemiBold:10.0"         \
-                        label.width=164 label.align=right             \
+# Network: up over down, stacked as in Centre Stage. net.down is zero-width and sits just right of
+# net.up (a zero-width item on the right side draws leftwards), so its text draws under net.up's;
+# both share font, width and padding to line up.
+netstack=(
+  label.font="$TEXT_FONT:Bold:9.0"
+  label.width=72
+  label.align=right
+)
+sketchybar --set net.up position=right "${stat[@]}" "${netstack[@]}"  \
+                        y_offset=5                                    \
                         popup.align=right                             \
+           --set net.down position=right "${stat[@]}" "${netstack[@]}" \
+                          y_offset=-5 width=0 drawing=on              \
            --set cpu.percent position=right "${stat[@]}"              \
                              popup.align=right                       \
-           --set mem position=right "${stat[@]}" popup.align=right    \
-           --set net.down position=right
+           --set mem position=right "${stat[@]}" popup.align=right
 
 # The CPU graph is the same item as in Centre Stage (same name, so plugins/stats.sh keeps feeding it,
 # and the same click opens the CPU popup). A graph's bounding rect always reports the width it was
@@ -97,7 +104,7 @@ sketchybar --set bluetooth icon.padding_left=3 icon.padding_right=3 \
            --set wifi icon.padding_left=3 icon.padding_right=3      \
            --set control icon.padding_left=3 icon.padding_right=3
 
-# Left to right: net.down (hidden), net.up, cpu, gpu, mem, bluetooth, wifi, volume icon, volume slider,
+# Left to right: net.up, net.down (zero-width, drawn under net.up), cpu, gpu, mem, bluetooth, wifi, volume icon, volume slider,
 # battery, control. The keys anchors (the shortcut sheet's popups) stay at the far right edge.
 sketchybar --move control after keys     \
            --move battery after control  \
@@ -109,8 +116,8 @@ sketchybar --move control after keys     \
            --move gpu.bar after mem        \
            --move cpu.graph after gpu.bar   \
            --move cpu.percent after cpu.graph \
-           --move net.up after cpu.percent  \
-           --move net.down after net.up
+           --move net.down after cpu.percent \
+           --move net.up after net.down
 
 # --- The control entry also holds the shortcut sheet (the "more" item is not shown) ---------------
 sketchybar --add item control.keys popup.control                 \

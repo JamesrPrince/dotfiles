@@ -13,7 +13,6 @@ sketchybar --set weather drawing=off \
            --set layout drawing=off \
            --set spotify.anchor drawing=off \
            --set spotify.progress drawing=off \
-           --set net.down drawing=off \
            --set more drawing=off \
            --set brightness drawing=off \
            --set brightness_icon drawing=off \

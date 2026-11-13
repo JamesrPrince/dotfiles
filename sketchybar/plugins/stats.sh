@@ -24,9 +24,16 @@ CPU_COLOR=$BLUE
 [ "$CPU" -ge 50 ] && CPU_COLOR=$YELLOW
 [ "$CPU" -ge 80 ] && CPU_COLOR=$RED
 
-# Memory: 100 minus the system-wide free percentage
+# Memory pressure: 100 minus the system-wide free percentage that memory_pressure reports
+# (not "memory used"), coloured by the kernel's pressure level, as Activity Monitor's graph is
+# (1 normal, 2 warning, 4 critical)
 FREE=$(memory_pressure -Q 2>/dev/null | awk -F': ' '/free percentage/{gsub("%","",$2); print $2}')
 MEM=$(( 100 - ${FREE:-100} ))
+case $(sysctl -n kern.memorystatus_vm_pressure_level 2>/dev/null) in
+  4) MEM_COLOR=$RED ;;
+  2) MEM_COLOR=$YELLOW ;;
+  *) MEM_COLOR=$GREEN ;;
+esac
 
 # GPU: busiest graphics card (Intel or Radeon), from IOAccelerator stats
 GPU=$(ioreg -r -d 1 -c IOAccelerator | grep -o '"PerformanceStatistics" = {[^}]*}' \
@@ -78,16 +85,14 @@ fi
 args=(--push cpu.graph "$(awk -v c="$CPU" 'BEGIN{printf "%.2f", c/100}')"
       --set cpu.percent label="${CPU}%" icon.color=$CPU_COLOR
       --set cpu.graph graph.color=$CPU_COLOR
-      --set mem label="${MEM}%"
+      --set mem label="${MEM}%" icon.color=$MEM_COLOR
       --set gpu label="${GPU}%" icon.color=$GPU_COLOR
       --set net.up label="$NET_UP $UP_LABEL"
       --set net.down label="$NET_DOWN $DOWN_LABEL")
 
-# The flat bar shows the GPU in its own item and both network rates on one line
+# The flat bar shows the GPU in its own item
 if [ "$BAR_STYLE" = flat ]; then
-  args+=(--set gpu.bar label="${GPU}%" icon.color=$GPU_COLOR
-         --set net.up label="$NET_DOWN $DOWN_LABEL  $NET_UP $UP_LABEL"
-         --set net.down label="")
+  args+=(--set gpu.bar label="${GPU}%" icon.color=$GPU_COLOR)
 fi
 
 sketchybar "${args[@]}"
