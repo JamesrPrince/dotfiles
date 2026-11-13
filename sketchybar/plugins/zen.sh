@@ -9,7 +9,7 @@ source "$HOME/.config/sketchybar/plugins/style.sh"
 
 zen_on() {
   touch "$ZEN"
-  [ "$BAR_STYLE" = flat ] && sketchybar --set gpu.bar drawing=off   # the flat bar's own GPU item
+  [ "$BAR_STYLE" = flat ] && sketchybar --set gpu.bar drawing=off --set window_title drawing=off   # the flat bar's own items
   sketchybar --set apple.logo drawing=off \
              --set layout drawing=off \
              --set vpn drawing=off \
@@ -58,6 +58,8 @@ zen_off() {
              --trigger power_source_change
   # The flat style hides most of these for good, and shows its GPU item
   [ "$BAR_STYLE" = flat ] && sketchybar --set gpu.bar drawing=on
+  # The window title shows only when a window is focused: let its script decide
+  [ "$BAR_STYLE" = flat ] && SENDER=forced "$HOME/.config/sketchybar/plugins/window_title.sh" &
   "$HOME/.config/sketchybar/plugins/flat_hide.sh"
   # The next event shows only when it has something to say: let its script decide
   NAME=next_event "$HOME/.config/sketchybar/plugins/next_event.sh" &

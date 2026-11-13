@@ -30,6 +30,23 @@ for sid in $SPACE_IDS; do
                               background.corner_radius=4
 done
 
+# --- Left, after the workspaces: the focused window's app icon and title --------------------------
+# Ghostty has no title bar in this look (macos-titlebar-style = hidden), so the title lives here.
+# max_chars keeps the longest title well clear of the clock in the centre.
+sketchybar --add item window_title left                              \
+           --set window_title script="$PLUGIN_DIR/window_title.sh"   \
+                              update_freq=3                          \
+                              icon.font="sketchybar-app-font:Regular:14.0" \
+                              icon.color=$GREY                       \
+                              icon.padding_left=0                    \
+                              icon.padding_right=6                   \
+                              label.font="$TEXT_FONT:Medium:12.0"    \
+                              label.color=$WHITE                     \
+                              label.max_chars=70                     \
+                              padding_left=12                        \
+                              padding_right=0                        \
+           --subscribe window_title aerospace_focus_change aerospace_workspace_change front_app_switched
+
 # --- Centre: the clock, weekday and time ---------------------------------------------------------
 sketchybar --set calendar position=center                    \
                           icon.drawing=off                   \
