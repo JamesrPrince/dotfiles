@@ -1,6 +1,7 @@
 #!/bin/bash
 # Every real Ghostty window tiles, so alt-hjkl (focus) and alt-shift-hjkl (move) work on it.
-# The first one goes to workspace 2; later ones tile where they open. Only the quick terminal
+# The first one goes to workspace 2; later ones tile where they open, and a workspace holding
+# only terminals becomes a horizontal accordion (see the end). Only the quick terminal
 # and native-tab AX windows (AeroSpace #68) float. The aerospace.toml rule floats every new
 # Ghostty window first, so those two never enter the tiling tree and nothing reflows.
 #   ghostty-on-detect.sh [window-id]            act on the window (AeroSpace passes AEROSPACE_WINDOW_ID)
@@ -125,4 +126,17 @@ just_launched=0
 "$AERO" layout tiling --window-id "$wid" >/dev/null 2>&1 || true
 if [ "${tiling_others:-0}" -eq 0 ] || [ "$just_launched" = 1 ]; then
     "$AERO" move-node-to-workspace --window-id "$wid" 2 >/dev/null 2>&1 || true
+fi
+
+# A workspace whose tiled windows are all terminals becomes a horizontal accordion: each new
+# terminal joins the row on the right, the focused one takes the width and its neighbours
+# peek in (accordion-padding). A workspace shared with another app keeps its layout.
+# alt-slash goes back to side-by-side tiles; alt-comma flips the accordion.
+all_windows="$("$AERO" list-windows --monitor all --format '%{window-id}|%{workspace}|%{app-bundle-id}|%{window-layout}' 2>/dev/null)"
+ws="$(printf '%s\n' "$all_windows" | awk -F'|' -v id="$wid" '$1 == id { print $2 }')"
+if [ -n "$ws" ] && printf '%s\n' "$all_windows" | awk -F'|' -v ws="$ws" '
+        $2 == ws && $4 != "" && $4 != "floating" { n++; if ($3 != "com.mitchellh.ghostty") other = 1 }
+        END { exit !(n >= 2 && !other) }'; then
+    "$AERO" layout --window-id "$wid" h_accordion >/dev/null 2>&1 || true
+    /usr/local/bin/sketchybar --trigger aerospace_layout_change >/dev/null 2>&1 || true
 fi
