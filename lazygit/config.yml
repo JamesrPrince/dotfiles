@@ -12,9 +12,8 @@ gui:
     markedBaseCommitFgColor: [blue]
     unstagedChangesColor: [red]
     defaultFgColor: [default]
-
 # delta renders the diffs (side-by-side off here: lazygit's panel is too narrow)
 git:
-  pagers:
+  diffRenderers:
     - colorArg: always
-      pager: delta --paging=never --side-by-side=false
+      command: delta --paging=never --no-gitconfig --line-numbers --syntax-theme=ansi
