@@ -32,10 +32,10 @@ rows=(); worst=none; n=0
 for f in "$DIR"/*; do
   [ -f "$f" ] || continue
   case $f in *.tmp.*) continue ;; esac
-  { read -r st; read -r folder; read -r cwd; read -r pid; read -r ts; read -r wid; } < "$f"
+  { read -r st; read -r folder; read -r cwd; read -r pid; read -r ts; read -r wid; read -r prompt; read -r ctx; read -r model; read -r reason; } < "$f"
   if ! kill -0 "$pid" 2>/dev/null; then rm -f "$f"; continue; fi
   n=$((n + 1))
-  rows+=("$st|$folder|$(( now - ${ts:-$now} ))|${wid:--}")
+  rows+=("$st|$folder|$(( now - ${ts:-$now} ))|${wid:--}|$prompt|$ctx|$model|$reason")
   case $st in
     waiting) worst=waiting ;;
     done)    [ "$worst" = waiting ] || worst=done ;;
@@ -75,13 +75,19 @@ if [ "$1" = click ] || [ "$POP" = on ]; then
   args=(--remove '/claude\.row\..*/')
   i=0
   for r in "${rows[@]}"; do
-    IFS='|' read -r st folder age wid <<< "$r"
+    IFS='|' read -r st folder age wid prompt ctx model reason <<< "$r"
     i=$((i + 1))
     if [ "$age" -lt 60 ]; then a="${age}s"; elif [ "$age" -lt 3600 ]; then a="$((age / 60))m"; else a="$((age / 3600))h"; fi
+    # folder · last prompt · status (or what it waits on) · context · model · age
+    lbl="$folder"; [ -n "$prompt" ] && lbl="$lbl · $prompt"
+    if [ "$st" = waiting ] && [ -n "$reason" ]; then lbl="$lbl  —  waiting: $reason"; else lbl="$lbl  —  $st"; fi
+    [ -n "$ctx" ] && lbl="$lbl · $(( (ctx + 500) / 1000 ))K"
+    [ -n "$model" ] && lbl="$lbl · $model"
+    lbl="$lbl · $a ago"
     case $st in waiting) c=$YELLOW ;; done) c=$GREEN ;; working) c=$BLUE ;; *) c=$GREY ;; esac
     args+=(--add item claude.row.$i popup.claude
            --set claude.row.$i icon=$'' icon.font="Maple Mono NF:Bold:14.0" icon.width=26 icon.color=$c
-                               label="$folder   $st   $a ago" label.font="$TEXT_FONT:SemiBold:13.0"
+                               label="$lbl" label.font="$TEXT_FONT:SemiBold:13.0"
                                padding_left=8 padding_right=12 background.corner_radius=$RR
                                script="$PLUGIN_DIR/hover.sh"
                                click_script="$PLUGIN_DIR/claude.sh focus '${wid:--}' '$folder'"
