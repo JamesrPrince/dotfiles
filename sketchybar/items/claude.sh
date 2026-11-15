@@ -25,9 +25,8 @@ claude=(
   popup.align=right
   popup.height=28
   script="$PLUGIN_DIR/claude.sh"
-  click_script="$PLUGIN_DIR/claude.sh click"
 )
 
 sketchybar --add item claude right \
            --set claude "${claude[@]}" \
-           --subscribe claude claude_update system_woke mouse.entered mouse.exited mouse.exited.global
+           --subscribe claude claude_update system_woke mouse.clicked mouse.entered mouse.exited mouse.exited.global

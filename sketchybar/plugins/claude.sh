@@ -10,6 +10,8 @@ source "$HOME/.config/sketchybar/plugins/hover.sh"
 source "$HOME/.config/sketchybar/colors.sh"
 source "$HOME/.config/sketchybar/plugins/style.sh"
 NAME=${NAME:-claude}
+PLUGIN_DIR="$HOME/.config/sketchybar/plugins"   # not exported by sketchybar to plugins
+[ "$SENDER" = mouse.clicked ] && set -- click   # the item subscribes to mouse.clicked (no click_script)
 DIR="${TMPDIR:-/tmp}/claude_sessions"
 
 if [ "$SENDER" = "mouse.exited.global" ]; then sketchybar --set claude popup.drawing=off; exit 0; fi
