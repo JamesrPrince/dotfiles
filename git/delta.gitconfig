@@ -1,5 +1,6 @@
 # delta as git's pager: side-by-side, syntax-highlighted diffs.
-# Included from ~/.gitconfig (which stays out of this repo: it holds the email address).
+# install.sh copies these keys into ~/.gitconfig (which stays out of this repo: it holds the email address).
+# Not an [include]: the ICOR script-fingerprints check cannot vouch for a git config that includes another file.
 # syntax-theme ansi follows the terminal colours, like bat, so it tracks the theme engine.
 [core]
 	pager = delta
