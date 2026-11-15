@@ -59,7 +59,7 @@ done
 sketchybar --set badges update_freq=$FLAT_POLL_BADGES updates=on \
            --subscribe badges smart_refresh
 
-# --- Market (new): BTC / gold while a trading window is open. Up to three symbols, one label each. ----
+# --- Market (new): BTC / gold, always shown (FLAT_MARKET_ALWAYS=0: only while a trading window is open). Up to three symbols, one label each. ----
 for i in 1 2 3; do
   sketchybar --add item market.$i right                                         \
              --set market.$i "${collapsed[@]}" icon.drawing=off label.font="$txt" \

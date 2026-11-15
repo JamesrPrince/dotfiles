@@ -25,7 +25,8 @@ FLAT_MEET_CHARS=12        # meeting title cap (the bar has ~120 px between the c
 FLAT_MUSIC_CHARS=16       # track title cap
 FLAT_BREW_HOURS=4         # `brew outdated` is re-run at most this often, started when the control popup opens (never blocks)
 FLAT_MARKET_MOVE_PCT=1    # |day change| % at which a market price turns FLAT_UP / FLAT_DOWN
-FLAT_MARKET_FETCH_SECS=30 # market prices are fetched at most this often, and only with a trading window open
+FLAT_MARKET_ALWAYS=1      # market item: 1 = always shown and fetched; 0 = only while a trading window from market_windows.conf is open
+FLAT_MARKET_FETCH_SECS=30 # market prices are fetched at most this often (the feed's limit: never lower), while the item is on
 # Keep-awake: the owners whose power assertions count (pmset -g assertions): Amphetamine and OnlySwitch's
 # "keep awake" switch, plus an open-ended caffeinate (the control centre's Keep Awake row; the 300 s ones
 # other tools start are ignored). Click the icon to see who is holding.
@@ -37,7 +38,7 @@ FLAT_POLL_AWAKE=30        # one `pmset -g assertions`
 FLAT_POLL_VPN=60          # one `scutil --nc list` (and on Wi-Fi changes / wake)
 FLAT_POLL_BADGES=15       # two `lsappinfo` reads
 FLAT_POLL_MEETING=30      # reads a cache; the calendar helper runs every 5 minutes
-FLAT_POLL_MARKET=30       # one `aerospace list-windows --all`; prices only while a trading window is open
+FLAT_POLL_MARKET=30       # redraws the market item and starts a fetch when due; with FLAT_MARKET_ALWAYS=0 also one `aerospace list-windows --all`
 
 # --- Geometry --------------------------------------------------------------------------------------
 FLAT_ICON_FONT_SIZE=14    # every glyph on the right side: SF Pro Medium at this size

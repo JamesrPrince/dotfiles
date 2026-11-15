@@ -122,6 +122,16 @@ PY
 }
 overlap_check "bar items"
 
+# --- flat style, FLAT_MARKET_ALWAYS=1: the market item is on the bar without any trading window open ---
+if [ "$(cat "$CONF/.barstyle" 2>/dev/null)" = flat ] && [ "$(bash -c 'source "$HOME/.config/sketchybar/plugins/flat_config.sh"; echo $FLAT_MARKET_ALWAYS')" = 1 ]; then
+  ok=1
+  for _ in 1 2 3 4 5 6 7 8; do   # a fresh bar draws it on its first tick or when the first fetch lands
+    sketchybar --query market.1 2>/dev/null | python3 -c 'import json,sys; g=json.load(sys.stdin)["geometry"]; sys.exit(0 if g["drawing"]=="on" else 1)' 2>/dev/null && { ok=0; break; }
+    sleep 1
+  done
+  result "market item always on (FLAT_MARKET_ALWAYS=1), no trading window needed" "$ok" "market.1 is hidden: no cached quote and the fetch failed?"
+fi
+
 # --- the flat style's smart items, all forced visible at once (test switch plugins/smart_demo.sh) -------
 smart_check() { # smart_check [label]  - flat only; always switches the test flags off again
   local label=${1:-smart items}
