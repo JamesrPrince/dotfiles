@@ -51,9 +51,11 @@ wid=""
 prompt=""; ctx=""; model=""
 [ -f "$FILE" ] && { wid=$(sed -n 6p "$FILE"); prompt=$(sed -n 7p "$FILE"); ctx=$(sed -n 8p "$FILE"); model=$(sed -n 9p "$FILE"); }
 
-# Last prompt: one line, no separators the bar splits on, cut to 40 characters
+# Last prompt: one line, no separators the bar splits on, pasted-text wrapper tags dropped,
+# cut to 40 characters
 if [ "$event" = UserPromptSubmit ]; then
-  prompt=$(printf '%s' "$input" | jq -r '.prompt // ""' | tr '\n\t|' '   ' | tr -s ' ' | sed 's/^ //' | cut -c1-40)
+  prompt=$(printf '%s' "$input" | jq -r '.prompt // ""' | tr '\n\t|' '   ' \
+    | sed -E 's#</?pasted_content[^>]*>##g' | tr -s ' ' | sed 's/^ //' | cut -c1-40)
 fi
 # Waiting reason, e.g. "Claude needs your permission to use Bash" -> "permission to use Bash"
 reason=""
