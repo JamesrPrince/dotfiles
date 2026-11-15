@@ -48,8 +48,13 @@ link lazygit/config.yml "$HOME/Library/Application Support/lazygit/config.yml"
 link zsh/ansi-tools.zsh "$HOME/.config/zsh/ansi-tools.zsh"   # fzf follows the terminal colours
 link zsh/peek.zsh "$HOME/.config/zsh/peek.zsh"   # peek <file>: images, PDFs and decks inline in Ghostty
 link zsh/peek-kitty.py "$HOME/.config/zsh/peek-kitty.py"   # peek's kitty-graphics writer
-link git/delta.gitconfig "$HOME/.config/git/delta.gitconfig"   # delta pager; included from ~/.gitconfig (kept out of the repo)
-command -v delta >/dev/null && ! git config --global --get-all include.path | grep -qx "~/.config/git/delta.gitconfig" && { git config --global --add include.path "~/.config/git/delta.gitconfig"; echo "gitcfg  included delta.gitconfig"; } || true
+# delta pager: git/delta.gitconfig is the source, and its keys are COPIED into ~/.gitconfig (kept out of the repo).
+# Never an [include]: the ICOR script-fingerprints check cannot vouch for a git config that includes another file.
+if command -v delta >/dev/null; then
+  git config --file "$DOT/git/delta.gitconfig" --list | while IFS='=' read -r k v; do git config --global "$k" "$v"; done
+  git config --global --unset-all include.path 'delta\.gitconfig$' 2>/dev/null || true
+  echo "gitcfg  delta settings copied into ~/.gitconfig"
+fi
 link launchd/dev.dotfiles.capslock-f18.plist "$HOME/Library/LaunchAgents/dev.dotfiles.capslock-f18.plist"  # Caps Lock -> F18 (the launch-mode leader key)
 
 # ~/.zshrc: Starship as the prompt (keep it last) and the fzf colours. Each added once; the file is backed up first.
