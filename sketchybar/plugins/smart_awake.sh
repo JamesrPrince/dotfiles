@@ -34,34 +34,11 @@ if [ "$1" = click ]; then
   exit 0
 fi
 
-awake=0; holders=""
-if smart_demo awake; then
-  awake=1; holders="OnlySwitch"
-else
-  owner=""; kind=0; timed=0
-  settle() {   # the assertion just read counts?
-    [ -n "$owner" ] && [ "$kind" = 1 ] || return 0
-    if [ "$owner" = caffeinate ]; then
-      [ "$timed" = 0 ] && { awake=1; holders="$holders $owner"; }
-    else
-      case " $FLAT_AWAKE_OWNERS " in *" $owner "*) awake=1; holders="$holders $owner" ;; esac
-    fi
-  }
-  re='pid [0-9]+\(([^)]*)\): .* (PreventUserIdleSystemSleep|PreventUserIdleDisplaySleep|PreventSystemSleep|NoIdleSleepAssertion|NoDisplaySleepAssertion) '
-  while IFS= read -r line; do
-    if [[ $line =~ $re ]]; then
-      settle; owner=${BASH_REMATCH[1]}; kind=1; timed=0
-    elif [[ $line == *"pid "* ]]; then
-      settle; owner=""; kind=0; timed=0
-    elif [[ $line == *"asserting for "[0-9]* ]]; then   # "asserting for 300 secs" is timed; "asserting forever" is not
-      timed=1
-    fi
-  done <<< "$(pmset -g assertions 2>/dev/null)"
-  settle
-fi
+source "$HOME/.config/sketchybar/plugins/awake_lib.sh"   # the shared detector (also the control popup's Keep Awake row)
+holders=$(awake_holders); awake=0; [ -n "$holders" ] && awake=1
 
 # who holds it, once each, for the click popup
-echo $(printf '%s\n' $holders | sort -u) > "$WHO"
+echo $holders > "$WHO"
 
 if [ "$awake" = 1 ]; then
   source "$HOME/.config/sketchybar/icons.sh"

@@ -22,7 +22,26 @@ focus_name() {
   [ -z "$id" ] && { echo off; return; }
   jq -r --arg id "$id" '.data[0].modeConfigurations[$id].mode.name // "On"' "$db/ModeConfigurations.json" 2>/dev/null || echo On
 }
-awake_on()   { pgrep -qf 'caffeinate -dis' && echo on || echo off; }
+# Keep Awake. The row's own switch is a `caffeinate -dis` it starts (awake_on, what a click toggles).
+# What the row SAYS comes from the shared detector (awake_lib.sh, the same one the flat bar's eye icon
+# uses): the label names any other app holding the Mac awake, so it never says Off under an icon that is on.
+# Test only: AWAKE_OWN_PIDS="123" stands in for the pids of the row's own caffeinate (empty = none).
+source "$HOME/.config/sketchybar/plugins/awake_lib.sh"
+own_pids()   { if [ -n "${AWAKE_OWN_PIDS+x}" ]; then echo $AWAKE_OWN_PIDS; else pgrep -f 'caffeinate -dis' | tr '\n' ' '; fi; }
+awake_on()   { [ -n "$(own_pids)" ] && echo on || echo off; }
+# awake_label: "Off", "On" (only the row's own switch), or "On · <holder>[, <holder>]" (another app holds it)
+awake_label() {
+  local own others="" name pid
+  own=" $(own_pids) "
+  while read -r name pid; do
+    [ -n "$name" ] || continue
+    case "$own" in *" $pid "*) continue ;; esac
+    case ", $others," in *", $name,"*) ;; *) others="${others:+$others, }$name" ;; esac
+  done <<< "$(awake_scan)"
+  if [ -n "$others" ]; then echo "On · $others"
+  elif [ "$(awake_on)" = on ]; then echo On
+  else echo Off; fi
+}
 
 row() { # row <name> <state> <label>
   local color=$GREY
@@ -41,7 +60,8 @@ refresh() {
     *)       row focus on "Focus  $F" ;;
   esac
   D=$(dark_on);  row dark  "$D" "Dark Mode  $( [ "$D" = on ] && echo On || echo Off )"
-  A=$(awake_on); row awake "$A" "Keep Awake  $( [ "$A" = on ] && echo On || echo Off )"
+  AL=$(awake_label); A=on; [ "$AL" = Off ] && A=off
+  row awake "$A" "Keep Awake  $AL"
   if [ "$A" = on ]; then args+=(--set control.awake icon=$AWAKE); else args+=(--set control.awake icon=$AWAKE_OFF); fi
   battery_rows
   B=$("$HELPER/brightness" 2>/dev/null)
