@@ -85,7 +85,7 @@ sketchybar --set apple.logo icon.color=$FLAT_REST icon.font="$FONT:Medium:15.0" 
                             padding_left=4 padding_right=4 popup.height=$FLAT_POPUP_ROW_H
 
 # --- Right, left to right: smart items, live stats, a divider, then the tray icons ---------------------
-#   [music market mic VPN awake updates badges]  net up/down, CPU % and graph, GPU, memory  |  bluetooth, Wi-Fi, volume, battery, control
+#   [music market mic VPN awake badges]  net up/down, CPU % and graph, GPU, memory  |  bluetooth, Wi-Fi, volume, battery, control
 # The stats are Centre Stage's own items, refreshed by plugins/stats.sh; they just move here with
 # their labels showing, in fixed-width labels so a changing value never shifts its neighbours.
 # They are neutral; colour appears only when a value needs James (plugins/stats.sh, flat_config.sh).
@@ -180,7 +180,7 @@ sketchybar --subscribe battery smart_refresh
 # The order, right to left (a later "after" sits to the left of the one before it):
 #   keys anchors | control, battery, volume, volume icon, Wi-Fi, bluetooth | divider |
 #   memory, GPU, CPU graph, CPU %, net down (zero-width), net up |
-#   WhatsApp, Slack, updates, keep-awake, VPN, mic/camera, market 3-2-1, music
+#   WhatsApp, Slack, keep-awake, VPN, mic/camera, market 3-2-1, music
 # net.down must stay right of net.up (a zero-width item on the right side draws leftwards).
 sketchybar --move control after keys     \
            --move battery after control  \
@@ -197,8 +197,7 @@ sketchybar --move control after keys     \
            --move net.up after net.down      \
            --move badge.whatsapp after net.up \
            --move badge.slack after badge.whatsapp \
-           --move updates after badge.slack  \
-           --move awake after updates        \
+           --move awake after badge.slack    \
            --move vpn after awake            \
            --move privacy after vpn          \
            --move market.3 after privacy     \
@@ -224,7 +223,16 @@ sketchybar --add item control.keys popup.control                 \
                                label.font="$TEXT_FONT:SemiBold:13.0" \
                                padding_left=8 padding_right=14      \
                                click_script="NAME=timer SENDER=mouse.clicked BUTTON=\$BUTTON $PLUGIN_DIR/timer.sh; /usr/local/bin/sketchybar --set control popup.drawing=off" \
-           --move control.timer before control.settings
+           --move control.timer before control.settings            \
+           --add item control.updates popup.control                \
+           --set control.updates drawing=off icon="$FLAT_UPDATES_ICON" icon.color=$GREY \
+                                 icon.font="Maple Mono NF:Bold:15.0" icon.width=28 \
+                                 label="Updates" label.font="$TEXT_FONT:SemiBold:13.0" \
+                                 padding_left=8 padding_right=14      \
+                                 click_script="$PLUGIN_DIR/brew_updates.sh toggle" \
+           --move control.updates before control.settings
+# The control popup opens through plugins/control.sh; in flat it also lets the Homebrew row read its cache
+sketchybar --set control click_script="$PLUGIN_DIR/popup.sh control; NAME=control $PLUGIN_DIR/control.sh refresh; $PLUGIN_DIR/brew_updates.sh row"
 
 # --- Popups in the bar's own language: radius 4, a 1 px quiet border (the defaults in sketchybarrc),
 # rows of one height and one padding, hover pills with the same radius (plugins/hover.sh).
@@ -235,7 +243,7 @@ sketchybar --set '/^(apple\.(prefs|activity|lock)|control\.[a-z]+|wifi\.(ssid|ip
 # --- Hover: a quiet colour shift (icon.highlight / label.highlight), no pills ---------------------------
 sketchybar --set gpu.bar icon.highlight_color=$FLAT_HOVER
 for item in apple.logo calendar net.up net.down cpu.percent mem bluetooth wifi volume_icon control \
-            vpn updates badge.slack badge.whatsapp market.1 market.2 market.3 next_event timer; do
+            vpn badge.slack badge.whatsapp market.1 market.2 market.3 next_event timer; do
   sketchybar --subscribe $item mouse.entered mouse.exited
 done
 for sid in $SPACE_IDS; do sketchybar --subscribe space.$sid mouse.entered mouse.exited; done

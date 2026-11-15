@@ -1,5 +1,5 @@
 #!/bin/bash
-# Shared by the flat style's smart items (privacy, VPN, keep-awake, updates, badges, market, music,
+# Shared by the flat style's smart items (privacy, VPN, keep-awake, badges, market, music,
 # next meeting, timer). Source it. An item that has nothing to say takes no space: it stays defined
 # with drawing=on but with zero padding, zero icon and label width and transparent text; showing it
 # animates the widths and colours in. Items that sit at the left end of the right-hand group only
@@ -13,7 +13,7 @@
 #   SM_ICON="$glyph" SM_LABEL="text" SM_IC=$colour SM_LC=$colour smart_show vpn
 #   smart_hide vpn
 # Test switch: plugins/smart_demo.sh on <name...|all>  (or SMART_DEMO=name,name when running a plugin by hand);
-# smart_demo <name> is true while a name is forced on. Names: privacy vpn awake updates slack whatsapp
+# smart_demo <name> is true while a name is forced on. Names: privacy vpn awake updates (the control popup row) slack whatsapp
 # market music meeting timer battery title workspaces.
 
 export PATH="/usr/local/bin:$PATH"
@@ -32,7 +32,6 @@ smart_geom() {
   case $1 in
     privacy)            G_LP=0 ;;
     vpn|awake)          G_IW=18 G_PL=2 G_PR=2 ;;
-    updates)            G_LP=2 G_PL=5 G_PR=5 ;;
     badge.*)            G_IW=16 G_LP=3 ;;
     market.*)           G_IW=0 G_LP=0 G_PL=4 G_PR=4 ;;
     spotify.anchor)     G_IW=18 G_PL=6 G_PR=6 ;;

@@ -125,6 +125,8 @@ if [ "$BAR_STYLE" = flat ]; then
   [ "$CN" -ge "$FLAT_CPU_SAMPLES" ] && { CL=2; [ "$CPU" -ge "$FLAT_CPU_CRIT" ] && CL=3; }
   [ "$GN" -ge "$FLAT_GPU_SAMPLES" ] && { GL=2; [ "$GPU" -ge "$FLAT_GPU_CRIT" ] && GL=3; }
   case $LEVEL in 4) ML=3 ;; 2) ML=2 ;; esac
+  [ -e "$SDIR/demo.warn" ] && { CL=2; ML=2; }      # test switches (plugins/smart_demo.sh on warn / crit)
+  [ -e "$SDIR/demo.crit" ] && GL=3
   [ "$CN" -gt 99 ] && CN=99; [ "$GN" -gt 99 ] && GN=99
   NEWKEY="$CL$GL$ML"
   echo "$CN $GN $NEWKEY" > "$SDIR/stats"

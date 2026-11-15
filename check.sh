@@ -104,8 +104,11 @@ if centre_clock:   # flat style only: in Centre Stage the clock lives at the rig
 # trivially), and nothing may touch the window title or the stats
 if os.environ.get("SMART_CHECK"):
     drawn = {it[0] for it in items}
-    want = "privacy vpn awake updates badge.slack badge.whatsapp market.1 market.2 spotify.anchor next_event timer window_title".split()
+    want = "privacy vpn awake badge.slack badge.whatsapp market.1 market.2 spotify.anchor next_event timer window_title".split()
     bad += ["not-drawn:" + n for n in want if n not in drawn]
+    # Homebrew updates are a row in the control popup, not a bar item: forced on, the row must be drawn
+    if q("control.updates")["geometry"]["drawing"] != "on":
+        bad.append("not-drawn:control.updates")
 for i, a in enumerate(items):
     for b in items[i + 1:]:
         if a[1] != b[1] or {a[0], b[0]} == {"net.up", "net.down"}:   # net.down is drawn under net.up in flat style

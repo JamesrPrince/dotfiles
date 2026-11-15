@@ -4,7 +4,8 @@
 # that decide WHEN they show live in plugins/flat_config.sh; the test switch is plugins/smart_demo.sh.
 #
 # Right group, left end (right to left as added, so left to right on screen):
-#   music, market, mic/camera, VPN, keep-awake, Homebrew updates, Slack, WhatsApp | stats | tray
+#   music, market, mic/camera, VPN, keep-awake, Slack, WhatsApp | stats | tray
+# (Homebrew updates are not on the bar: they are a row in the control popup, see items/flat.sh)
 # After the clock: next meeting, then the focus timer (zero-width centre items: they draw to the
 # right of the clock and never move it).
 
@@ -23,7 +24,6 @@ collapsed=(
 )
 sym="$FONT:Medium:$FLAT_ICON_FONT_SIZE"
 txt="$TEXT_FONT:Medium:12.0"
-nf="Maple Mono NF:Bold:$FLAT_NF_FONT_SIZE"
 
 sketchybar --add event smart_refresh
 
@@ -46,18 +46,10 @@ sketchybar --add item awake right                                               
            --set awake "${collapsed[@]}" icon=$AWAKE icon.font="$sym"           \
                        label.drawing=off                                       \
                        update_freq=$FLAT_POLL_AWAKE                           \
+                       popup.align=right popup.height=$FLAT_POPUP_ROW_H        \
                        script="$PLUGIN_DIR/smart_awake.sh"                     \
-           --subscribe awake system_woke smart_refresh
-
-# --- Homebrew updates (new): icon and count; click lists them, never upgrades -------------------------
-sketchybar --add item updates right                                             \
-           --set updates "${collapsed[@]}" icon="$FLAT_UPDATES_ICON" icon.font="$nf" \
-                         label="" label.font="$txt"                            \
-                         update_freq=$FLAT_POLL_UPDATES                       \
-                         popup.align=right popup.height=$FLAT_POPUP_ROW_H       \
-                         script="$PLUGIN_DIR/brew_updates.sh"                  \
-                         click_script="$PLUGIN_DIR/brew_updates.sh click"      \
-           --subscribe updates system_woke smart_refresh mouse.exited.global
+                       click_script="$PLUGIN_DIR/smart_awake.sh click"         \
+           --subscribe awake system_woke smart_refresh mouse.exited.global
 
 # --- Slack and WhatsApp unread counts (existing badges; Telegram and Outlook stay hidden) ------------
 for b in slack whatsapp; do

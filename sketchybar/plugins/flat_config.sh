@@ -23,20 +23,18 @@ FLAT_MEET_WINDOW_MIN=30   # next meeting shows this many minutes ahead
 FLAT_MEET_SOON_MIN=5      # inside this it turns FLAT_WARN (and FLAT_CRIT once it starts)
 FLAT_MEET_CHARS=12        # meeting title cap (the bar has ~120 px between the clock and the right-hand smart items: see smart_lib.sh)
 FLAT_MUSIC_CHARS=16       # track title cap
-FLAT_BREW_HOURS=4         # `brew outdated` is re-run at most this often (never blocks the bar)
-FLAT_BREW_MAX_ROWS=10     # packages listed in the updates popup
+FLAT_BREW_HOURS=4         # `brew outdated` is re-run at most this often, started when the control popup opens (never blocks)
 FLAT_MARKET_MOVE_PCT=1    # |day change| % at which a market price turns FLAT_UP / FLAT_DOWN
 FLAT_MARKET_FETCH_SECS=30 # market prices are fetched at most this often, and only with a trading window open
-# Keep-awake: the owners whose power assertions count (pmset -g assertions). Amphetamine, plus an
-# open-ended caffeinate (the control centre's Keep Awake row; the 300 s ones other tools start are
-# ignored). Add OnlySwitch here to count its "keep awake" switch too.
-FLAT_AWAKE_OWNERS="Amphetamine"
+# Keep-awake: the owners whose power assertions count (pmset -g assertions): Amphetamine and OnlySwitch's
+# "keep awake" switch, plus an open-ended caffeinate (the control centre's Keep Awake row; the 300 s ones
+# other tools start are ignored). Click the icon to see who is holding.
+FLAT_AWAKE_OWNERS="Amphetamine OnlySwitch"
 
 # --- Poll intervals (seconds) of the items that have no event to listen to -------------------------
 FLAT_POLL_PRIVACY=5       # mic / camera: two tiny helper processes per tick
 FLAT_POLL_AWAKE=30        # one `pmset -g assertions`
 FLAT_POLL_VPN=60          # one `scutil --nc list` (and on Wi-Fi changes / wake)
-FLAT_POLL_UPDATES=300     # reads a cache file; brew itself runs every FLAT_BREW_HOURS
 FLAT_POLL_BADGES=15       # two `lsappinfo` reads
 FLAT_POLL_MEETING=30      # reads a cache; the calendar helper runs every 5 minutes
 FLAT_POLL_MARKET=30       # one `aerospace list-windows --all`; prices only while a trading window is open
@@ -62,6 +60,9 @@ flat_colors() {
   FLAT_DIM="0x77${WHITE:4}"           # dimmed: Bluetooth off, stale prices, empty workspaces' neighbours
   FLAT_WARN=$ORANGE
   FLAT_CRIT=$RED
+  # Matte Black's own ORANGE (c63d3d) is almost its RED (d35f5f), so 80% and 95% would look alike: its warn
+  # slot takes the theme's amber (its GREEN slot, ffc107) and critical stays red. Every other theme unchanged.
+  [ "$THEME" = matteblack ] && FLAT_WARN=$GREEN
   FLAT_GOOD=$GREEN                    # charging
   FLAT_UP=$GREEN
   FLAT_DOWN=$RED
@@ -71,4 +72,4 @@ flat_colors() {
 }
 
 # The smart items, in the order zen mode and the demo switch walk them
-SMART_ITEMS="privacy vpn awake updates badge.slack badge.whatsapp market.1 market.2 market.3 spotify.anchor next_event timer"
+SMART_ITEMS="privacy vpn awake badge.slack badge.whatsapp market.1 market.2 market.3 spotify.anchor next_event timer"

@@ -32,7 +32,7 @@ if [ "$(cat "$HOME/.config/sketchybar/.barstyle" 2>/dev/null)" = flat ]; then
       fi
       exit 0 ;;
     apple.logo|calendar|net.up|net.down|cpu.percent|gpu.bar|mem|bluetooth|wifi|volume_icon|control|battery|\
-    vpn|updates|badge.*|market.*|next_event|timer|awake|privacy)
+    vpn|badge.*|market.*|next_event|timer|awake|privacy)
       if [ "$SENDER" = "mouse.entered" ]; then H=on; else H=off; fi
       args=(--set "$NAME" icon.highlight=$H label.highlight=$H)
       [ "$NAME" = net.up ] && args+=(--set net.down icon.highlight=$H label.highlight=$H)
