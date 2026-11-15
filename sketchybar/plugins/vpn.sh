@@ -15,13 +15,18 @@ if [ "$SENDER" = "mouse.exited.global" ]; then
   exit 0
 fi
 
+# Flat style: a padlock at the left end of the right-hand group, only while a VPN is connected. It needs
+# no public IP, so the lookup below runs only when the popup is opened.
+FLAT=0; [ "$BAR_STYLE" = flat ] && FLAT=1
 LIST=$(scutil --nc list 2>/dev/null | grep -E '^\*? *\(' )
 VPN=$(echo "$LIST" | awk -F'"' '/\(Connected\)/{print $2; exit}')
 CACHE="${TMPDIR:-/tmp}/sketchybar_ip"
 
 # Cache line: vpn-name|ip|country|city
 IFS='|' read -r C_VPN IP CC CITY < "$CACHE" 2>/dev/null
-if [ "$C_VPN" != "$VPN" ] || [ -z "$IP" ] || [ "$SENDER" = "wifi_change" ] || \
+if [ "$FLAT" = 1 ] && [ "$SENDER" != "click" ]; then
+  :   # flat, not a click: no lookup
+elif [ "$C_VPN" != "$VPN" ] || [ -z "$IP" ] || [ "$SENDER" = "wifi_change" ] || \
    [ "$SENDER" = "system_woke" ] || [ -z "$(find "$CACHE" -mmin -15 2>/dev/null)" ]; then
   [ "$SENDER" = "wifi_change" ] || [ "$C_VPN" != "$VPN" ] && sleep 2   # let routes settle
   # ifconfig.co first; ipinfo.io as the fallback (it rate-limits shared IPs)
@@ -37,7 +42,14 @@ if [ "$C_VPN" != "$VPN" ] || [ -z "$IP" ] || [ "$SENDER" = "wifi_change" ] || \
   echo "$VPN|$IP|$CC|$CITY" > "$CACHE"
 fi
 
-if [ -n "$VPN" ]; then
+if [ "$FLAT" = 1 ]; then
+  source "$HOME/.config/sketchybar/plugins/smart_lib.sh"
+  if [ -n "$VPN" ] || smart_demo vpn; then
+    SM_ICON=$LOCK_FILL; SM_LABEL=; smart_show vpn
+  else
+    smart_hide vpn
+  fi
+elif [ -n "$VPN" ]; then
   sketchybar --set vpn icon=$LOCK_FILL icon.color=$GREEN label="$CC" label.color=$GREEN
 elif [ -n "$IP" ]; then
   sketchybar --set vpn icon=$GLOBE icon.color=$WHITE label="$CC" label.color=$GREY
@@ -50,6 +62,7 @@ fi
 # Popup: status, public IP (click copies), place, then one row per VPN service
 row=(icon.font="$FONT:Regular:14.0" icon.width=26 label.font="$TEXT_FONT:SemiBold:13.0"
      padding_left=8 padding_right=12)
+[ "$FLAT" = 1 ] && row+=(background.corner_radius=4)
 args=(--remove '/vpn\.row\..*/')
 add() { args+=(--add item vpn.row.$1 popup.vpn --set vpn.row.$1 "${row[@]}" "${@:2}"); }
 

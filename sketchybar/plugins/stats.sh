@@ -105,16 +105,44 @@ fi
 
 printf -v GRAPH '%d.%02d' $(( CPU / 100 )) $(( CPU % 100 ))   # 0.00 to 1.00
 args=(--push cpu.graph "$GRAPH"
-      --set cpu.percent label="${CPU}%" icon.color=$CPU_COLOR
-      --set cpu.graph graph.color=$CPU_COLOR
-      --set mem label="${MEM}%" icon.color=$MEM_COLOR
-      --set gpu label="${GPU}%" icon.color=$GPU_COLOR
+      --set cpu.percent label="${CPU}%"
+      --set mem label="${MEM}%"
+      --set gpu label="${GPU}%"
       --set net.up label="$NET_UP $UP_LABEL"
       --set net.down label="$NET_DOWN $DOWN_LABEL")
 
-# The flat bar shows the GPU in its own item
 if [ "$BAR_STYLE" = flat ]; then
-  args+=(--set gpu.bar label="${GPU}%" icon.color=$GPU_COLOR)
+  # The flat bar shows the GPU in its own item, and keeps everything neutral: colour appears only when
+  # a value needs James (thresholds in plugins/flat_config.sh). The colours are sent when the state
+  # changes, not every tick, so a hover highlight is not wiped and the bar is sent less.
+  source "$HOME/.config/sketchybar/plugins/flat_config.sh"
+  SDIR="${TMPDIR:-/tmp}/sketchybar_smart"; [ -d "$SDIR" ] || mkdir -p "$SDIR"
+  [ -r "$SDIR/stats" ] && read -r CN GN KEY < "$SDIR/stats"
+  CN=${CN:-0}; GN=${GN:-0}
+  [ "$CPU" -ge "$FLAT_CPU_HIGH" ] && CN=$((CN + 1)) || CN=0
+  [ "$GPU" -ge "$FLAT_GPU_HIGH" ] && GN=$((GN + 1)) || GN=0
+  CL=0; GL=0; ML=0                                   # 0 neutral, 2 warning, 3 critical
+  [ "$CN" -ge "$FLAT_CPU_SAMPLES" ] && { CL=2; [ "$CPU" -ge "$FLAT_CPU_CRIT" ] && CL=3; }
+  [ "$GN" -ge "$FLAT_GPU_SAMPLES" ] && { GL=2; [ "$GPU" -ge "$FLAT_GPU_CRIT" ] && GL=3; }
+  case $LEVEL in 4) ML=3 ;; 2) ML=2 ;; esac
+  [ "$CN" -gt 99 ] && CN=99; [ "$GN" -gt 99 ] && GN=99
+  NEWKEY="$CL$GL$ML"
+  echo "$CN $GN $NEWKEY" > "$SDIR/stats"
+  if [ "$NEWKEY" != "$KEY" ]; then
+    flat_colors
+    pick() { case $1 in 3) echo "$FLAT_CRIT" ;; 2) echo "$FLAT_WARN" ;; *) echo "$FLAT_REST" ;; esac; }
+    C=$(pick $CL); G=$(pick $GL); M=$(pick $ML)
+    args+=(--set cpu.percent icon.color=$C label.color=$C
+           --set cpu.graph graph.color=$C
+           --set gpu.bar icon.color=$G label.color=$G
+           --set mem icon.color=$M label.color=$M)
+  fi
+  args+=(--set gpu.bar label="${GPU}%")
+else
+  args+=(--set cpu.percent icon.color=$CPU_COLOR
+         --set cpu.graph graph.color=$CPU_COLOR
+         --set mem icon.color=$MEM_COLOR
+         --set gpu icon.color=$GPU_COLOR)
 fi
 
 sketchybar "${args[@]}"

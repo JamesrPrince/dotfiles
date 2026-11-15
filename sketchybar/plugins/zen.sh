@@ -10,6 +10,11 @@ source "$HOME/.config/sketchybar/plugins/style.sh"
 zen_on() {
   touch "$ZEN"
   [ "$BAR_STYLE" = flat ] && sketchybar --set gpu.bar drawing=off --set window_title drawing=off   # the flat bar's own items
+  if [ "$BAR_STYLE" = flat ]; then   # and its smart items (plugins/smart_lib.sh shows nothing while the flag file exists)
+    source "$HOME/.config/sketchybar/plugins/flat_config.sh"
+    args=(); for item in $SMART_ITEMS flat.div; do args+=(--set $item drawing=off); done
+    sketchybar "${args[@]}"
+  fi
   sketchybar --set apple.logo drawing=off \
              --set layout drawing=off \
              --set vpn drawing=off \
@@ -58,6 +63,12 @@ zen_off() {
              --trigger power_source_change
   # The flat style hides most of these for good, and shows its GPU item
   [ "$BAR_STYLE" = flat ] && sketchybar --set gpu.bar drawing=on
+  if [ "$BAR_STYLE" = flat ]; then   # the smart items come back, and each re-reads its own state
+    source "$HOME/.config/sketchybar/plugins/flat_config.sh"
+    args=(); for item in $SMART_ITEMS flat.div; do args+=(--set $item drawing=on); done
+    for f in "${TMPDIR:-/tmp}"/sketchybar_smart/state.*; do [ -e "$f" ] && echo unknown > "$f"; done
+    sketchybar "${args[@]}" --trigger smart_refresh
+  fi
   # The window title shows only when a window is focused: let its script decide
   [ "$BAR_STYLE" = flat ] && SENDER=forced "$HOME/.config/sketchybar/plugins/window_title.sh" &
   "$HOME/.config/sketchybar/plugins/flat_hide.sh"

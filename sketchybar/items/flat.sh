@@ -14,20 +14,41 @@ sketchybar --set spaces background.drawing=off \
            --set stats background.drawing=off \
            --set mode background.drawing=off label.font="$TEXT_FONT:Bold:12.0"
 
-# --- Left: the workspaces as plain numbers -------------------------------------------------------
-# The focused one is in ACCENT (icon.highlight_color, set in items/spaces.sh) on a faint marker;
-# plugins/spaces.sh colours it and greys the empty ones.
+# --- Left: the workspaces as plain numbers, each with its app icons ------------------------------
+# The focused one is in ACCENT on a faint marker, the others neutral, empty ones a dim number;
+# plugins/spaces.sh colours them (directly, so the change animates) and fills the app icons
+# (sketchybar-app-font, grey, at most FLAT_WS_MAX_ICONS, then "+N" in spacemore.<id>, which is
+# an item of its own because the app font has no digits).
+source "$PLUGIN_DIR/flat_config.sh"
+flat_colors
 for sid in $SPACE_IDS; do
   sketchybar --set space.$sid position=left                  \
                               icon=$sid                      \
                               icon.font="$TEXT_FONT:SemiBold:13.0" \
+                              icon.color=$FLAT_DIM           \
+                              icon.highlight_color=$FLAT_HOVER \
                               icon.padding_left=7            \
                               icon.padding_right=7           \
                               padding_left=1                 \
-                              padding_right=1                \
+                              padding_right=0                \
+                              label.font="sketchybar-app-font:Regular:13.0" \
+                              label.color=$GREY              \
+                              label.padding_left=0           \
+                              label.padding_right=7          \
+                              label.background.drawing=off   \
                               label.drawing=off              \
-                              background.height=18           \
-                              background.corner_radius=4
+                              label.width=dynamic            \
+                              popup.height=$FLAT_POPUP_ROW_H \
+                              background.height=20           \
+                              background.corner_radius=4     \
+           --add item spacemore.$sid left                    \
+           --set spacemore.$sid icon.drawing=off label="" label.drawing=off \
+                              label.font="$TEXT_FONT:SemiBold:11.0" label.color=$GREY \
+                              label.padding_left=0 label.padding_right=6    \
+                              padding_left=0 padding_right=0                \
+                              background.drawing=off                        \
+                              click_script="$PLUGIN_DIR/space_click.sh $sid" \
+           --move spacemore.$sid after space.$sid
 done
 
 # --- Left, after the workspaces: the focused window's app icon and title --------------------------
@@ -59,13 +80,15 @@ sketchybar --set calendar position=center                    \
                           popup.align=center
 
 # --- Left: the Apple logo, before the workspaces; it opens the same popup as in Centre Stage -------
-sketchybar --set apple.logo icon.color=$ICON_COLOR icon.font="$FONT:Bold:14.0" \
-                            padding_left=4 padding_right=4
+sketchybar --set apple.logo icon.color=$FLAT_REST icon.font="$FONT:Medium:15.0" \
+                            icon.width=$FLAT_ICON_W icon.align=center icon.padding_left=0 icon.padding_right=0 \
+                            padding_left=4 padding_right=4 popup.height=$FLAT_POPUP_ROW_H
 
-# --- Right, left to right: live stats, then the tray icons ------------------------------------------
-#   network (up over down, stacked), CPU (percentage and graph), GPU, memory   |   bluetooth, Wi-Fi, volume, battery, control
+# --- Right, left to right: smart items, live stats, a divider, then the tray icons ---------------------
+#   [music market mic VPN awake updates badges]  net up/down, CPU % and graph, GPU, memory  |  bluetooth, Wi-Fi, volume, battery, control
 # The stats are Centre Stage's own items, refreshed by plugins/stats.sh; they just move here with
 # their labels showing, in fixed-width labels so a changing value never shifts its neighbours.
+# They are neutral; colour appears only when a value needs James (plugins/stats.sh, flat_config.sh).
 # plugins/stats.sh also feeds gpu.bar.
 stat=(
   padding_left=4
@@ -74,10 +97,14 @@ stat=(
   icon.padding_right=2
   label.padding_left=2
   label.padding_right=3
+  icon.color=$FLAT_REST
+  label.color=$FLAT_REST
+  icon.highlight_color=$FLAT_HOVER
+  label.highlight_color=$FLAT_HOVER
 )
 sketchybar --add item gpu.bar right                                   \
            --set gpu.bar "${stat[@]}"                                  \
-                         icon=GPU icon.font="$TEXT_FONT:Bold:9.0" icon.color=$GREEN \
+                         icon=GPU icon.font="$TEXT_FONT:Bold:9.0"      \
                          label="--%" label.font="$TEXT_FONT:ExtraBold:12.0" \
                          label.width=34 label.align=right
 # Network: up over down, stacked as in Centre Stage. net.down is zero-width and sits just right of
@@ -85,25 +112,27 @@ sketchybar --add item gpu.bar right                                   \
 # both share font, width and padding to line up.
 netstack=(
   label.font="$TEXT_FONT:Bold:9.0"
-  label.width=72
+  label.width=64
   label.align=right
 )
 sketchybar --set net.up position=right "${stat[@]}" "${netstack[@]}"  \
                         y_offset=5                                    \
-                        popup.align=right                             \
+                        popup.align=right popup.height=$FLAT_POPUP_ROW_H \
            --set net.down position=right "${stat[@]}" "${netstack[@]}" \
                           y_offset=-5 width=0 drawing=on              \
            --set cpu.percent position=right "${stat[@]}"              \
-                             popup.align=right                       \
-           --set mem position=right "${stat[@]}" popup.align=right
+                             icon.font="$FONT:Medium:$FLAT_ICON_FONT_SIZE" \
+                             popup.align=right popup.height=$FLAT_POPUP_ROW_H \
+           --set mem position=right "${stat[@]}" popup.align=right    \
+                     icon.font="$FONT:Medium:$FLAT_ICON_FONT_SIZE" popup.height=$FLAT_POPUP_ROW_H
 
 # The CPU graph is the same item as in Centre Stage (same name, so plugins/stats.sh keeps feeding it,
 # and the same click opens the CPU popup). A graph's bounding rect always reports the width it was
-# added with, so it is added again here at the flat width (44px) to keep the overlap check honest.
+# added with, so it is added again here at the flat width (38px) to keep the overlap check honest.
 sketchybar --remove cpu.graph
-sketchybar --add graph cpu.graph right 44                       \
-           --set cpu.graph graph.color=$BLUE                   \
-                           graph.fill_color=$ACCENT_FILL       \
+sketchybar --add graph cpu.graph right 38                       \
+           --set cpu.graph graph.color=$FLAT_REST               \
+                           graph.fill_color=$FLAT_GRAPH_FILL    \
                            label.drawing=off icon.drawing=off  \
                            background.height=20                \
                            background.drawing=on               \
@@ -111,32 +140,75 @@ sketchybar --add graph cpu.graph right 44                       \
                            padding_left=0 padding_right=4      \
                            click_script="$PLUGIN_DIR/stat_popup.sh cpu.percent cpu"
 
-sketchybar --set battery label.drawing=off icon.font="$FONT:Regular:16.0" \
-           --set volume_icon label.font="$FONT:Regular:14.0"
+# --- The tray: one icon weight (SF Pro Medium 14; the two Nerd Font glyphs are Bold 15, which draws as
+# heavy), one icon cell (20 wide, centred), even spacing. Their plugins colour them only on a state.
+tray=(
+  padding_left=$FLAT_ICON_PAD
+  padding_right=$FLAT_ICON_PAD
+  icon.font="$FONT:Medium:$FLAT_ICON_FONT_SIZE"
+  icon.width=$FLAT_ICON_W
+  icon.align=center
+  icon.padding_left=0
+  icon.padding_right=0
+  icon.color=$FLAT_REST
+  icon.highlight_color=$FLAT_HOVER
+  label.highlight_color=$FLAT_HOVER
+)
+sketchybar --set bluetooth "${tray[@]}" icon.font="Maple Mono NF:Bold:$FLAT_NF_FONT_SIZE" popup.height=$FLAT_POPUP_ROW_H \
+           --set wifi "${tray[@]}" popup.height=$FLAT_POPUP_ROW_H           \
+           --set control "${tray[@]}" popup.height=$FLAT_POPUP_ROW_H        \
+           --set battery "${tray[@]}" icon.width=24                         \
+                         label.drawing=on label.width=0 label.padding_left=0 label.padding_right=0 \
+                         label.color=$TRANSPARENT label.font="$TEXT_FONT:SemiBold:12.0" \
+           --set volume_icon padding_left=$FLAT_ICON_PAD padding_right=$FLAT_ICON_PAD \
+                             label.font="$FONT:Medium:$FLAT_ICON_FONT_SIZE" label.width=$FLAT_ICON_W \
+                             label.align=center label.padding_left=0 label.padding_right=0 \
+                             label.color=$FLAT_REST label.highlight_color=$FLAT_HOVER \
+                             popup.height=$FLAT_POPUP_ROW_H
 
-for item in bluetooth wifi volume_icon battery control; do
-  sketchybar --set $item padding_left=5 padding_right=5
-done
-sketchybar --set bluetooth icon.padding_left=3 icon.padding_right=3 \
-           --set wifi icon.padding_left=3 icon.padding_right=3      \
-           --set control icon.padding_left=3 icon.padding_right=3
+# A thin, quiet divider between the stats and the tray
+sketchybar --add item flat.div right                                \
+           --set flat.div width=1 icon.drawing=off label.drawing=off \
+                          padding_left=7 padding_right=7             \
+                          background.drawing=on background.height=14 \
+                          background.corner_radius=0 background.color=$FLAT_DIVIDER
 
-# Left to right: net.up, net.down (zero-width, drawn under net.up), cpu, gpu, mem, bluetooth, wifi, volume icon, volume slider,
-# battery, control. The keys anchors (the shortcut sheet's popups) stay at the far right edge.
+# --- The smart items: appear only when relevant (items/flat_smart.sh) -----------------------------------
+source "$ITEM_DIR/flat_smart.sh"
+sketchybar --subscribe battery smart_refresh
+
+# The order, right to left (a later "after" sits to the left of the one before it):
+#   keys anchors | control, battery, volume, volume icon, Wi-Fi, bluetooth | divider |
+#   memory, GPU, CPU graph, CPU %, net down (zero-width), net up |
+#   WhatsApp, Slack, updates, keep-awake, VPN, mic/camera, market 3-2-1, music
+# net.down must stay right of net.up (a zero-width item on the right side draws leftwards).
 sketchybar --move control after keys     \
            --move battery after control  \
            --move volume after battery   \
            --move volume_icon after volume \
            --move wifi after volume_icon   \
            --move bluetooth after wifi     \
-           --move mem after bluetooth      \
+           --move flat.div after bluetooth \
+           --move mem after flat.div       \
            --move gpu.bar after mem        \
            --move cpu.graph after gpu.bar   \
            --move cpu.percent after cpu.graph \
            --move net.down after cpu.percent \
-           --move net.up after net.down
+           --move net.up after net.down      \
+           --move badge.whatsapp after net.up \
+           --move badge.slack after badge.whatsapp \
+           --move updates after badge.slack  \
+           --move awake after updates        \
+           --move vpn after awake            \
+           --move privacy after vpn          \
+           --move market.3 after privacy     \
+           --move market.2 after market.3    \
+           --move market.1 after market.2    \
+           --move spotify.anchor after market.1 \
+           --move next_event after calendar  \
+           --move timer after next_event
 
-# --- The control entry also holds the shortcut sheet (the "more" item is not shown) ---------------
+# --- The control entry also holds the shortcut sheet and the focus timer (the "more" item is not shown) -
 sketchybar --add item control.keys popup.control                 \
            --set control.keys icon=$KEYBOARD icon.color=$BLUE      \
                               icon.font="$FONT:Regular:15.0" icon.width=28 \
@@ -144,7 +216,30 @@ sketchybar --add item control.keys popup.control                 \
                               label.font="$TEXT_FONT:SemiBold:13.0" \
                               padding_left=8 padding_right=14      \
                               click_script="/usr/bin/python3 $PLUGIN_DIR/keys.py toggle; /usr/local/bin/sketchybar --set control popup.drawing=off" \
-           --move control.keys before control.settings
+           --move control.keys before control.settings             \
+           --add item control.timer popup.control                  \
+           --set control.timer icon=$TIMER_ICON icon.color=$GREY    \
+                               icon.font="$FONT:Regular:15.0" icon.width=28 \
+                               label="Focus timer   25 min  (right-click: 50)" \
+                               label.font="$TEXT_FONT:SemiBold:13.0" \
+                               padding_left=8 padding_right=14      \
+                               click_script="NAME=timer SENDER=mouse.clicked BUTTON=\$BUTTON $PLUGIN_DIR/timer.sh; /usr/local/bin/sketchybar --set control popup.drawing=off" \
+           --move control.timer before control.settings
+
+# --- Popups in the bar's own language: radius 4, a 1 px quiet border (the defaults in sketchybarrc),
+# rows of one height and one padding, hover pills with the same radius (plugins/hover.sh).
+sketchybar --set '/^(apple\.(prefs|activity|lock)|control\.[a-z]+|wifi\.(ssid|ip|router|signal|channel|advice|speed|speed\.result|toggle)|wifi\.(saved|near)\.[0-9]|wifi\.hdr\.(saved|near)|bluetooth\.(power|note)|np\.[a-z0-9.]+|cp\.[a-z0-9.]+|mp\.[a-z0-9.]+)$/' \
+                  padding_left=8 padding_right=12 background.corner_radius=$FLAT_POPUP_RADIUS \
+           --set '/^space\.[0-9A-Za-z]+$/' popup.height=$FLAT_POPUP_ROW_H
+
+# --- Hover: a quiet colour shift (icon.highlight / label.highlight), no pills ---------------------------
+sketchybar --set gpu.bar icon.highlight_color=$FLAT_HOVER
+for item in apple.logo calendar net.up net.down cpu.percent mem bluetooth wifi volume_icon control \
+            vpn updates badge.slack badge.whatsapp market.1 market.2 market.3 next_event timer; do
+  sketchybar --subscribe $item mouse.entered mouse.exited
+done
+for sid in $SPACE_IDS; do sketchybar --subscribe space.$sid mouse.entered mouse.exited; done
+sketchybar --set market.2 script="$PLUGIN_DIR/hover.sh" --set market.3 script="$PLUGIN_DIR/hover.sh"
 
 # --- Everything else is defined but not drawn ------------------------------------------------------
 source "$PLUGIN_DIR/flat_hide.sh"   # sourced, so its calls join the load-time batch

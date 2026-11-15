@@ -3,7 +3,9 @@
 #   check.sh            read-only: no bar reload, no theme or style switch
 #                       (it does run `aerospace reload-config`, which is harmless)
 #   check.sh --themes   also run themes/check-all.sh (switches through all 11 themes, then restores)
-#   check.sh --styles   also switch to the other bar style and back, checking each (reloads the bar twice)
+#   check.sh --styles   also switch to the other bar style and back, checking each (reloads the bar twice);
+#                        in flat it also forces every smart item visible and checks nothing overlaps
+#   check.sh --smart    only the forced-visible smart-item check, on the current (flat) style
 export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"
 DOT="$(cd "$(dirname "$0")" && pwd)"
 CONF="$HOME/.config/sketchybar"
@@ -65,13 +67,14 @@ style_check() { # style_check [label]  - state valid and gap matches
 style_check "bar style"
 
 # --- no two visible bar items overlap ----------------------------------------------------------
-overlap_check() { # overlap_check [label]
+overlap_check() { # overlap_check [label] [smart]  - "smart": the smart items are forced on, so each must be drawn
   local label=${1:-bar items} out
-  out=$(python3 - <<'PY'
-import json, subprocess, time
+  out=$(SMART_CHECK=${2:-} python3 - <<'PY'
+import json, os, subprocess, time
 q = lambda *a: json.loads(subprocess.run(["sketchybar", "--query", *a], capture_output=True, text=True).stdout)
 def collect():
-    bar = q("bar"); H = bar["height"]; items = []
+    global centre_clock
+    bar = q("bar"); H = bar["height"]; items = []; centre_clock = False
     for name in bar["items"]:
         it = q(name)
         if it.get("type") != "item" or it["geometry"]["drawing"] != "on" or it["geometry"]["position"] not in ("left", "right", "center"):
@@ -80,6 +83,8 @@ def collect():
             (x, y), (w, h) = r["origin"], r["size"]
             if w > 0 and h > 0 and y < H:
                 items.append((name, disp, x, y, w, h))
+                if name == "calendar":
+                    centre_clock = it["geometry"]["position"] == "center"
     return items
 for _ in range(15):   # the bar answers empty while it reloads: retry for up to 15 s
     try:
@@ -89,18 +94,42 @@ for _ in range(15):   # the bar answers empty while it reloads: retry for up to 
 else:
     raise SystemExit(1)
 bad = []
+# The clock sits exactly in the middle of its display, with or without smart items next to it
+if centre_clock:   # flat style only: in Centre Stage the clock lives at the right
+    frames = {"display-%s" % d["arrangement-id"]: d["frame"]["w"] for d in q("displays")}
+    for name, disp, x, y, w, h in items:
+        if name == "calendar" and disp in frames and abs(x + w / 2 - frames[disp] / 2) > 1:
+            bad.append("clock-off-centre(%+.1f)" % (x + w / 2 - frames[disp] / 2))
+# Forced on, every smart item must really be drawn (a broken demo switch would pass the overlap check
+# trivially), and nothing may touch the window title or the stats
+if os.environ.get("SMART_CHECK"):
+    drawn = {it[0] for it in items}
+    want = "privacy vpn awake updates badge.slack badge.whatsapp market.1 market.2 spotify.anchor next_event timer window_title".split()
+    bad += ["not-drawn:" + n for n in want if n not in drawn]
 for i, a in enumerate(items):
     for b in items[i + 1:]:
         if a[1] != b[1] or {a[0], b[0]} == {"net.up", "net.down"}:   # net.down is drawn under net.up in flat style
             continue
         if min(a[2] + a[4], b[2] + b[4]) - max(a[2], b[2]) > 1 and min(a[3] + a[5], b[3] + b[5]) - max(a[3], b[3]) > 1:
             bad.append(a[0] + "/" + b[0])
-print(len(items), " ".join(bad[:4]))
+print(len(items), " ".join(bad[:5]))
 PY
 )
   result "$label: no overlap among ${out%% *} visible items" "$([ -n "$out" ] && [ -z "${out#* }" ] && echo 0 || echo 1)" "overlap: ${out#* }"
 }
 overlap_check "bar items"
+
+# --- the flat style's smart items, all forced visible at once (test switch plugins/smart_demo.sh) -------
+smart_check() { # smart_check [label]  - flat only; always switches the test flags off again
+  local label=${1:-smart items}
+  [ "$(cat "$CONF/.barstyle" 2>/dev/null)" = flat ] || return 0
+  trap 'bash "$CONF/plugins/smart_demo.sh" off >/dev/null 2>&1' EXIT   # a Ctrl-C mid-check still switches them off
+  bash "$CONF/plugins/smart_demo.sh" on all >/dev/null 2>&1
+  sleep 2   # the appear animation
+  overlap_check "$label: all smart items forced visible" smart
+  bash "$CONF/plugins/smart_demo.sh" off >/dev/null 2>&1
+  sleep 1
+}
 
 # --- themes: 11 of them, each complete -------------------------------------------------------------
 list=$(bash "$CONF/plugins/theme.sh" list --plain | cut -f1)
@@ -128,8 +157,11 @@ for arg in "$@"; do
         bash "$CONF/plugins/barstyle.sh" set "$s" >/dev/null 2>&1
         sleep 3   # the bar reloads asynchronously; the overlap check retries until it answers
         style_check "switched to $s"; overlap_check "style $s"
+        [ "$s" = flat ] && smart_check "style flat"
       done ;;
-    *) echo "usage: check.sh [--themes] [--styles]" >&2; exit 2 ;;
+    --smart)
+      smart_check "smart items" ;;
+    *) echo "usage: check.sh [--themes] [--styles] [--smart]" >&2; exit 2 ;;
   esac
 done
 

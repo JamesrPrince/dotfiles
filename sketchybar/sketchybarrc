@@ -34,6 +34,8 @@ PLUGIN_DIR="$HOME/.config/sketchybar/plugins"
 
 # A fresh bar starts out of zen mode, and redraws the workspaces from scratch
 rm -f "${TMPDIR:-/tmp}/sketchybar_zen" "${TMPDIR:-/tmp}/sketchybar_spaces_state"
+# ... and the flat style's smart items start from nothing shown, with every test switch off
+rm -rf "${TMPDIR:-/tmp}/sketchybar_smart"
 
 FONT="SF Pro" # Needs Regular, Bold, Semibold, Heavy and Black
 # BAR_STYLE ("centre" or "flat") and TEXT_FONT (Nunito, or Maple Mono NF in flat) come from here;
@@ -101,8 +103,16 @@ defaults=(
   popup.background.shadow.drawing=on
 )
 
-# Flat: no pills, so only the focused workspace marker and the popup rows use a background
-[ "$BAR_STYLE" = flat ] && defaults+=(background.height=20 background.corner_radius=4)
+# Flat: no pills, so only the focused workspace marker and the popup rows use a background. Popups take
+# the bar's own look: radius 4 and a quiet 1 px border (plugins/flat_config.sh), not Centre Stage's 9 and 2.
+if [ "$BAR_STYLE" = flat ]; then
+  source "$PLUGIN_DIR/flat_config.sh"
+  flat_colors
+  defaults+=(background.height=20 background.corner_radius=4
+             popup.background.border_width=$FLAT_POPUP_BORDER_W
+             popup.background.corner_radius=$FLAT_POPUP_RADIUS
+             popup.background.border_color=$FLAT_POPUP_BORDER)
+fi
 
 sketchybar --default "${defaults[@]}"
 

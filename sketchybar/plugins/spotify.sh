@@ -3,6 +3,7 @@
 export PATH="/usr/local/bin:$PATH"
 source "$HOME/.config/sketchybar/icons.sh"
 source "$HOME/.config/sketchybar/plugins/style.sh"
+[ "$BAR_STYLE" = flat ] && source "$HOME/.config/sketchybar/plugins/smart_lib.sh"
 
 next ()
 {
@@ -56,6 +57,7 @@ update ()
     COVER=$(osascript -e 'tell application "Spotify" to get artwork url of current track')
     NOW_PLAYING="$(echo "$INFO" | jq -r '.Name + (if (.Artist // "") != "" then "  ·  " + .Artist else "" end)' \
                    | sed 's/\(.\{28\}\).*/\1…/')"
+    TITLE_FULL="$(echo "$INFO" | jq -r .Name)"
   fi
 
   args=()
@@ -75,16 +77,35 @@ update ()
            --set spotify.repeat icon.highlight=$REPEAT
            --set spotify.cover background.image="/tmp/cover.jpg"
                                background.color=0x00000000
-           --set spotify.anchor drawing=on label="$NOW_PLAYING"
-           --set spotify.progress drawing=on                    )
+           )
+    [ "$BAR_STYLE" = flat ] || args+=(--set spotify.anchor drawing=on label="$NOW_PLAYING"
+                                      --set spotify.progress drawing=on)
   else
-    args+=(--set spotify.anchor drawing=off popup.drawing=off
-           --set spotify.progress drawing=off
+    args+=(--set spotify.anchor popup.drawing=off
            --set spotify.play icon=$SPOTIFY_PLAY                         )
+    [ "$BAR_STYLE" = flat ] || args+=(--set spotify.anchor drawing=off --set spotify.progress drawing=off)
   fi
-  # The flat bar has no music pill
-  [ "$BAR_STYLE" = flat ] && args+=(--set spotify.anchor drawing=off --set spotify.progress drawing=off)
   sketchybar -m "${args[@]}"
+  # The flat bar: a compact music item (icon and title), only while playing. spotify.progress stays off
+  # (it would ask Spotify for its position every 2 s).
+  if [ "$BAR_STYLE" = flat ]; then
+    if [ $PLAYING -eq 0 ]; then printf 'on|%s\n' "$TITLE_FULL" > "$SMART_DIR/real.music"
+    else rm -f "$SMART_DIR/real.music"; fi
+    flat_music
+  fi
+}
+
+# Flat: draw the music item from the last real state (or the demo's sample)
+flat_music() {
+  local t=""
+  if smart_demo music; then t="Midnight City (Extended Mix)"
+  elif [ -r "$SMART_DIR/real.music" ]; then IFS='|' read -r _ t < "$SMART_DIR/real.music"; fi
+  if [ -n "$t" ]; then
+    [ "${#t}" -gt "$FLAT_MUSIC_CHARS" ] && t="${t:0:$((FLAT_MUSIC_CHARS - 1))}…"
+    SM_ICON=$SPOTIFY; SM_LABEL=$t; smart_show spotify.anchor
+  else
+    smart_hide spotify.anchor
+  fi
 }
 
 scrubbing() {
@@ -167,6 +188,15 @@ routine() {
 
 [ "$1" = "click" ] && { click_anchor; exit 0; }
 
+# Flat, at load: if Spotify is already playing, build the event's info from it (never starts Spotify)
+if [ "$1" = "initflat" ]; then
+  pgrep -xq Spotify || exit 0
+  INFO=$(osascript -e 'tell application "Spotify" to return (player state as text) & (ASCII character 9) & (name of current track) & (ASCII character 9) & (artist of current track) & (ASCII character 9) & (album of current track)' 2>/dev/null \
+         | jq -R 'split("\t") | {"Player State": (.[0] | if . == "playing" then "Playing" else . end), Name: .[1], Artist: .[2], Album: .[3]}')
+  [ -n "$INFO" ] && update
+  exit 0
+fi
+
 case "$SENDER" in
   "mouse.clicked") mouse_clicked
   ;;
@@ -177,6 +207,8 @@ case "$SENDER" in
   "routine") routine
   ;;
   "forced") exit 0
+  ;;
+  "smart_refresh") flat_music
   ;;
   *) update
   ;;

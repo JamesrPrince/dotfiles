@@ -38,6 +38,19 @@ else
   else COLOR=$ORANGE; fi
 fi
 
+# Flat style: neutral unless something is wrong (thresholds in flat_config.sh): Wi-Fi off, no
+# connection, or a weak signal
+FLAT=0; STYLE=; [ -r "$HOME/.config/sketchybar/.barstyle" ] && read -r STYLE < "$HOME/.config/sketchybar/.barstyle"
+if [ "$STYLE" = flat ]; then
+  FLAT=1
+  source "$HOME/.config/sketchybar/plugins/flat_config.sh"; flat_colors
+  if [ "$POWER" != "on" ]; then COLOR=$FLAT_WARN
+  elif [ -z "$IP" ]; then COLOR=$FLAT_CRIT
+  elif [ "${RSSI:-0}" -lt "$FLAT_WIFI_BAD" ]; then COLOR=$FLAT_CRIT
+  elif [ "${RSSI:-0}" -lt "$FLAT_WIFI_WEAK" ]; then COLOR=$FLAT_WARN
+  else COLOR=$FLAT_REST; fi
+fi
+
 args=(--set wifi icon=$ICON icon.color=$COLOR
       --set wifi.toggle label="$TOGGLE" icon=$TOGGLE_ICON icon.color=$TOGGLE_COLOR)
 

@@ -11,6 +11,8 @@ NAME="${NAME:-window_title}"
 CACHE="${TMPDIR:-/tmp}/sketchybar_window_title"
 
 now="$(aerospace list-windows --focused --format '%{app-name}|%{window-title}' 2>/dev/null | head -1)"
+# Test switch (plugins/smart_demo.sh on title): a 70-character title, the longest the bar allows
+[ -e "${TMPDIR:-/tmp}/sketchybar_smart/demo.title" ] && now="Ghostty|0123456789 The quick brown fox jumps over the lazy dog, then keeps going, to 70"
 # "forced" is the bar loading (the item is empty then, whatever the cache says)
 if [ "$SENDER" != forced ] && [ "$now" = "$(cat "$CACHE" 2>/dev/null)" ]; then exit 0; fi
 printf '%s' "$now" > "$CACHE"

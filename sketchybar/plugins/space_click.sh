@@ -27,6 +27,7 @@ for other in $(sketchybar --query bar | jq -r '.items[]' | grep '^space\.[^.]*$'
   [ "$other" = "space.$SID" ] || sketchybar --set "$other" popup.drawing=off
 done
 
+RR=7; [ "$(cat "$HOME/.config/sketchybar/.barstyle" 2>/dev/null)" = flat ] && RR=4
 args=()
 n=0
 while IFS='|' read -r wid app title; do
@@ -38,7 +39,7 @@ while IFS='|' read -r wid app title; do
          --set "$name" icon="$icon_result" icon.font="sketchybar-app-font:Regular:16.0"
                        icon.width=30 icon.color=$WHITE
                        label="$title" label.max_chars=44 label.font="$TEXT_FONT:SemiBold:14.0"
-                       padding_left=8 padding_right=12 background.corner_radius=7
+                       padding_left=8 padding_right=12 background.corner_radius=$RR
                        script="$PLUGINS/hover.sh"
                        click_script="/usr/local/bin/aerospace focus --window-id $wid; /usr/local/bin/sketchybar --set space.$SID popup.drawing=off"
          --subscribe "$name" mouse.entered mouse.exited)

@@ -27,6 +27,7 @@ toggle_devices() {
   source "$HOME/.config/sketchybar/colors.sh"
   source "$HOME/.config/sketchybar/icons.sh"
 
+  PR=14; [ "$(cat "$HOME/.config/sketchybar/.barstyle" 2>/dev/null)" = flat ] && PR=12
   args=(--remove '/volume.device\..*/' --set "$NAME" popup.align=right)
   COUNTER=0
   CURRENT="$("$AUDIO" current)"
@@ -38,7 +39,7 @@ toggle_devices() {
     args+=(--add item volume.device.$COUNTER popup."$NAME" \
            --set volume.device.$COUNTER label="$device" label.color="$COLOR" \
                  icon=$SPEAKER icon.color="$COLOR" icon.width=26 \
-                 padding_left=8 padding_right=14 \
+                 padding_left=8 padding_right=$PR \
                  click_script="$HOME/.config/sketchybar/plugins/audio_switch.sh $COUNTER")
     COUNTER=$((COUNTER+1))
   done <<< "$("$AUDIO" list)"

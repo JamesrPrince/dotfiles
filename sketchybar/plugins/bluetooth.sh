@@ -19,6 +19,14 @@ source "$HOME/.config/sketchybar/icons.sh"
 FONT="SF Pro"          # glyph icons (SF Symbols)
 source "$HOME/.config/sketchybar/plugins/style.sh"   # TEXT_FONT: Nunito, or Maple Mono NF in the flat style
 BT_FONT="MesloLGS NF"  # Bluetooth glyphs (Nerd Font)
+ROW_R=7
+BT_OFF=$GREY; BT_ON_COLOR=""
+if [ "$BAR_STYLE" = flat ]; then
+  # Flat: Maple Mono NF Bold for the glyph (as heavy as the SF Symbols beside it), neutral when on
+  # (the connected glyph says "connected"), dimmed when off
+  source "$HOME/.config/sketchybar/plugins/flat_config.sh"; flat_colors
+  BT_FONT="Maple Mono NF"; BT_WEIGHT=Bold; ROW_R=$FLAT_POPUP_RADIUS; BT_OFF=$FLAT_DIM; BT_ON_COLOR=$FLAT_REST
+fi
 BT_APP="${BT_APP:-$HOME/.config/sketchybar/helper/SketchyBarBluetooth.app}"   # override only to test the fallback
 STATE="${TMPDIR:-/tmp}/sketchybar_bluetooth_state"
 AUTH_FILE="${TMPDIR:-/tmp}/sketchybar_bluetooth_auth"
@@ -113,12 +121,13 @@ fi
 
 if [ "$POWER" != "1" ]; then
   new="$MODE:off"
-  args+=(--set bluetooth icon=$BLUETOOTH_OFF icon.color=$GREY
+  args+=(--set bluetooth icon=$BLUETOOTH_OFF icon.color=$BT_OFF
          --set bluetooth.power icon=$BT_POWER icon.color=$GREEN label="Turn Bluetooth On")
   DEVICES=""
 else
   CONNECTED=$(grep -c '|true|' <<< "$DEVICES")
   if [ "$CONNECTED" -gt 0 ]; then BAR_ICON=$BLUETOOTH_CONNECTED COLOR=$BLUE; else BAR_ICON=$BLUETOOTH_ICON COLOR=$WHITE; fi
+  [ -n "$BT_ON_COLOR" ] && COLOR=$BT_ON_COLOR
   args+=(--set bluetooth icon=$BAR_ICON icon.color=$COLOR
          --set bluetooth.power icon=$BT_POWER icon.color=$RED label="Turn Bluetooth Off")
   new="$MODE:on:$DEVICES"
@@ -138,9 +147,9 @@ if [ "$(cat "$STATE" 2>/dev/null)" != "$new" ]; then
     fi
     row="bluetooth.dev.$n"
     args+=(--add item $row popup.bluetooth
-           --set $row icon=$icon icon.color=$icon_color icon.font="$BT_FONT:Regular:15.0" icon.width=26
+           --set $row icon=$icon icon.color=$icon_color icon.font="$BT_FONT:${BT_WEIGHT:-Regular}:15.0" icon.width=26
                       label="$name" label.color=$label_color label.font="$font" label.max_chars=32
-                      padding_left=8 padding_right=12 background.corner_radius=7
+                      padding_left=8 padding_right=12 background.corner_radius=$ROW_R
                       script="$HOME/.config/sketchybar/plugins/hover.sh"
                       click_script="$HOME/.config/sketchybar/plugins/bluetooth.sh connect $addr"
            --subscribe $row mouse.entered mouse.exited)

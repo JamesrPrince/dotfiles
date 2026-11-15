@@ -28,6 +28,17 @@ FOCUSED="${FOCUSED_WORKSPACE:-$(aerospace list-workspaces --focused)}"
 # One AeroSpace call for every window, instead of one per workspace
 WINDOWS=$(aerospace list-windows --all --format '%{workspace}|%{app-name}' | sort -u)
 
+# Flat style: the test switch (plugins/smart_demo.sh on workspaces) pretends every workspace holds six
+# apps, to check the widest the app icons can get ("+2" after four)
+FLATSTYLE=; [ -r "$HOME/.config/sketchybar/.barstyle" ] && read -r FLATSTYLE < "$HOME/.config/sketchybar/.barstyle"
+SDIR="${TMPDIR:-/tmp}/sketchybar_smart"
+if [ "$FLATSTYLE" = flat ] && [ -e "$SDIR/demo.workspaces" ]; then
+  WINDOWS=""
+  for d in 1 2 3 4 5; do
+    for a in "Brave Browser" Ghostty Slack Finder Spotify WhatsApp; do WINDOWS+="$d|$a"$'\n'; done
+  done
+fi
+
 STATE="$FOCUSED"$'\n'"$WINDOWS"
 case "$SENDER" in
   system_woke|forced) ;;   # always redraw after sleep or a bar reload
@@ -39,6 +50,11 @@ source "$HOME/.config/sketchybar/plugins/icon_map.sh"
 source "$HOME/.config/sketchybar/colors.sh"
 source "$HOME/.config/sketchybar/plugins/style.sh"
 source "$HOME/.config/sketchybar/workspaces.conf"
+if [ "$BAR_STYLE" = flat ]; then
+  source "$HOME/.config/sketchybar/plugins/flat_config.sh"; flat_colors
+  [ -d "$SDIR" ] || mkdir -p "$SDIR"
+  echo "$FOCUSED" > "$SDIR/ws.focus"
+fi
 
 # Written by items/spaces.sh when the bar loads
 SPACE_IDS=$(cat "${TMPDIR:-/tmp}/sketchybar_spaces" 2>/dev/null)
@@ -47,11 +63,37 @@ SPACE_IDS=$(cat "${TMPDIR:-/tmp}/sketchybar_spaces" 2>/dev/null)
 args=()
 for sid in $SPACE_IDS; do
   icons=""
-  while IFS='|' read -r ws app; do
-    [ "$ws" = "$sid" ] && [ -n "$app" ] || continue
-    __icon_map "$app"
-    icons+="$icon_result "
-  done <<< "$WINDOWS"
+  if [ "$BAR_STYLE" != flat ]; then
+    while IFS='|' read -r ws app; do
+      [ "$ws" = "$sid" ] && [ -n "$app" ] || continue
+      __icon_map "$app"
+      icons+="$icon_result "
+    done <<< "$WINDOWS"
+  fi
+
+  if [ "$BAR_STYLE" = flat ]; then
+    # Plain numbers with their app icons (at most FLAT_WS_MAX_ICONS, then "+N"). The focused workspace is
+    # in the accent on a faint marker, the others neutral, an empty one a dim number. The colours are set
+    # directly (not through highlight) so the change animates.
+    n=0; shown=""
+    while IFS='|' read -r ws app; do
+      [ "$ws" = "$sid" ] && [ -n "$app" ] || continue
+      n=$((n + 1))
+      if [ "$n" -le "$FLAT_WS_MAX_ICONS" ]; then __icon_map "$app"; shown+="$icon_result "; fi
+    done <<< "$WINDOWS"
+    extra=$((n - FLAT_WS_MAX_ICONS)); [ "$extra" -lt 0 ] && extra=0
+    if [ "$sid" = "$FOCUSED" ]; then ic=$ACCENT; lc=$ACCENT; marker=$ACCENT_FILL
+    elif [ "$n" -gt 0 ]; then ic=$FLAT_REST; lc=$GREY; marker=$TRANSPARENT
+    else ic=$FLAT_DIM; lc=$GREY; marker=$TRANSPARENT; fi
+    drawing=on; padr=4; [ "$n" -eq 0 ] && { drawing=off; padr=7; }
+    more=off; [ "$extra" -gt 0 ] && more=on
+    printf '%s %s\n' "$ic" "$lc" > "$SDIR/ws.$sid"
+    args+=(--set space.$sid icon.highlight=off icon.color=$ic label.color=$lc label="${shown% }"
+                            label.drawing=$drawing icon.padding_right=$padr
+                            background.color=$marker background.border_width=0 background.height=20
+           --set spacemore.$sid label="+$extra" label.drawing=$more label.color=$lc)
+    continue
+  fi
 
   selected=off
   width=dynamic
@@ -70,16 +112,11 @@ for sid in $SPACE_IDS; do
     color=$GREY
   fi
 
-  if [ "$BAR_STYLE" = flat ]; then
-    # Plain numbers: the focused one in the accent (highlight) on a faint marker, empty ones grey
-    args+=(--set space.$sid icon.highlight=$selected icon.color=$color label.drawing=off
-                            background.color=$pill background.border_width=0 background.height=18)
-    continue
-  fi
   args+=(--set space.$sid icon.highlight=$selected icon.color=$color label="${icons% }"
                           label.drawing=$drawing label.width=$width
                           background.color=$pill background.border_color=$ACCENT
                           background.border_width=$border background.height=26)
 done
 
-sketchybar --animate tanh 10 "${args[@]}"
+ANIM="tanh 10"; [ "$BAR_STYLE" = flat ] && ANIM=$FLAT_ANIM_WS
+sketchybar --animate $ANIM "${args[@]}"

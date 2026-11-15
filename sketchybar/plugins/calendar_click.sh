@@ -30,6 +30,7 @@ for _ in $(seq 40); do pgrep -qx cal || break; sleep 0.1; done
 row=(icon.font="$TEXT_FONT:Bold:12.0" icon.width=90 icon.color=$BLUE
      label.font="$TEXT_FONT:SemiBold:13.0" label.max_chars=40
      padding_left=8 padding_right=14)
+[ "$BAR_STYLE" = flat ] && row+=(padding_right=12 background.corner_radius=4)
 args=(--remove '/calendar\.event\..*/')
 N=0
 while IFS=$'\t' read -r when title; do

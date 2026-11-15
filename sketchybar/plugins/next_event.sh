@@ -7,9 +7,18 @@ export PATH="/usr/local/bin:$PATH"
 source "$HOME/.config/sketchybar/plugins/hover.sh"
 source "$HOME/.config/sketchybar/colors.sh"
 
-# Zen mode keeps it hidden, and so does the flat style
+# Zen mode keeps it hidden
 source "$HOME/.config/sketchybar/plugins/style.sh"
-[ -f "${TMPDIR:-/tmp}/sketchybar_zen" ] || [ "$BAR_STYLE" = flat ] && { sketchybar --set "$NAME" drawing=off; exit 0; }
+[ -f "${TMPDIR:-/tmp}/sketchybar_zen" ] && { [ "$BAR_STYLE" = flat ] || sketchybar --set "$NAME" drawing=off; exit 0; }
+
+# Flat style: the meeting shows from FLAT_MEET_WINDOW_MIN minutes ahead, as a calendar glyph and
+# "<title> in 12m" right of the clock, monochrome until FLAT_MEET_SOON_MIN (see smart_lib.sh).
+if [ "$BAR_STYLE" = flat ]; then
+  source "$HOME/.config/sketchybar/plugins/smart_lib.sh"
+  WINDOW=$FLAT_MEET_WINDOW_MIN
+else
+  WINDOW=60
+fi
 
 CACHE="${TMPDIR:-/tmp}/sketchybar_next"
 APP="$HOME/.config/sketchybar/helper/SketchyBarCal.app"
@@ -27,15 +36,32 @@ fi
 
 NOW=$(date +%s); TODAY=$(date +%Y-%m-%d)
 TITLE=""; MINS=""
+if [ "$BAR_STYLE" = flat ] && smart_demo meeting; then TITLE="Quarterly planning review"; MINS=12; else
 while IFS=$'\t' read -r when title; do
   [[ "$when" =~ ^[0-9]{2}:[0-9]{2}$ ]] || continue
   T=$(date -j -f "%Y-%m-%d %H:%M:%S" "$TODAY $when:00" +%s 2>/dev/null) || continue
   [ "$T" -lt $((NOW - 60)) ] && continue          # already under way
   TITLE="$title"; MINS=$(( (T - NOW + 59) / 60 )); break
 done < "$CACHE" 2>/dev/null
+fi
 
-if [ -z "$MINS" ] || [ "$MINS" -gt 60 ]; then
-  sketchybar --set "$NAME" drawing=off
+if [ -z "$MINS" ] || [ "$MINS" -gt "$WINDOW" ]; then
+  if [ "$BAR_STYLE" = flat ]; then smart_hide next_event; else sketchybar --set "$NAME" drawing=off; fi
+  exit 0
+fi
+
+if [ "$BAR_STYLE" = flat ]; then
+  flat_colors
+  [ "${#TITLE}" -gt "$FLAT_MEET_CHARS" ] && TITLE="${TITLE:0:$((FLAT_MEET_CHARS - 1))}…"
+  SM_IC=$FLAT_REST; SM_LC=$FLAT_REST
+  if   [ "$MINS" -le 0 ]; then WHEN="now"; SM_IC=$FLAT_CRIT; SM_LC=$FLAT_CRIT
+  else
+    WHEN="in ${MINS}m"
+    [ "$MINS" -le "$FLAT_MEET_SOON_MIN" ] && { SM_IC=$FLAT_WARN; SM_LC=$FLAT_WARN; }
+  fi
+  source "$HOME/.config/sketchybar/icons.sh"; SM_ICON=$CALENDAR
+  SM_LABEL="$TITLE $WHEN"
+  smart_show next_event
   exit 0
 fi
 
