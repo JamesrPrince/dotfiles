@@ -4,8 +4,10 @@
 # UserPromptSubmit, Notification, Stop and SessionEnd. Reads the hook JSON on stdin.
 #   SessionStart -> idle   UserPromptSubmit -> working   Notification -> waiting
 #   Stop -> done           SessionEnd -> state file removed
-# One file per session in ${TMPDIR:-/tmp}/claude_sessions/, five lines:
-#   status, folder name, full cwd, PID of the claude process, epoch time.
+# One file per session in ${TMPDIR:-/tmp}/claude_sessions/, six lines:
+#   status, folder name, full cwd, PID of the claude process, epoch time, Ghostty window id.
+# The window id is the AeroSpace id of the window focused when the session starts or a prompt is
+# sent (you just typed there, so it is this session's window); the bar's popup rows focus it.
 # Always exits 0 and prints nothing on stdout, so it can never block or pollute a session.
 # CLAUDE_HEADLESS=1 skips everything: set it on `claude -p` runs (no launchd job uses one
 # today) so they never show up in the bar.
@@ -41,7 +43,16 @@ for _ in 1 2 3 4 5 6; do
   [ -n "$p" ] && [ "$p" -gt 1 ] 2>/dev/null || break
 done
 
-printf '%s\n%s\n%s\n%s\n%s\n' "$status" "$(basename "${cwd:-?}")" "$cwd" "$pid" "$(date +%s)" > "$FILE.tmp.$$" \
+# This session's window: the focused Ghostty window at SessionStart / UserPromptSubmit; else keep the old one
+wid=""
+[ -f "$FILE" ] && wid=$(sed -n 6p "$FILE")
+case "$event" in
+  SessionStart|UserPromptSubmit)
+    IFS='|' read -r fid fapp < <(aerospace list-windows --focused --format '%{window-id}|%{app-name}' 2>/dev/null)
+    [ "$fapp" = Ghostty ] && [ -n "$fid" ] && wid=$fid ;;
+esac
+
+printf '%s\n%s\n%s\n%s\n%s\n%s\n' "$status" "$(basename "${cwd:-?}")" "$cwd" "$pid" "$(date +%s)" "$wid" > "$FILE.tmp.$$" \
   && mv "$FILE.tmp.$$" "$FILE"
 
 # Claude Code already raises a native banner for Notification (inputNeededNotifEnabled), so the hook

@@ -16,8 +16,10 @@ DIR="${TMPDIR:-/tmp}/claude_sessions"
 
 if [ "$SENDER" = "mouse.exited.global" ]; then sketchybar --set claude popup.drawing=off; exit 0; fi
 
-if [ "$1" = focus ]; then
+if [ "$1" = focus ]; then   # focus <window id|-> <folder>: the session's own window, else a title match
   sketchybar --set claude popup.drawing=off
+  if [ "$2" != - ] && aerospace focus --window-id "$2" 2>/dev/null; then exit 0; fi
+  set -- focus "$3"
   id=$(aerospace list-windows --all --format '%{window-id}|%{app-name}|%{window-title}' 2>/dev/null \
        | awk -F'|' -v f="$2" '$2 ~ /Ghostty/ && index($3, f) { print $1; exit }')
   if [ -n "$id" ]; then aerospace focus --window-id "$id"; else open -a Ghostty; fi
@@ -30,10 +32,10 @@ rows=(); worst=none; n=0
 for f in "$DIR"/*; do
   [ -f "$f" ] || continue
   case $f in *.tmp.*) continue ;; esac
-  { read -r st; read -r folder; read -r cwd; read -r pid; read -r ts; } < "$f"
+  { read -r st; read -r folder; read -r cwd; read -r pid; read -r ts; read -r wid; } < "$f"
   if ! kill -0 "$pid" 2>/dev/null; then rm -f "$f"; continue; fi
   n=$((n + 1))
-  rows+=("$st|$folder|$(( now - ${ts:-$now} ))")
+  rows+=("$st|$folder|$(( now - ${ts:-$now} ))|${wid:--}")
   case $st in
     waiting) worst=waiting ;;
     done)    [ "$worst" = waiting ] || worst=done ;;
@@ -73,7 +75,7 @@ if [ "$1" = click ] || [ "$POP" = on ]; then
   args=(--remove '/claude\.row\..*/')
   i=0
   for r in "${rows[@]}"; do
-    IFS='|' read -r st folder age <<< "$r"
+    IFS='|' read -r st folder age wid <<< "$r"
     i=$((i + 1))
     if [ "$age" -lt 60 ]; then a="${age}s"; elif [ "$age" -lt 3600 ]; then a="$((age / 60))m"; else a="$((age / 3600))h"; fi
     case $st in waiting) c=$YELLOW ;; done) c=$GREEN ;; working) c=$BLUE ;; *) c=$GREY ;; esac
@@ -82,7 +84,7 @@ if [ "$1" = click ] || [ "$POP" = on ]; then
                                label="$folder   $st   $a ago" label.font="$TEXT_FONT:SemiBold:13.0"
                                padding_left=8 padding_right=12 background.corner_radius=$RR
                                script="$PLUGIN_DIR/hover.sh"
-                               click_script="$PLUGIN_DIR/claude.sh focus '$folder'"
+                               click_script="$PLUGIN_DIR/claude.sh focus '${wid:--}' '$folder'"
            --subscribe claude.row.$i mouse.entered mouse.exited)
   done
   sketchybar "${args[@]}" >/dev/null 2>&1
