@@ -39,17 +39,23 @@ link sketchybar "$HOME/.config/sketchybar"
 link aerospace/aerospace.toml "$HOME/.aerospace.toml"
 link ghostty "$HOME/.config/ghostty"
 link starship/starship.toml "$HOME/.config/starship.toml"
+link claude/hooks/session-state.sh "$HOME/.claude/hooks/session-state.sh"   # Claude Code session hook for the bar's claude item
 link nvim "$HOME/.config/nvim"                      # LazyVim; the colourscheme file is written by theme.sh
 link fastfetch "$HOME/.config/fastfetch"
 link btop/btop.conf "$HOME/.config/btop/btop.conf"  # TTY theme: follows the terminal colours
 link bat/config "$HOME/.config/bat/config"          # ansi theme
 link lazygit/config.yml "$HOME/Library/Application Support/lazygit/config.yml"
 link zsh/ansi-tools.zsh "$HOME/.config/zsh/ansi-tools.zsh"   # fzf follows the terminal colours
+link zsh/peek.zsh "$HOME/.config/zsh/peek.zsh"   # peek <file>: images, PDFs and decks inline in Ghostty
+link zsh/peek-kitty.py "$HOME/.config/zsh/peek-kitty.py"   # peek's kitty-graphics writer
+link git/delta.gitconfig "$HOME/.config/git/delta.gitconfig"   # delta pager; included from ~/.gitconfig (kept out of the repo)
+command -v delta >/dev/null && ! git config --global --get-all include.path | grep -qx "~/.config/git/delta.gitconfig" && { git config --global --add include.path "~/.config/git/delta.gitconfig"; echo "gitcfg  included delta.gitconfig"; } || true
 link launchd/dev.dotfiles.capslock-f18.plist "$HOME/Library/LaunchAgents/dev.dotfiles.capslock-f18.plist"  # Caps Lock -> F18 (the launch-mode leader key)
 
 # ~/.zshrc: Starship as the prompt (keep it last) and the fzf colours. Each added once; the file is backed up first.
 if [ -f "$HOME/.zshrc" ]; then
-  if ! grep -q 'ansi-tools.zsh' "$HOME/.zshrc" || ! grep -q 'starship init zsh' "$HOME/.zshrc"; then cp "$HOME/.zshrc" "$HOME/.zshrc.bak-$STAMP"; fi
+  if ! grep -q 'peek.zsh' "$HOME/.zshrc" || ! grep -q 'ansi-tools.zsh' "$HOME/.zshrc" || ! grep -q 'starship init zsh' "$HOME/.zshrc"; then cp "$HOME/.zshrc" "$HOME/.zshrc.bak-$STAMP"; fi
+  grep -q 'peek.zsh' "$HOME/.zshrc" || { echo '[ -f ~/.config/zsh/peek.zsh ] && source ~/.config/zsh/peek.zsh' >> "$HOME/.zshrc"; echo "zshrc   added peek"; }
   grep -q 'ansi-tools.zsh' "$HOME/.zshrc" || { echo '[ -f ~/.config/zsh/ansi-tools.zsh ] && source ~/.config/zsh/ansi-tools.zsh' >> "$HOME/.zshrc"; echo "zshrc   added fzf colours"; }
   grep -q 'starship init zsh' "$HOME/.zshrc" || { echo 'eval "$(starship init zsh)"' >> "$HOME/.zshrc"; echo "zshrc   added Starship (remove any other prompt theme yourself)"; }
 fi

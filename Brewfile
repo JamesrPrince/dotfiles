@@ -18,6 +18,9 @@ brew "btop"
 brew "bat"
 brew "fzf"
 brew "lazygit"
+# delta (git pager, git/delta.gitconfig): NOT from brew on Intel macOS 15, which compiles Rust from source.
+#   Use the last Intel release: gh release download 0.18.2 -R dandavison/delta -p "*x86_64-apple-darwin*"
+#   then install -m 755 delta /usr/local/bin/. On Apple Silicon: brew "git-delta".
 brew "lazydocker"
 brew "yazi"
 

@@ -197,6 +197,7 @@ sketchybar --move control after keys     \
            --move net.up after net.down      \
            --move badge.whatsapp after net.up \
            --move badge.slack after badge.whatsapp \
+           --move claude after badge.slack     \
            --move awake after badge.slack    \
            --move vpn after awake            \
            --move privacy after vpn          \
@@ -243,7 +244,7 @@ sketchybar --set '/^(apple\.(prefs|activity|lock)|control\.[a-z]+|wifi\.(ssid|ip
 # --- Hover: a quiet colour shift (icon.highlight / label.highlight), no pills ---------------------------
 sketchybar --set gpu.bar icon.highlight_color=$FLAT_HOVER
 for item in apple.logo calendar net.up net.down cpu.percent mem bluetooth wifi volume_icon control \
-            vpn badge.slack badge.whatsapp market.1 market.2 market.3 next_event timer; do
+            vpn badge.slack badge.whatsapp claude market.1 market.2 market.3 next_event timer; do
   sketchybar --subscribe $item mouse.entered mouse.exited
 done
 for sid in $SPACE_IDS; do sketchybar --subscribe space.$sid mouse.entered mouse.exited; done

@@ -146,6 +146,7 @@ source "$ITEM_DIR/brightness.sh"
 source "$ITEM_DIR/volume.sh"
 source "$ITEM_DIR/next_event.sh"
 source "$ITEM_DIR/notifications.sh"
+source "$ITEM_DIR/claude.sh"   # Claude Code sessions: hidden until a `claude` is running
 source "$ITEM_DIR/timer.sh"   # hidden: runs the countdown shown in the "more" popup
 
 # Status pill: volume, brightness, battery, VPN, Bluetooth, Wi-Fi and the control centre

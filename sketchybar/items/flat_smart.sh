@@ -51,6 +51,13 @@ sketchybar --add item awake right                                               
                        click_script="$PLUGIN_DIR/smart_awake.sh click"         \
            --subscribe awake system_woke smart_refresh mouse.exited.global
 
+# --- Claude Code sessions (items/claude.sh): the count, only while a `claude` is running -------------------
+sketchybar --set claude position=right "${collapsed[@]}"                          \
+                        icon=$'\uf120' icon.font="Maple Mono NF:Bold:14.0"        \
+                        label.drawing=on label.font="$txt" update_freq=30         \
+                        popup.align=right popup.height=$FLAT_POPUP_ROW_H          \
+                        icon.highlight_color=$FLAT_HOVER label.highlight_color=$FLAT_HOVER
+
 # --- Slack and WhatsApp unread counts (existing badges; Telegram and Outlook stay hidden) ------------
 for b in slack whatsapp; do
   sketchybar --set badge.$b "${collapsed[@]}" icon.font="sketchybar-app-font:Regular:13.0" \

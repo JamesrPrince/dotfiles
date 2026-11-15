@@ -1,0 +1,89 @@
+#!/bin/bash
+# The "claude" item. State files (one per session) are written by claude/hooks/session-state.sh:
+# status, folder, full cwd, claude PID, epoch. Runs on claude_update, every 30 s as a fallback and on wake.
+# It prunes files whose PID is gone, then shows the count in the colour of the most urgent state.
+#   claude.sh click           toggle the popup of sessions
+#   claude.sh focus <folder>  focus that Ghostty window (the popup rows call this)
+
+export PATH="/usr/local/bin:$PATH"
+source "$HOME/.config/sketchybar/plugins/hover.sh"
+source "$HOME/.config/sketchybar/colors.sh"
+source "$HOME/.config/sketchybar/plugins/style.sh"
+NAME=${NAME:-claude}
+DIR="${TMPDIR:-/tmp}/claude_sessions"
+
+if [ "$SENDER" = "mouse.exited.global" ]; then sketchybar --set claude popup.drawing=off; exit 0; fi
+
+if [ "$1" = focus ]; then
+  sketchybar --set claude popup.drawing=off
+  id=$(aerospace list-windows --all --format '%{window-id}|%{app-name}|%{window-title}' 2>/dev/null \
+       | awk -F'|' -v f="$2" '$2 ~ /Ghostty/ && index($3, f) { print $1; exit }')
+  if [ -n "$id" ]; then aerospace focus --window-id "$id"; else open -a Ghostty; fi
+  exit 0
+fi
+
+# Prune dead sessions, then read the live ones
+now=$(date +%s)
+rows=(); worst=none; n=0
+for f in "$DIR"/*; do
+  [ -f "$f" ] || continue
+  case $f in *.tmp.*) continue ;; esac
+  { read -r st; read -r folder; read -r cwd; read -r pid; read -r ts; } < "$f"
+  if ! kill -0 "$pid" 2>/dev/null; then rm -f "$f"; continue; fi
+  n=$((n + 1))
+  rows+=("$st|$folder|$(( now - ${ts:-$now} ))")
+  case $st in
+    waiting) worst=waiting ;;
+    done)    [ "$worst" = waiting ] || worst=done ;;
+    working) case $worst in waiting|done) ;; *) worst=working ;; esac ;;
+    *)       [ "$worst" = none ] && worst=idle ;;
+  esac
+done
+
+case $worst in
+  waiting) col=$YELLOW ;;
+  done)    col=$GREEN ;;
+  working) col=$BLUE ;;
+  *)       col=$GREY ;;
+esac
+FLAT=0; [ "$BAR_STYLE" = flat ] && FLAT=1
+if [ "$FLAT" = 1 ]; then source "$HOME/.config/sketchybar/plugins/smart_lib.sh"; fi
+
+if [ "$FLAT" = 1 ] && smart_demo claude && [ "$n" -eq 0 ]; then n=2; worst=waiting; col=$YELLOW; rows=("waiting|dotfiles|12" "working|ICOR|340"); fi
+
+if [ "$n" -eq 0 ]; then
+  sketchybar --set claude popup.drawing=off
+  if [ "$FLAT" = 1 ]; then smart_hide claude; else sketchybar --set claude drawing=off; fi
+  exit 0
+fi
+
+if [ "$FLAT" = 1 ]; then
+  SM_ICON=$''; SM_LABEL="$n"; SM_IC=$col; SM_LC=$col; SM_IW=16
+  smart_show claude
+else
+  sketchybar --set claude drawing=on icon.color=$col label="$n" label.color=$col
+fi
+
+# Popup rows: rebuilt on click and while the popup is open (so ages stay fresh)
+POP=$(sketchybar --query claude | jq -r '.popup.drawing')
+if [ "$1" = click ] || [ "$POP" = on ]; then
+  RR=7; [ "$FLAT" = 1 ] && RR=4
+  args=(--remove '/claude\.row\..*/')
+  i=0
+  for r in "${rows[@]}"; do
+    IFS='|' read -r st folder age <<< "$r"
+    i=$((i + 1))
+    if [ "$age" -lt 60 ]; then a="${age}s"; elif [ "$age" -lt 3600 ]; then a="$((age / 60))m"; else a="$((age / 3600))h"; fi
+    case $st in waiting) c=$YELLOW ;; done) c=$GREEN ;; working) c=$BLUE ;; *) c=$GREY ;; esac
+    args+=(--add item claude.row.$i popup.claude
+           --set claude.row.$i icon=$'' icon.font="Maple Mono NF:Bold:14.0" icon.width=26 icon.color=$c
+                               label="$folder   $st   $a ago" label.font="$TEXT_FONT:SemiBold:13.0"
+                               padding_left=8 padding_right=12 background.corner_radius=$RR
+                               script="$PLUGIN_DIR/hover.sh"
+                               click_script="$PLUGIN_DIR/claude.sh focus '$folder'"
+           --subscribe claude.row.$i mouse.entered mouse.exited)
+  done
+  sketchybar "${args[@]}" >/dev/null 2>&1
+  [ "$1" = click ] && "$HOME/.config/sketchybar/plugins/popup.sh" claude toggle
+fi
+exit 0
