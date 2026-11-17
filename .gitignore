@@ -27,3 +27,5 @@ sketchybar/.alfred-themes
 sketchybar/.claude_usage.json
 sketchybar/.claude_usage.lock
 sketchybar/.claude_usage.json.tmp.*
+capture/ocr
+capture/colour

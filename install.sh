@@ -74,6 +74,7 @@ LA=dev.dotfiles.capslock-f18
   && echo "keys    Caps Lock is now F18"
 launchctl print "gui/$(id -u)/$LA" >/dev/null 2>&1 || launchctl bootstrap "gui/$(id -u)" "$HOME/Library/LaunchAgents/$LA.plist" 2>/dev/null || true
 if [ "${SKIP_HELPERS:-}" = 1 ]; then echo "helpers skipped (SKIP_HELPERS=1)"; else "$DOT/sketchybar/helper/build.sh"; fi
+"$DOT/capture/build.sh"   # OCR and colour-picker helpers for the om Capture menu
 # The bar's stats sampler: a plain binary, no signing and no permissions, so it is always built.
 # Without it plugins/stats.sh falls back to the slower tool chain.
 clang -O2 -o "$DOT/sketchybar/helper/statsample" "$DOT/sketchybar/helper/statsample.c" -framework IOKit -framework CoreFoundation \
