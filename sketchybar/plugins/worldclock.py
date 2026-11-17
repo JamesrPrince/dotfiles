@@ -258,23 +258,14 @@ def frac(iso):
         return None
 
 
-def strip(progress, fact):
-    """24 hours, midnight to midnight: daylight thick, night thin. The marker at now is a sun
-    inside the lit band and a moon outside it (SketchyBar gives a label one colour, so the
-    shape carries what Elsewhen's gold and white marker does)."""
+def is_lit(progress, fact):
+    """Daylight at the city, as Elsewhen's day phase: now between its sunrise and sunset (read in the
+    city's own clock). Elsewhen's 6 to 18 band stands in until the city is placed."""
     sr = frac((fact or {}).get("sunrise") or "")
     ss = frac((fact or {}).get("sunset") or "")
     if sr is None or ss is None:
-        sr, ss = 6 / 24, 18 / 24           # Elsewhen's band until the city is placed
-    now_cell = min(STRIP_CELLS - 1, int(progress * STRIP_CELLS))
-    cells = []
-    for i in range(STRIP_CELLS):
-        mid = (i + 0.5) / STRIP_CELLS
-        lit = sr <= mid <= ss if sr <= ss else (mid >= sr or mid <= ss)
-        cells.append("━" if lit else "╌")
-    marker = GLYPHS["sunny"] if sr <= progress <= ss else "\U000F0594"   # weather-night
-    cells[now_cell] = marker
-    return "".join(cells)
+        sr, ss = 6 / 24, 18 / 24
+    return sr <= progress <= ss if sr <= ss else (progress >= sr or progress <= ss)
 
 
 # ---- drawing -------------------------------------------------------------------------------------
@@ -292,6 +283,13 @@ def popup_open():
 
 
 def render(st):
+    """The popup, after Elsewhen's panel: a caption, the title, then one rounded card per city, then
+    an Add button. SketchyBar stacks popup rows and clips each item to its own row, so a card is three
+    rows (city and time; date and zone; daylight dot and weather) sharing one fill. The fill is cut so
+    the card has no seams: the first row's background is pushed down D px, so its rounded bottom corners
+    fall outside the row and are clipped away (the D px left above it are the gap between cards); the last
+    row's is pushed up D px; the middle row's is square. Every row's background height is its row
+    height, which is what keeps the rows from growing and leaving stripes."""
     now = datetime.now(timezone.utc)
     home = home_zone()
     home_t = now.astimezone(ZoneInfo(home))
@@ -300,16 +298,46 @@ def render(st):
     facts = read_cache().get("data", {})
     here = next((c["name"] for c in st["cities"] if c["zone"] == home), home.split("/")[-1].replace("_", " "))
     plugin = os.path.expanduser("~/.config/sketchybar/plugins/worldclock.sh")
-    pad = ["padding_left=12", "padding_right=14"]
-    if FLAT:
-        pad += ["background.corner_radius=4"]
-    W_LEFT, W_RIGHT = 190, 100
 
-    a = ["--remove", "/worldclock\\..*/"]
-    a += ["--add", "item", "worldclock.head", "popup." + ITEM, "--set", "worldclock.head", *pad,
-          "icon.drawing=off", f"label=It's {fmt_time(home_t, hour24)} here in {here}",
-          f"label.font={TEXT_FONT}:Bold:13.0", f"label.color={WHITE}",
-          "background.padding_bottom=4", f"click_script={plugin} toggle hour24"]
+    W = 300                             # the popup's width
+    R = 4 if FLAT else 6                # card corner radius, the bar style's own
+    D = R                               # how far the first and last rows' fill is pushed (D >= R)
+    H1, H2, H3 = 30, 18, 22             # the visible fill of a card's three rows
+    PAD_X = 18                          # text inside the card
+    ZONE = 150                          # the left text's share of the row
+    CLEAR = "0x00000000"
+    SUN = ENV.get("YELLOW", "0xffe0af68")
+    if ENV.get("THEME") == "matteblack":
+        SUN = ENV.get("GREEN", SUN)     # Matte Black's yellow slot is a red: its amber sits in the green slot
+    CARD = "0x1c" + WHITE[4:]           # a quiet lift of the popup's own colour
+
+    def row(name, height, **kw):
+        """One popup row: a fixed height, and the base properties every row shares."""
+        p = ["--add", "item", name, "popup." + ITEM, "--set", name, f"width={W}",
+             "padding_left=0", "padding_right=0", "background.drawing=on", f"background.height={height}",
+             "background.padding_left=6", "background.padding_right=6", f"background.corner_radius={kw.pop('radius', R)}",
+             f"background.color={kw.pop('fill', CLEAR)}", f"background.y_offset={kw.pop('shift', 0)}",
+             f"icon.padding_left={PAD_X}", "icon.padding_right=0", "label.padding_left=0", f"label.padding_right={PAD_X}"]
+        for k, v in kw.items():
+            p.append(f"{k.replace('__', '.')}={v}")
+        return p
+
+    def text(side, value, font, size, color, width, align, y=0):
+        return {f"{side}": value, f"{side}__font": f"{font}:{'Bold' if font == TEXT_FONT and size >= 13 else 'Regular'}:{size}",
+                f"{side}__color": color, f"{side}__width": width, f"{side}__align": align, f"{side}__y_offset": y}
+
+    def blank(side):
+        return {f"{side}__drawing": "off"}
+
+    # popup.height must stay positive: -1 crashes SketchyBar 2.24.1 in popup_draw
+    a = ["--set", ITEM, "popup.height=2", "--remove", "/worldclock\\..*/"]
+    a += row("worldclock.top", 6, **blank("icon"), **blank("label"))
+    a += row("worldclock.cap", 20, **blank("icon"), label=f"It's {fmt_time(home_t, hour24)} here in {here}",
+             label__font=f"{TEXT_FONT}:Regular:11.0", label__color=DIM, label__width=W - 12, label__align="center",
+             label__padding_right=0, click_script=f"{plugin} toggle hour24")
+    a += row("worldclock.title", 30, **blank("icon"), label="World \U000F01E7 Clock",
+             label__font=f"{NF}:Bold:15.0", label__color=WHITE, label__width=W - 12, label__align="center",
+             label__padding_right=0, click_script=f"{plugin} toggle hour24")
 
     for i, c in enumerate(st["cities"]):
         try:
@@ -322,26 +350,31 @@ def render(st):
         fact = facts.get(key(c))
         kind = weather_kind((fact or {}).get("w"))
         temp = temp_label(fact, units)
-        when = f"{WEEKDAYS[t.weekday()]} {MONTHS[t.month - 1]} {t.day}"
         dl = day_label(delta)
-        info = "  ".join(x for x in [(temp + (" " + GLYPHS[kind] if kind else "")).strip(),
-                                       when + (" · " + dl if dl else "")] if x)
+        when = f"{WEEKDAYS[t.weekday()]} {MONTHS[t.month - 1]} {t.day}" + (" \u00b7 " + dl if dl else "")
         rel = relative_label(m, home_m)
         offset = (t.tzname() + (" " + rel if rel else "")) if mode == "home" else utc_label(m)
+        lit = is_lit((t.hour * 60 + t.minute) / DAY_MIN, fact)
         n = f"worldclock.c{i}"
-        a += ["--add", "item", n + ".a", "popup." + ITEM, "--set", n + ".a", *pad,
-              f"icon={c['name']}", f"icon.font={TEXT_FONT}:Bold:13.0", f"icon.color={WHITE}",
-              f"icon.width={W_LEFT}", f"label={fmt_time(t, hour24)}", f"label.font={TEXT_FONT}:Bold:16.0",
-              f"label.color={WHITE}", f"label.width={W_RIGHT}", "label.align=right",
-              f"click_script={plugin} toggle hour24"]
-        a += ["--add", "item", n + ".b", "popup." + ITEM, "--set", n + ".b", *pad,
-              f"icon={info}", f"icon.font={NF}:Regular:11.0", f"icon.color={DIM}", f"icon.width={W_LEFT}",
-              f"label={offset}", f"label.font={NF}:Regular:11.0", f"label.color={FAINT}",
-              f"label.width={W_RIGHT}", "label.align=right", f"click_script={plugin} toggle offset"]
-        a += ["--add", "item", n + ".s", "popup." + ITEM, "--set", n + ".s", *pad,
-              "icon.drawing=off", f"label={strip((t.hour * 60 + t.minute) / DAY_MIN, fact)}",
-              f"label.font={NF}:Regular:9.0", f"label.color={DIM}", "background.padding_bottom=6",
-              f"click_script={plugin} toggle units"]
+        # line 1: city, and the time big (a 12-hour time has no room for a small AM/PM of its own)
+        a += row(n + ".a", H1 + D, fill=CARD, shift=-D, click_script=f"{plugin} toggle hour24",
+                 **text("icon", c["name"], TEXT_FONT, 13.0, WHITE, ZONE, "left", -D // 2),
+                 **text("label", fmt_time(t, hour24), TEXT_FONT, 20.0 if hour24 else 16.0, WHITE, W - ZONE, "right", -D // 2))
+        # line 2: the date, and the zone with its offset
+        a += row(n + ".b", H2, fill=CARD, radius=0, click_script=f"{plugin} toggle offset",
+                 **text("icon", when, NF, 11.0, DIM, ZONE + 50, "left"),
+                 **text("label", offset, NF, 11.0, FAINT, W - ZONE - 50, "right"))
+        # line 3: the daylight dot (its own item, so it has its own colour), and the weather
+        a += row(n + ".c", H3 + D, fill=CARD, shift=D, click_script=f"{plugin} toggle units",
+                 **text("icon", "\u25cf", NF, 11.0, SUN if lit else GREY, 30, "left", D // 2),
+                 **text("label", (temp + (" " + GLYPHS[kind] if kind else "")).strip(), NF, 11.0, DIM, W - 30, "left", D // 2))
+
+    a += row("worldclock.gap", 4, **blank("icon"), **blank("label"))
+    a += row("worldclock.add", 30, radius=R, **{"background__border_width": 1, "background__border_color": "0x66" + GREY[4:]},
+             **blank("icon"), label="+ Add a city", label__font=f"{TEXT_FONT}:Regular:12.0", label__color=DIM,
+             label__width=W - 12, label__align="center", label__padding_right=0,
+             click_script=f"/usr/bin/open -t {STATE}; {SB} --set {ITEM} popup.drawing=off")
+    a += row("worldclock.end", 6, **blank("icon"), **blank("label"))
     sb(*a)
 
 

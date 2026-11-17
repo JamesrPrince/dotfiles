@@ -13,5 +13,5 @@ fi
 
 source "$HOME/.config/sketchybar/colors.sh"
 source "$HOME/.config/sketchybar/plugins/style.sh"
-export WHITE GREY ACCENT POPUP_BACKGROUND_COLOR BAR_STYLE TEXT_FONT SENDER BUTTON MODIFIER
+export WHITE GREY YELLOW GREEN THEME ACCENT POPUP_BACKGROUND_COLOR BAR_STYLE TEXT_FONT SENDER BUTTON MODIFIER
 exec /usr/bin/python3 -I "$HOME/.config/sketchybar/plugins/worldclock.py" "$@"
