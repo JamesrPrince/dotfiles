@@ -4,6 +4,9 @@
 # It prunes files whose PID is gone, then shows the count in the colour of the most urgent state.
 #   claude.sh click           toggle the popup of sessions
 #   claude.sh focus <folder>  focus that Ghostty window (the popup rows call this)
+# The popup also carries a local usage block (today and this 5-hour window: tokens, messages, sessions, top
+# model) from plugins/claude_usage.py. LOCAL data only: no Keychain, no token, no network. The plan-limit
+# bars are not built; the "Limits" row says so (the hook is plan_limits() in claude_usage.py).
 
 export PATH="/usr/local/bin:$PATH"
 source "$HOME/.config/sketchybar/plugins/hover.sh"
@@ -72,7 +75,7 @@ fi
 POP=$(sketchybar --query claude | jq -r '.popup.drawing')
 if [ "$1" = click ] || [ "$POP" = on ]; then
   RR=7; [ "$FLAT" = 1 ] && RR=4
-  args=(--remove '/claude\.row\..*/')
+  args=(--remove '/claude\.row\..*/' --remove '/claude\.use\..*/')
   i=0
   for r in "${rows[@]}"; do
     IFS='|' read -r st folder age wid prompt ctx model reason <<< "$r"
@@ -93,6 +96,37 @@ if [ "$1" = click ] || [ "$POP" = on ]; then
                                click_script="$PLUGIN_DIR/claude.sh focus '${wid:--}' '$folder'"
            --subscribe claude.row.$i mouse.entered mouse.exited)
   done
+  # Usage block: cached record (never scans here); a stale or missing cache is refreshed in the background,
+  # which fires claude_update when done so this block redraws.
+  USAGE="$PLUGIN_DIR/claude_usage.py"
+  /usr/bin/python3 "$USAGE" --refresh-bg >/dev/null 2>&1
+  UJ=$(/usr/bin/python3 "$USAGE" --cached 2>/dev/null)
+  ui=0
+  use_row() { # use_row <key> <value> [value colour]
+    ui=$((ui + 1))
+    args+=(--add item claude.use.$ui popup.claude
+           --set claude.use.$ui icon="$1" icon.font="$TEXT_FONT:Bold:12.0" icon.width=92 icon.color=$GREY
+                               label="$2" label.font="$TEXT_FONT:SemiBold:12.0" label.color=${3:-$WHITE}
+                               padding_left=8 padding_right=12 background.drawing=off)
+  }
+  use_row "CLAUDE USAGE" "local data" $GREY
+  if [ -z "$UJ" ]; then
+    use_row "Usage" "reading local transcripts…" $GREY
+  else
+    while IFS='|' read -r key val; do use_row "$key" "$val"; done < <(jq -r '
+      def n: if . >= 1e9 then "\((. / 1e8 | round) / 10)B" elif . >= 1e6 then "\((. / 1e5 | round) / 10)M"
+             elif . >= 1e3 then "\((. / 1e2 | round) / 10)K" else "\(.)" end;
+      def m: sub("^claude-"; "");
+      def toks: "in \(.input | n) · out \(.output | n) · cache \(.cacheRead + .cacheCreate | n)";
+      def cnt: "\(.messages) msgs · \(.sessions) sessions" + (if .topModel != "" then " · \(.topModel | m)" else "" end);
+      "Today|\(.today | toks)",
+      "|\(.today | cnt)\(if .today.prompts > 0 then " · \(.today.prompts) prompts" else "" end)",
+      (if .window.active then
+         "5h window|\(.window | toks)",
+         "|\(.window | cnt) · resets \(.window.resetsAt[11:16])"
+       else "5h window|no active window" end)' <<< "$UJ")
+  fi
+  use_row "Limits" "not connected" $GREY
   sketchybar "${args[@]}" >/dev/null 2>&1
   [ "$1" = click ] && "$HOME/.config/sketchybar/plugins/popup.sh" claude toggle
 fi
