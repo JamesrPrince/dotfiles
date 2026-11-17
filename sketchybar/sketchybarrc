@@ -149,6 +149,7 @@ source "$ITEM_DIR/next_event.sh"
 source "$ITEM_DIR/notifications.sh"
 source "$ITEM_DIR/claude.sh"   # Claude Code sessions: hidden until a `claude` is running
 source "$ITEM_DIR/timer.sh"   # hidden: runs the countdown shown in the "more" popup
+source "$ITEM_DIR/capture.sh"   # hidden: the capture_done toast (capture/capture.sh)
 
 # Status pill: volume, brightness, battery, VPN, Bluetooth, Wi-Fi and the control centre
 pill=(

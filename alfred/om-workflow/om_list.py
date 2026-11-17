@@ -26,8 +26,28 @@ try:
         items.append(item)
 except Exception:
     pass
-items += [
-    {"uid": "barstyle", "title": "Next bar style", "subtitle": "barstyle.sh next", "arg": "barstyle", "match": "bar style next"},
+CAPTURE = [("region", "region", "Capture region", "Pick a region, PNG to the clipboard"),
+           ("file", "region-file", "Capture region to file", "Pick a region, saved to ~/Pictures/Screenshots"),
+           ("window", "window", "Capture window", "Click a window, PNG to the clipboard"),
+           ("text", "text", "Capture text (OCR)", "Pick a region, its text to the clipboard"),
+           ("colour", "colour", "Pick colour", "Colour under the cursor, #RRGGBB to the clipboard")]
+for uid, cmd, title, sub in CAPTURE:
+    items.append({"uid": "cap-" + uid, "title": title, "subtitle": sub, "arg": "cap:" + cmd,
+                  "match": "capture screenshot " + title.lower() + " " + cmd + (" color" if uid == "colour" else "")})
+toggles = {}
+try:
+    out = subprocess.run(["/bin/bash", HOME + "/dotfiles/toggles/toggle.sh", "status"], capture_output=True, text=True, timeout=5).stdout
+    toggles = dict(l.split("=", 1) for l in out.split() if "=" in l)
+except Exception:
+    pass
+TOGGLES = [("gaps", "Toggle gaps", "Window gaps (AeroSpace)"),
+           ("bar", "Toggle bar", "Show or hide the bar"),
+           ("opacity", "Toggle Ghostty opacity", "Front Ghostty window, cmd+shift+o")]
+for name, title, sub in TOGGLES:
+    st = toggles.get(name, "n/a")
+    items.append({"uid": "toggle-" + name, "title": title + ("  (" + st + ")" if st in ("on", "off") else ""),
+                  "subtitle": sub, "arg": "toggle:" + name, "match": "toggle " + title.lower() + " " + name})
+items += [    {"uid": "barstyle", "title": "Next bar style", "subtitle": "barstyle.sh next", "arg": "barstyle", "match": "bar style next"},
     {"uid": "keys", "title": "Shortcut sheet", "subtitle": "Show or hide the key cheat sheet", "arg": "keys", "match": "shortcut keys cheat sheet"},
     {"uid": "lock", "title": "Lock screen", "subtitle": "pmset displaysleepnow", "arg": "lock", "match": "lock screen"},
     {"uid": "sleep", "title": "Sleep", "subtitle": "pmset sleepnow", "arg": "sleep", "match": "sleep"},
