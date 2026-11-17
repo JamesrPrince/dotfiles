@@ -1,6 +1,7 @@
 #!/bin/bash
 
 export PATH="/usr/local/bin:$PATH"
+if [ "$SENDER" = "mouse.exited.global" ]; then sketchybar --set battery popup.drawing=off; exit 0; fi
 # Battery is always shown with its percentage. Green while charging,
 # white from 40%, orange from 20-39%, red below 20%.
 

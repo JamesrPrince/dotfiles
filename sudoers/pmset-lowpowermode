@@ -1,0 +1,4 @@
+# Lets the SketchyBar battery popup flip Low Power Mode without a password.
+# Exactly these two commands, for ekko only; nothing else.
+# Install: sudo install -m 0440 -o root -g wheel ~/dotfiles/sudoers/pmset-lowpowermode /etc/sudoers.d/pmset-lowpowermode
+ekko ALL=(root) NOPASSWD: /usr/bin/pmset -a lowpowermode 1, /usr/bin/pmset -a lowpowermode 0
