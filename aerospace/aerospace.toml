@@ -37,7 +37,7 @@ default-root-container-orientation = 'auto'
 automatically-unhide-macos-hidden-apps = false
 
 # Numbered workspaces only: alt-<letter> stays free for typing accents and symbols
-persistent-workspaces = ["1", "2", "3", "4", "5"]
+persistent-workspaces = ["1", "2", "3", "4", "5", "6", "7"]
 
 # Tell SketchyBar which mode is on (the pill next to the workspaces)
 on-mode-changed = ['exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_mode_change MODE=$(/usr/local/bin/aerospace list-modes --current)']
@@ -230,7 +230,7 @@ gaps.outer.right =      8
 
 [[on-window-detected]]
     if.app-id = 'ru.keepcoder.Telegram'
-    run = 'move-node-to-workspace 5'
+    run = 'move-node-to-workspace 6'
 
 [[on-window-detected]]
     if.app-id = 'com.tinyspeck.slackmacgap'
@@ -283,6 +283,8 @@ gaps.outer.right =      8
     alt-3 = 'workspace 3'
     alt-4 = 'workspace 4'
     alt-5 = 'workspace 5'
+    alt-6 = 'workspace 6'
+    alt-7 = 'workspace 7'
 
     # The trigger refreshes the icons even when the move leaves no window to focus
     alt-shift-1 = ['move-node-to-workspace 1', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_focus_change']
@@ -290,6 +292,8 @@ gaps.outer.right =      8
     alt-shift-3 = ['move-node-to-workspace 3', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_focus_change']
     alt-shift-4 = ['move-node-to-workspace 4', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_focus_change']
     alt-shift-5 = ['move-node-to-workspace 5', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_focus_change']
+    alt-shift-6 = ['move-node-to-workspace 6', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_focus_change']
+    alt-shift-7 = ['move-node-to-workspace 7', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_focus_change']
 
     # Take the window along: move it and follow to that workspace
     ctrl-alt-shift-1 = 'move-node-to-workspace --focus-follows-window 1'
@@ -297,6 +301,8 @@ gaps.outer.right =      8
     ctrl-alt-shift-3 = 'move-node-to-workspace --focus-follows-window 3'
     ctrl-alt-shift-4 = 'move-node-to-workspace --focus-follows-window 4'
     ctrl-alt-shift-5 = 'move-node-to-workspace --focus-follows-window 5'
+    ctrl-alt-shift-6 = 'move-node-to-workspace --focus-follows-window 6'
+    ctrl-alt-shift-7 = 'move-node-to-workspace --focus-follows-window 7'
 
     # Cycle through the windows in this workspace, wrapping at the end
     alt-backtick = 'focus --boundaries-action wrap-around-the-workspace dfs-next'
