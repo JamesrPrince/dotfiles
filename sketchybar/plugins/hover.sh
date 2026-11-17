@@ -31,7 +31,7 @@ if [ "$(cat "$HOME/.config/sketchybar/.barstyle" 2>/dev/null)" = flat ]; then
         [ -n "$ICOL" ] && sketchybar --animate tanh 6 --set "$NAME" icon.color=$ICOL label.color=$LCOL
       fi
       exit 0 ;;
-    apple.logo|calendar|net.up|net.down|cpu.percent|gpu.bar|mem|bluetooth|wifi|volume_icon|control|battery|\
+    apple.logo|calendar|worldclock|net.up|net.down|cpu.percent|gpu.bar|mem|bluetooth|wifi|volume_icon|control|battery|\
     vpn|claude|badge.*|market.*|next_event|timer|awake|privacy)
       if [ "$SENDER" = "mouse.entered" ]; then H=on; else H=off; fi
       args=(--set "$NAME" icon.highlight=$H label.highlight=$H)

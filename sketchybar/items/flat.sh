@@ -78,6 +78,24 @@ sketchybar --set calendar position=center                    \
                           padding_right=0                    \
                           update_freq=10                     \
                           popup.align=center
+# The world clock sits right of the clock, as Elsewhen does in Omarchy 4.5 (centerEnd, before weather)
+sketchybar --set worldclock position=center                  \
+                            icon.font="Maple Mono NF:Regular:$FLAT_NF_FONT_SIZE" \
+                            icon.color=$FLAT_REST            \
+                            icon.highlight_color=$FLAT_HOVER \
+                            icon.width=16                    \
+                            icon.align=center                \
+                            icon.padding_left=0              \
+                            icon.padding_right=0             \
+                            padding_left=9                   \
+                            padding_right=0                  \
+                            popup.align=center               \
+           --add item clock.pad center                       \
+           --set clock.pad width=25 padding_left=0 padding_right=0 icon.drawing=off label.drawing=off \
+                           background.drawing=off             \
+           --move clock.pad before calendar
+# clock.pad mirrors the globe's 25px (9 padding + 16 icon) on the clock's left, so the clock
+# itself stays centred on the screen, as Omarchy's does
 
 # --- Left: the Apple logo, before the workspaces; it opens the same popup as in Centre Stage -------
 sketchybar --set apple.logo icon.color=$FLAT_REST icon.font="$FONT:Medium:15.0" \
@@ -205,7 +223,8 @@ sketchybar --move control after keys     \
            --move market.2 after market.3    \
            --move market.1 after market.2    \
            --move spotify.anchor after market.1 \
-           --move next_event after calendar  \
+           --move worldclock after calendar  \
+           --move next_event after worldclock \
            --move timer after next_event
 
 # --- The control entry also holds the shortcut sheet and the focus timer (the "more" item is not shown) -
@@ -243,7 +262,7 @@ sketchybar --set '/^(apple\.(prefs|activity|lock)|control\.[a-z]+|wifi\.(ssid|ip
 
 # --- Hover: a quiet colour shift (icon.highlight / label.highlight), no pills ---------------------------
 sketchybar --set gpu.bar icon.highlight_color=$FLAT_HOVER
-for item in apple.logo calendar net.up net.down cpu.percent mem bluetooth wifi volume_icon control \
+for item in apple.logo calendar worldclock net.up net.down cpu.percent mem bluetooth wifi volume_icon control \
             vpn badge.slack badge.whatsapp claude market.1 market.2 market.3 next_event timer; do
   sketchybar --subscribe $item mouse.entered mouse.exited
 done

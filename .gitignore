@@ -22,4 +22,5 @@ themes/backgrounds/
 nvim/lua/plugins/theme.lua
 themes/setwall
 sketchybar/.barstyle
+sketchybar/.worldclock.json
 sketchybar/.alfred-themes
