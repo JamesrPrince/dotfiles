@@ -198,6 +198,8 @@ def describe(cmds, cache):
     if m := re.search(r"scratchpad\S*\s+(send|bring|toggle)\b", c):
         return "Rearrange", {"send": "Send window to scratchpad", "bring": "Bring scratchpad window back",
                              "toggle": "Toggle scratchpad"}[m.group(1)]
+    if "claude-console.sh" in c:
+        return "Apps", "Claude console (show / hide)"
     if "theme.sh next" in c:
         return "Layout", "Next theme"
     if "barstyle.sh next" in c:

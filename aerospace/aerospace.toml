@@ -157,6 +157,14 @@ gaps.outer.right =      8
 
 # Apps that always open on their own workspace (new windows only)
 # 1 browser, 2 terminal and Claude, 3 notes, 4 work (spreadsheets, mail), 5 chat and music
+# The Claude console (claude-console.sh, alt-c) is its own Ghostty window with a pinned title.
+# It floats and is placed by that script, so ghostty-on-detect.sh must never tile it or turn
+# workspace 2 into an accordion. First match wins: this sits above the Ghostty rule below.
+[[on-window-detected]]
+    if.app-id = 'com.mitchellh.ghostty'
+    if.window-title-regex-substring = '^claude-console$'
+    run = 'layout floating'
+
 # Ghostty native tabs are extra AX windows (AeroSpace #68; ghostty.org/docs/help/macos-tiling-wms).
 # Every real Ghostty window tiles (alt-hjkl and alt-shift-hjkl need a tiled window): the first
 # on workspace 2, later ones where they open. Only the quick terminal and native tabs float,
@@ -281,6 +289,10 @@ gaps.outer.right =      8
     # Scratchpad: hidden workspace S
     alt-shift-minus = 'exec-and-forget ~/dotfiles/aerospace/scratchpad.sh send' # send window to scratchpad
     alt-shift-equal = 'exec-and-forget ~/dotfiles/aerospace/scratchpad.sh bring' # bring back last scratchpad window, floating
+
+    # Quake-style Claude console, after Omarchy's SUPER+`: a dedicated Ghostty window running claude.
+    # Not running: open it here. Elsewhere or hidden: bring it here, floating. Focused: hide it (workspace S).
+    alt-c = 'exec-and-forget ~/dotfiles/aerospace/claude-console.sh toggle'
 
     alt-minus = 'resize smart -50'
     alt-equal = 'resize smart +50'
