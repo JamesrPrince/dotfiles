@@ -23,7 +23,11 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 # our id -> Omarchy's folder name (themes/<name>/preview.png in github.com/basecamp/omarchy)
 OMARCHY = {"tokyonight": "tokyo-night", "catppuccin": "catppuccin", "everforest": "everforest",
            "gruvbox": "gruvbox", "kanagawa": "kanagawa", "nord": "nord", "rosepine": "rose-pine",
-           "matteblack": "matte-black", "ristretto": "ristretto"}
+           "matteblack": "matte-black", "ristretto": "ristretto",
+           "catppuccinlatte": "catppuccin-latte", "ethereal": "ethereal", "flexokilight": "flexoki-light",
+           "hackerman": "hackerman", "jadehorse": "jade-horse", "lasthorizon": "last-horizon", "lumon": "lumon",
+           "lupine": "lupine", "miasma": "miasma", "retro82": "retro-82", "solitude": "solitude",
+           "starship": "starship", "vantablack": "vantablack", "white": "white"}
 SWATCH_KEYS = ["background", "foreground", "accent", "red", "yellow", "green", "cyan", "blue", "magenta"]
 THUMB_W, THUMB_H, THUMB_STRIP = 400, 225, 18
 PREV_W, PREV_H, PREV_STRIP = 1280, 720, 64

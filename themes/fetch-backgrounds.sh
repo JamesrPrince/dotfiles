@@ -6,7 +6,7 @@ DOT="$(cd "$(dirname "$0")/.." && pwd)"
 DEST="$DOT/themes/backgrounds"
 TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
 
-git clone --depth 1 -q https://github.com/basecamp/omarchy.git "$TMP/omarchy"
+git clone --depth 1 -q --branch v4.5.0 https://github.com/basecamp/omarchy.git "$TMP/omarchy"
 git clone --depth 1 -q https://github.com/omacom/omarchy-osaka-jade-theme.git "$TMP/osaka"
 
 grab() { # grab <our id> <source backgrounds dir>
@@ -15,7 +15,10 @@ grab() { # grab <our id> <source backgrounds dir>
   echo "$1: $(ls "$DEST/$1" | wc -l | tr -d ' ') images"
 }
 for pair in tokyonight:tokyo-night catppuccin:catppuccin everforest:everforest gruvbox:gruvbox \
-            kanagawa:kanagawa nord:nord rosepine:rose-pine matteblack:matte-black ristretto:ristretto; do
+            kanagawa:kanagawa nord:nord rosepine:rose-pine matteblack:matte-black ristretto:ristretto \
+            catppuccinlatte:catppuccin-latte ethereal:ethereal flexokilight:flexoki-light hackerman:hackerman \
+            jadehorse:jade-horse lasthorizon:last-horizon lumon:lumon lupine:lupine miasma:miasma retro82:retro-82 \
+            solitude:solitude starship:starship vantablack:vantablack white:white; do
   grab "${pair%%:*}" "$TMP/omarchy/themes/${pair##*:}/backgrounds"
 done
 grab osakajade "$TMP/osaka/backgrounds"

@@ -1,0 +1,64 @@
+{
+  "alfredtheme": {
+    "name": "Om Hackerman",
+    "credit": "dotfiles, from themes/hackerman/colors.toml",
+    "result": {
+      "textSpacing": 5,
+      "roundness": 6,
+      "paddingVertical": 4,
+      "iconSize": 36,
+      "iconPaddingHorizontal": 6,
+      "backgroundSelected": "#1f253aff",
+      "text": {
+        "size": 18,
+        "font": "System",
+        "color": "#ddf7ffff",
+        "colorSelected": "#ddf7ffff"
+      },
+      "subtext": {
+        "size": 12,
+        "font": "System",
+        "color": "#6a6e95ff",
+        "colorSelected": "#b5c5dbff"
+      },
+      "shortcut": {
+        "size": 16,
+        "font": "System",
+        "color": "#6a6e95ff",
+        "colorSelected": "#ddf7ffff"
+      }
+    },
+    "search": {
+      "background": "#06060cff",
+      "backgroundSelected": "#1f253aff",
+      "roundness": 6,
+      "paddingHorizontal": 8,
+      "paddingVertical": 6,
+      "spacing": 8,
+      "text": {
+        "size": 32,
+        "font": "System Light",
+        "color": "#ddf7ffff",
+        "colorSelected": "#ddf7ffff"
+      }
+    },
+    "window": {
+      "color": "#0b0c16ff",
+      "borderColor": "#82fb9cff",
+      "borderPadding": 2,
+      "blur": 0,
+      "roundness": 8,
+      "width": 600,
+      "paddingHorizontal": 10,
+      "paddingVertical": 10
+    },
+    "separator": {
+      "color": "#2d3450ff",
+      "thickness": 1
+    },
+    "scrollbar": {
+      "color": "#2d3450ff",
+      "thickness": 2
+    }
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "alfredtheme": {
+    "name": "Om Catppuccin Latte",
+    "credit": "dotfiles, from themes/catppuccinlatte/colors.toml",
+    "result": {
+      "textSpacing": 5,
+      "roundness": 6,
+      "paddingVertical": 4,
+      "iconSize": 36,
+      "iconPaddingHorizontal": 6,
+      "backgroundSelected": "#ccd0daff",
+      "text": {
+        "size": 18,
+        "font": "System",
+        "color": "#4c4f69ff",
+        "colorSelected": "#4c4f69ff"
+      },
+      "subtext": {
+        "size": 12,
+        "font": "System",
+        "color": "#9ca0b0ff",
+        "colorSelected": "#5c5f77ff"
+      },
+      "shortcut": {
+        "size": 16,
+        "font": "System",
+        "color": "#9ca0b0ff",
+        "colorSelected": "#4c4f69ff"
+      }
+    },
+    "search": {
+      "background": "#d7d8dcff",
+      "backgroundSelected": "#ccd0daff",
+      "roundness": 6,
+      "paddingHorizontal": 8,
+      "paddingVertical": 6,
+      "spacing": 8,
+      "text": {
+        "size": 32,
+        "font": "System Light",
+        "color": "#4c4f69ff",
+        "colorSelected": "#4c4f69ff"
+      }
+    },
+    "window": {
+      "color": "#eff1f5ff",
+      "borderColor": "#1e66f5ff",
+      "borderPadding": 2,
+      "blur": 0,
+      "roundness": 8,
+      "width": 600,
+      "paddingHorizontal": 10,
+      "paddingVertical": 10
+    },
+    "separator": {
+      "color": "#acb0beff",
+      "thickness": 1
+    },
+    "scrollbar": {
+      "color": "#acb0beff",
+      "thickness": 2
+    }
+  }
+}

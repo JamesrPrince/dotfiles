@@ -7,7 +7,7 @@
 # the same variable names; WHITE is the text colour (dark on a light theme).
 # THEME_GHOSTTY: bundled Ghostty theme, or "palette" to write themes/<id>/colors.toml.
 
-THEMES="macchiato tokyonight catppuccin everforest gruvbox kanagawa nord rosepine matteblack osakajade ristretto"
+THEMES="macchiato tokyonight catppuccin everforest gruvbox kanagawa nord rosepine matteblack osakajade ristretto catppuccinlatte ethereal flexokilight hackerman jadehorse lasthorizon lumon lupine miasma retro82 solitude starship vantablack white"
 THEME=${THEME_OVERRIDE:-$(cat "$HOME/.config/sketchybar/.theme" 2>/dev/null)}   # THEME_OVERRIDE: preview/list without switching
 case " $THEMES " in *" $THEME "*) ;; *) THEME=macchiato ;; esac
 export THEME THEMES
@@ -102,6 +102,132 @@ case $THEME in
     export BAR_COLOR=0xa02c2525 BACKGROUND_1=0x90403e41 BACKGROUND_2=0x9072696a
     export POPUP_BACKGROUND_COLOR=0xff2c2525
     export ACCENT=0xfff38d70
+    ;;
+  catppuccinlatte)
+    export THEME_NAME="Catppuccin Latte" THEME_MODE=light THEME_GHOSTTY="Catppuccin Latte"
+    export BLACK=0xffd7d8dc  WHITE=0xff4c4f69  RED=0xffd20f39    GREEN=0xff40a02b
+    export BLUE=0xff1e66f5   YELLOW=0xffdf8e1d ORANGE=0xffd84e2b MAGENTA=0xffea76cb
+    export GREY=0xff7b7e92
+    export BAR_COLOR=0xa0eff1f5 BACKGROUND_1=0x90ccd0da BACKGROUND_2=0x90acb0be
+    export POPUP_BACKGROUND_COLOR=0xffeff1f5
+    export ACCENT=0xff1e66f5
+    ;;
+  ethereal)
+    export THEME_NAME="Ethereal" THEME_MODE=dark THEME_GHOSTTY="palette"
+    export BLACK=0xff030610  WHITE=0xffffcead  RED=0xffed5b5a    GREEN=0xff92a593
+    export BLUE=0xff7d82d9   YELLOW=0xffe9bb4f ORANGE=0xffeb8b54 MAGENTA=0xffc89dc1
+    export GREY=0xffa08477
+    export BAR_COLOR=0xa0060b1e BACKGROUND_1=0x90252e56 BACKGROUND_2=0x906d7db6
+    export POPUP_BACKGROUND_COLOR=0xff060b1e
+    export ACCENT=0xff7d82d9
+    ;;
+  flexokilight)
+    export THEME_NAME="Flexoki Light" THEME_MODE=light THEME_GHOSTTY="Flexoki Light"
+    export BLACK=0xffe5e2d8  WHITE=0xff100f0f  RED=0xffd14d41    GREEN=0xff879a39
+    export BLUE=0xff205ea6   YELLOW=0xffd0a215 ORANGE=0xffd0772b MAGENTA=0xffce5d97
+    export GREY=0xff6b6964
+    export BAR_COLOR=0xa0fffcf0 BACKGROUND_1=0x90cecdc3 BACKGROUND_2=0x90b7b5ac
+    export POPUP_BACKGROUND_COLOR=0xfffffcf0
+    export ACCENT=0xff205ea6
+    ;;
+  hackerman)
+    export THEME_NAME="Hackerman" THEME_MODE=dark THEME_GHOSTTY="palette"
+    export BLACK=0xff06060c  WHITE=0xffddf7ff  RED=0xff50f872    GREEN=0xff4fe88f
+    export BLUE=0xff829dd4   YELLOW=0xff50f7d4 ORANGE=0xff50f7a3 MAGENTA=0xff86a7df
+    export GREY=0xff8d9ea6
+    export BAR_COLOR=0xa00b0c16 BACKGROUND_1=0x901f253a BACKGROUND_2=0x902d3450
+    export POPUP_BACKGROUND_COLOR=0xff0b0c16
+    export ACCENT=0xff82fb9c
+    ;;
+  jadehorse)
+    export THEME_NAME="Jade Horse" THEME_MODE=dark THEME_GHOSTTY="palette"
+    export BLACK=0xff0a1713  WHITE=0xfff0faf4  RED=0xffd88d91    GREEN=0xff8bcbb1
+    export BLUE=0xff96b7d0   YELLOW=0xffc5cc91 ORANGE=0xffd2ab8d MAGENTA=0xffb7a1c8
+    export GREY=0xff92a19a
+    export BAR_COLOR=0xa0142620 BACKGROUND_1=0x902b5147 BACKGROUND_2=0x9064887b
+    export POPUP_BACKGROUND_COLOR=0xff142620
+    export ACCENT=0xff8bcbb1
+    ;;
+  lasthorizon)
+    export THEME_NAME="Last Horizon" THEME_MODE=dark THEME_GHOSTTY="palette"
+    export BLACK=0xff060606  WHITE=0xffe2dddc  RED=0xffc38b7b    GREEN=0xff87a9b0
+    export BLUE=0xffb59790   YELLOW=0xff6b5e73 ORANGE=0xff6b5e73 MAGENTA=0xffc4d8e2
+    export GREY=0xffa0a0a0
+    export BAR_COLOR=0xa00c0b0c BACKGROUND_1=0x90584e51 BACKGROUND_2=0x90584e51
+    export POPUP_BACKGROUND_COLOR=0xff0c0b0c
+    export ACCENT=0xffb59790
+    ;;
+  lumon)
+    export THEME_NAME="Lumon" THEME_MODE=dark THEME_GHOSTTY="palette"
+    export BLACK=0xff0b1216  WHITE=0xfff2fcff  RED=0xff4d86b0    GREEN=0xff5e95bc
+    export BLUE=0xff6fb8e3   YELLOW=0xff6fa4c9 ORANGE=0xff8bc9eb MAGENTA=0xff8bc9eb
+    export GREY=0xff8d9aa5
+    export BAR_COLOR=0xa016242d BACKGROUND_1=0x90243d56 BACKGROUND_2=0x90304860
+    export POPUP_BACKGROUND_COLOR=0xff16242d
+    export ACCENT=0xff8bc9eb
+    ;;
+  lupine)
+    export THEME_NAME="Lupine" THEME_MODE=light THEME_GHOSTTY="palette"
+    export BLACK=0xffdedede  WHITE=0xff000000  RED=0xffc900c4    GREEN=0xff4a2fd0
+    export BLUE=0xff3264eb   YELLOW=0xff026fde ORANGE=0xff026fde MAGENTA=0xff8a4ad7
+    export GREY=0xff737373
+    export BAR_COLOR=0xa0fafafa BACKGROUND_1=0x90d0d0d0 BACKGROUND_2=0x909e9e9e
+    export POPUP_BACKGROUND_COLOR=0xfffafafa
+    export ACCENT=0xff3264eb
+    ;;
+  miasma)
+    export THEME_NAME="Miasma" THEME_MODE=dark THEME_GHOSTTY="Miasma"
+    export BLACK=0xff121212  WHITE=0xffc2c2b0  RED=0xff685742    GREEN=0xff5f875f
+    export BLUE=0xff78824b   YELLOW=0xffb36d43 ORANGE=0xff8d6242 MAGENTA=0xffbb7744
+    export GREY=0xff85857a
+    export BAR_COLOR=0xa0222222 BACKGROUND_1=0x90383838 BACKGROUND_2=0x90666666
+    export POPUP_BACKGROUND_COLOR=0xff222222
+    export ACCENT=0xff78824b
+    ;;
+  retro82)
+    export THEME_NAME="Retro 82" THEME_MODE=dark THEME_GHOSTTY="palette"
+    export BLACK=0xff020c17  WHITE=0xfff6dcac  RED=0xfff85525    GREEN=0xff028391
+    export BLUE=0xff3f8f8a   YELLOW=0xffe97b3c ORANGE=0xfffaa968 MAGENTA=0xff3f8f8a
+    export GREY=0xff9a927c
+    export BAR_COLOR=0xa005182e BACKGROUND_1=0x90134e5a BACKGROUND_2=0x902a6b78
+    export POPUP_BACKGROUND_COLOR=0xff05182e
+    export ACCENT=0xfffaa968
+    ;;
+  solitude)
+    export THEME_NAME="Solitude" THEME_MODE=dark THEME_GHOSTTY="palette"
+    export BLACK=0xff080a0b  WHITE=0xffa5aeb4  RED=0xff565d60    GREEN=0xff9fa5a9
+    export BLUE=0xff798186   YELLOW=0xffd9dbdc ORANGE=0xffd9dbdc MAGENTA=0xffaeaeae
+    export GREY=0xff838686
+    export BAR_COLOR=0xa0101315 BACKGROUND_1=0x90343d41 BACKGROUND_2=0x904b4e55
+    export POPUP_BACKGROUND_COLOR=0xff101315
+    export ACCENT=0xff798186
+    ;;
+  starship)
+    export THEME_NAME="Starship" THEME_MODE=dark THEME_GHOSTTY="palette"
+    export BLACK=0xff0e0e10  WHITE=0xffffffff  RED=0xffff5f4a    GREEN=0xffff9f0a
+    export BLUE=0xff8fb8de   YELLOW=0xffffc27a ORANGE=0xffff6a3d MAGENTA=0xffff8fa3
+    export GREY=0xffa3a3a5
+    export BAR_COLOR=0xa01c1c1e BACKGROUND_1=0x903a3a3c BACKGROUND_2=0x908e8e93
+    export POPUP_BACKGROUND_COLOR=0xff1c1c1e
+    export ACCENT=0xffff9f0a
+    ;;
+  vantablack)
+    export THEME_NAME="Vantablack" THEME_MODE=dark THEME_GHOSTTY="palette"
+    export BLACK=0xff070707  WHITE=0xffffffff  RED=0xffa4a4a4    GREEN=0xffb6b6b6
+    export BLUE=0xff8d8d8d   YELLOW=0xffcecece ORANGE=0xffb9b9b9 MAGENTA=0xff9b9b9b
+    export GREY=0xff9e9e9e
+    export BAR_COLOR=0xa0000000 BACKGROUND_1=0x901a1a1a BACKGROUND_2=0x907a7a7a
+    export POPUP_BACKGROUND_COLOR=0xff000000
+    export ACCENT=0xff8d8d8d
+    ;;
+  white)
+    export THEME_NAME="White" THEME_MODE=light THEME_GHOSTTY="palette"
+    export BLACK=0xffe8e8e8  WHITE=0xff000000  RED=0xff2a2a2a    GREEN=0xff3a3a3a
+    export BLUE=0xff1a1a1a   YELLOW=0xff4a4a4a ORANGE=0xff4a4a4a MAGENTA=0xff2e2e2e
+    export GREY=0xff616161
+    export BAR_COLOR=0xa0ffffff BACKGROUND_1=0x90c0c0c0 BACKGROUND_2=0x90808080
+    export POPUP_BACKGROUND_COLOR=0xffffffff
+    export ACCENT=0xff6e6e6e
     ;;
   *)
     export THEME_NAME="Catppuccin Macchiato" THEME_MODE=dark THEME_GHOSTTY="Catppuccin Macchiato"

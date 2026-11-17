@@ -2,7 +2,7 @@
 # One command that verifies the desktop: one PASS or FAIL line per check, exit 0 only if all pass.
 #   check.sh            read-only: no bar reload, no theme or style switch
 #                       (it does run `aerospace reload-config`, which is harmless)
-#   check.sh --themes   also run themes/check-all.sh (switches through all 11 themes, then restores)
+#   check.sh --themes   also run themes/check-all.sh (switches through all themes, then restores)
 #   check.sh --styles   also switch to the other bar style and back, checking each (reloads the bar twice);
 #                        in flat it also forces every smart item visible and checks nothing overlaps
 #   check.sh --smart    only the forced-visible smart-item check, on the current (flat) style
@@ -144,7 +144,7 @@ smart_check() { # smart_check [label]  - flat only; always switches the test fla
   sleep 1
 }
 
-# --- themes: 11 of them, each complete -------------------------------------------------------------
+# --- themes: all of them, each complete -------------------------------------------------------------
 list=$(bash "$CONF/plugins/theme.sh" list --plain | cut -f1)
 count=$(echo "$list" | grep -c .)
 bad=""
@@ -154,7 +154,7 @@ for t in $list; do
   [ -s "$DOT/themes/$t/neovim.lua" ] || bad="$bad $t:neovim"
   ls "$DOT/themes/backgrounds/$w"/* >/dev/null 2>&1 || bad="$bad $t:wallpaper"
 done
-result "theme.sh list returns 11 themes, each with colours, neovim file, wallpaper folder" "$([ "$count" = 11 ] && [ -z "$bad" ] && echo 0 || echo 1)" "count $count$bad"
+result "theme.sh list returns $(ls ~/dotfiles/themes/*/colors.toml | wc -l | tr -d " ") themes, each with colours, neovim file, wallpaper folder" "$([ "$count" = "$(ls ~/dotfiles/themes/*/colors.toml | wc -l | tr -d " ")" ] && [ -z "$bad" ] && echo 0 || echo 1)" "count $count$bad"
 out=$(python3 "$DOT/alfred/gen-themes.py" --check 2>&1); result "one valid Alfred theme file per theme" $? "$(echo "$out" | head -1)"
 cur=$(bash "$CONF/plugins/theme.sh" current)
 result "launch mode exists and Caps Lock is F18" "$(aerospace list-modes | grep -qx launch && hidutil property --get UserKeyMapping | grep -q 30064771181 && echo 0 || echo 1)"

@@ -5,7 +5,7 @@ Theme names are "Om <name>" (the name theme.sh passes to Alfred's `set theme`).
 Usage: python3 alfred/gen-themes.py            write all
        python3 alfred/gen-themes.py --check    validate the files on disk, exit 1 on a problem
 """
-import json, os, re, subprocess, sys
+import glob, json, os, re, subprocess, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 THEMES_DIR = os.path.join(os.path.dirname(HERE), "themes")
 OUT = os.path.join(HERE, "themes")
@@ -60,7 +60,7 @@ if __name__ == "__main__":
         for tid, name in themes:
             try: validate(f"{OUT}/{tid}.alfredappearance", tid, name)
             except Exception as e: bad += 1; print("FAIL", tid, e)
-        print("%d themes, %d bad" % (len(themes), bad)); sys.exit(1 if bad or len(themes) != 11 else 0)
+        print("%d themes, %d bad" % (len(themes), bad)); sys.exit(1 if bad or len(themes) != len(glob.glob(f"{THEMES_DIR}/*/colors.toml")) else 0)
     for tid, name in themes:
         with open(f"{OUT}/{tid}.alfredappearance", "w") as f:
             json.dump(build(tid, name), f, indent=2); f.write("\n")

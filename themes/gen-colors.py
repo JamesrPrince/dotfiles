@@ -2,7 +2,7 @@
 """Regenerates sketchybar/colors.sh from themes/<id>/colors.toml (Omarchy's files).
 
 Mapping: BLACK=darker_background  WHITE=bright_foreground  RED..MAGENTA=the base colours
-GREY=foreground 62% over background  BAR=background @ a0  BACKGROUND_1=selection @ 90
+ORANGE=orange (yellow where a theme has none)  GREY=foreground 62% over background  BAR=background @ a0  BACKGROUND_1=selection @ 90
 BACKGROUND_2=muted @ 90  POPUP=background  ACCENT=accent.  Prints a contrast report.
 Usage: python3 themes/gen-colors.py > sketchybar/colors.sh   (macchiato is kept as written below)
 """
@@ -20,6 +20,21 @@ THEMES = [
     ("matteblack", "Matte Black",  "Matte Black"),
     ("osakajade",  "Osaka Jade",   "palette"),
     ("ristretto",  "Ristretto",    "Monokai Pro Ristretto"),
+    # The rest of Omarchy 4.5.0's set (MIT). Ghostty theme only where Ghostty ships the same palette.
+    ("catppuccinlatte", "Catppuccin Latte", "Catppuccin Latte"),
+    ("ethereal",    "Ethereal",     "palette"),
+    ("flexokilight", "Flexoki Light", "Flexoki Light"),
+    ("hackerman",   "Hackerman",    "palette"),
+    ("jadehorse",   "Jade Horse",   "palette"),
+    ("lasthorizon", "Last Horizon", "palette"),
+    ("lumon",       "Lumon",        "palette"),
+    ("lupine",      "Lupine",       "palette"),
+    ("miasma",      "Miasma",       "Miasma"),
+    ("retro82",     "Retro 82",     "palette"),
+    ("solitude",    "Solitude",     "palette"),
+    ("starship",    "Starship",     "palette"),
+    ("vantablack",  "Vantablack",   "palette"),
+    ("white",       "White",        "palette"),
 ]
 
 def load(tid):
@@ -62,7 +77,7 @@ for tid, name, gh in THEMES:
     out.append(f'''  {tid})
     export THEME_NAME="{name}" THEME_MODE={c["mode"]} THEME_GHOSTTY="{gh}"
     export BLACK={X(c["darker_background"])}  WHITE={X(white)}  RED={X(c["red"])}    GREEN={X(c["green"])}
-    export BLUE={X(c["blue"])}   YELLOW={X(c["yellow"])} ORANGE={X(c["orange"])} MAGENTA={X(c["magenta"])}
+    export BLUE={X(c["blue"])}   YELLOW={X(c["yellow"])} ORANGE={X(c.get("orange", c["yellow"]))} MAGENTA={X(c["magenta"])}
     export GREY={X(grey)}
     export BAR_COLOR={X(bg, "a0")} BACKGROUND_1={X(c["selection"], "90")} BACKGROUND_2={X(c["muted"], "90")}
     export POPUP_BACKGROUND_COLOR={X(bg)}

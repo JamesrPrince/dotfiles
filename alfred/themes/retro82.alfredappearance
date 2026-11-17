@@ -1,0 +1,64 @@
+{
+  "alfredtheme": {
+    "name": "Om Retro 82",
+    "credit": "dotfiles, from themes/retro82/colors.toml",
+    "result": {
+      "textSpacing": 5,
+      "roundness": 6,
+      "paddingVertical": 4,
+      "iconSize": 36,
+      "iconPaddingHorizontal": 6,
+      "backgroundSelected": "#134e5aff",
+      "text": {
+        "size": 18,
+        "font": "System",
+        "color": "#f6dcacff",
+        "colorSelected": "#f6dcacff"
+      },
+      "subtext": {
+        "size": 12,
+        "font": "System",
+        "color": "#3f8f8aff",
+        "colorSelected": "#a7c9c6ff"
+      },
+      "shortcut": {
+        "size": 16,
+        "font": "System",
+        "color": "#3f8f8aff",
+        "colorSelected": "#f6dcacff"
+      }
+    },
+    "search": {
+      "background": "#020c17ff",
+      "backgroundSelected": "#134e5aff",
+      "roundness": 6,
+      "paddingHorizontal": 8,
+      "paddingVertical": 6,
+      "spacing": 8,
+      "text": {
+        "size": 32,
+        "font": "System Light",
+        "color": "#f6dcacff",
+        "colorSelected": "#f6dcacff"
+      }
+    },
+    "window": {
+      "color": "#05182eff",
+      "borderColor": "#faa968ff",
+      "borderPadding": 2,
+      "blur": 0,
+      "roundness": 8,
+      "width": 600,
+      "paddingHorizontal": 10,
+      "paddingVertical": 10
+    },
+    "separator": {
+      "color": "#2a6b78ff",
+      "thickness": 1
+    },
+    "scrollbar": {
+      "color": "#2a6b78ff",
+      "thickness": 2
+    }
+  }
+}

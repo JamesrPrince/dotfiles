@@ -19,7 +19,7 @@ My macOS desktop: an [AeroSpace](https://github.com/nikitabobko/AeroSpace) tilin
 - **Battery**: always shown with its percentage. Green while charging, orange below 40%, red below 20%.
 - **GPU**: load of the busiest graphics card (Intel UHD or Radeon), green, yellow from 50%, red from 80%.
 - **Workspaces**: the focused workspace is a pill in the theme's accent; empty ones are grey.
-- **Themes**: eleven, switched as one (see Theme engine below). `alt-shift-t` or the Theme row in the control centre moves to the next one.
+- **Themes**: 25 from Omarchy 4.5, switched as one (see Theme engine below). `alt-shift-t` or the Theme row in the control centre moves to the next one.
 - **Hover and popups**: clickable items light up under the pointer, and popups slide in.
 - **Spotify**: the track and artist sit in the bar with a thin progress line under them while music plays. Click for album art and controls.
 - **Next event**: in the hour before your next timed event, its name and a countdown sit left of the clock; orange from 10 minutes, red at the start. Click opens Calendar.
@@ -55,10 +55,10 @@ Hide the macOS menu bar (System Settings → Control Center → Automatically hi
 ```bash
 ~/dotfiles/check.sh            # read-only: one PASS or FAIL line per check, exit 0 only if all pass
 ~/dotfiles/check.sh --styles   # also switches to the other bar style and back, checking each
-~/dotfiles/check.sh --themes   # also runs themes/check-all.sh (switches through all 11 themes, then restores)
+~/dotfiles/check.sh --themes   # also runs themes/check-all.sh (switches through all themes, then restores)
 ```
 
-It checks shell and Python syntax, Ghostty and AeroSpace config, the shortcut sheet (0 missing), the helper apps' signatures, every symlink `install.sh` makes, the bar style against `gaps.outer.top`, that no two visible bar items overlap (`net.down` sits under `net.up` on purpose), that all 11 themes are complete, the Alfred theme files, and the Caps Lock leader key.
+It checks shell and Python syntax, Ghostty and AeroSpace config, the shortcut sheet (0 missing), the helper apps' signatures, every symlink `install.sh` makes, the bar style against `gaps.outer.top`, that no two visible bar items overlap (`net.down` sits under `net.up` on purpose), that all themes are complete, the Alfred theme files, and the Caps Lock leader key.
 
 ## Launch mode (Caps Lock)
 
