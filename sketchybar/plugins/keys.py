@@ -165,6 +165,8 @@ def describe(cmds, cache):
         return "Rearrange", "Grow window" if m.group(1) == "+" else "Shrink window"
     if m := re.match(r"join-with (\w+)$", c):
         return "Service", "Join with " + m.group(1)
+    if m := re.search(r"layout-cycle\.sh (next|back)\b", c):
+        return "Layout", "Next layout (tiles, stack, float)" if m.group(1) == "next" else "Previous layout"
     if c.startswith("layout tiles"):
         return "Layout", "Tiles / flip direction"
     if c.startswith("layout accordion"):

@@ -12,8 +12,14 @@ if [ "$SENDER" = "mouse.clicked" ]; then
   else aerospace layout tiles accordion; fi
 fi
 
-IFS='|' read -r L FS <<< "$(aerospace list-windows --focused \
-  --format '%{window-parent-container-layout}|%{window-is-fullscreen}' 2>/dev/null)"
+IFS='|' read -r L FS WS <<< "$(aerospace list-windows --focused \
+  --format '%{window-parent-container-layout}|%{window-is-fullscreen}|%{workspace}' 2>/dev/null)"
+
+# A workspace in floating mode (layout-cycle.sh) shows FLOATING even when empty or when
+# the focused window is one the user tiled by hand
+STATE="${AEROSPACE_LAYOUT_STATE:-$HOME/.local/state/aerospace-layouts}"
+[ -n "$WS" ] || WS=$(aerospace list-workspaces --focused 2>/dev/null)
+[ -n "$WS" ] && [ "$(cat "$STATE/$WS.mode" 2>/dev/null)" = floating ] && L=floating
 
 HIDDEN=off
 [ "$FS" = "true" ] && HIDDEN=on

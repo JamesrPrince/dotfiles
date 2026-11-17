@@ -7,7 +7,9 @@ config-version = 2
 after-startup-command = [
     'exec-and-forget /usr/local/bin/sketchybar',
     # Highlight border on the focused window (JankyBorders), in the bar theme's accent
-    'exec-and-forget /bin/bash ~/.config/sketchybar/plugins/theme.sh borders'
+    'exec-and-forget /bin/bash ~/.config/sketchybar/plugins/theme.sh borders',
+    # Re-apply each workspace's saved layout (accordion, floating) from layout-cycle.sh
+    'exec-and-forget ~/dotfiles/aerospace/layout-cycle.sh restore'
 ]
 
 # Tell SketchyBar which workspace is focused
@@ -21,6 +23,8 @@ exec-on-workspace-change = ['/bin/bash', '-c',
 # the newly focused window, so clicking a window never makes it jump.
 on-focus-changed = [
     'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_focus_change',
+    # A window that opens on a floating workspace floats (no-op when no workspace floats)
+    'exec-and-forget ~/dotfiles/aerospace/layout-cycle.sh enforce',
     'move-mouse window-lazy-center'
 ]
 
@@ -244,9 +248,18 @@ gaps.outer.right =      8
     if.app-id = 'com.colliderli.iina'
     run = 'move-node-to-workspace 5'
 
+# Last rule, so only windows no rule above claimed reach it: float a new window on a
+# floating workspace right away (on-focus-changed catches the ones the rules above handle)
+[[on-window-detected]]
+    if.app-name-regex-substring = ''
+    run = 'exec-and-forget ~/dotfiles/aerospace/layout-cycle.sh enforce'
+
 [mode.main.binding]
-    # The layout pill in the bar follows these
-    alt-slash = ['layout tiles horizontal vertical', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_layout_change']
+    # Per-workspace layout cycle, as Omarchy's SUPER+L: tiles, accordion, floating (all windows
+    # of the workspace float; leaving re-tiles only those). layout-cycle.sh refreshes the bar pill.
+    alt-slash = 'exec-and-forget ~/dotfiles/aerospace/layout-cycle.sh next'
+    alt-shift-period = 'exec-and-forget ~/dotfiles/aerospace/layout-cycle.sh back'
+    # Plain accordion on the focused container, outside the cycle
     alt-comma = ['layout accordion horizontal vertical', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_layout_change']
 
     alt-h = 'focus left'
