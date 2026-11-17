@@ -4,7 +4,9 @@
 #   theme.sh set <name>    a named theme (see list)
 #   theme.sh list [--plain]  every theme; --plain is "id<TAB>name" for scripts
 #   theme.sh current       the active theme id
+#   theme.sh toast         show the two-second toast (name and preview of the active theme) now
 #   theme.sh borders|ghostty|nvim|wall|alfred   re-apply one part only
+# `next` (alt-shift-t) ends with that toast, once the reloaded bar is up (plugins/theme_toast.sh).
 # A switch sets: the bar (colors.sh), window borders, the Ghostty palette, the Neovim
 # colourscheme, the wallpaper, the Alfred window theme. btop, bat, fzf, lazygit, yazi and Starship use the
 # terminal's own ANSI colours, so they follow Ghostty with no files of their own.
@@ -95,7 +97,10 @@ case "$1" in
       if [ "$1" = "$THEME" ]; then NEXT=${2:-$(echo $THEMES | cut -d' ' -f1)}; break; fi
       shift
     done
+    # The reload wipes every item, so an item added now tells the toast when the new bar is up
+    sketchybar --add item theme_toast.wait left --set theme_toast.wait drawing=off >/dev/null 2>&1
     apply "$NEXT"
+    /bin/bash "$CONF/plugins/theme_toast.sh" --wait >/dev/null 2>&1 &
     ;;
   set)
     case " $THEMES " in
@@ -116,5 +121,6 @@ case "$1" in
   nvim)    nvim_on ;;
   wall)    wall_on ;;
   alfred)  alfred_on ;;
-  *) echo "usage: theme.sh next | set <name> | list [--plain] | current | borders | ghostty | nvim | wall | alfred" >&2; exit 2 ;;
+  toast)   /bin/bash "$CONF/plugins/theme_toast.sh" ;;
+  *) echo "usage: theme.sh next | set <name> | list [--plain] | current | toast | borders | ghostty | nvim | wall | alfred" >&2; exit 2 ;;
 esac

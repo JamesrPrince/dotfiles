@@ -106,9 +106,17 @@ A switch changes:
 | Alfred | one theme per bar theme (`alfred/themes/`), switched through Alfred's AppleScript once imported (see Alfred and the browser) |
 | btop, bat, fzf, lazygit, yazi, Starship, fastfetch | nothing to switch: each is set to use the terminal's 16 ANSI colours (btop `TTY`, bat `ansi`, fzf `--color=16`, lazygit named colours, Starship cyan), so they follow Ghostty |
 
+### Theme previews
+
+Each theme has `themes/<id>/preview.png` (the full picture) and `preview-thumb.png` (400x225, palette strip along the bottom). Where Omarchy has the theme, `preview.png` is Omarchy's own screenshot, reused under its MIT licence (github.com/basecamp/omarchy; Osaka Jade: github.com/omacom/omarchy-osaka-jade-theme, MIT, Copyright (c) 2025 Justin Lowry). Macchiato is not an Omarchy theme, so its preview is generated: its wallpaper plus a strip of its palette.
+
+- **Alfred `om`**: every theme row shows its thumbnail as the icon, the active theme is marked "active", and shift (or cmd-Y) opens the full `preview.png` in Quick Look. After changing `alfred/om-workflow/`, copy it in again (what `install.sh` does): `cp -R alfred/om-workflow/. "$HOME/Library/Application Support/Alfred/Alfred.alfredpreferences/workflows/user.workflow.om-menu/"`.
+- **alt-shift-t** (`theme.sh next`): once the bar has reloaded, a toast under the clock shows the new theme's name and thumbnail for two seconds (`sketchybar/plugins/theme_toast.sh`; `theme.sh toast` shows it for the active theme without switching).
+- **Rebuild**: `python3 themes/make-previews.py` writes the thumbnails and any missing preview (standard library plus `sips`). `--omarchy <repo> [--osaka <repo>]` first copies Omarchy's previews from clones of those repos; `--force` regenerates the generated ones.
+
 Wallpapers are not in git. `themes/fetch-backgrounds.sh` downloads them from Omarchy (Osaka Jade from its own repo); `install.sh` runs it. A wallpaper tool rebuild is `swiftc -O themes/setwall.swift -o themes/setwall`.
 
-Add a theme: put `colors.toml` and `neovim.lua` in `themes/<id>/`, add a line to `THEMES` in `themes/gen-colors.py`, run `python3 themes/gen-colors.py > sketchybar/colors.sh`, and add the wallpaper mapping in `fetch-backgrounds.sh`.
+Add a theme: put `colors.toml` and `neovim.lua` in `themes/<id>/`, add a line to `THEMES` in `themes/gen-colors.py`, run `python3 themes/gen-colors.py > sketchybar/colors.sh`, add the wallpaper mapping in `fetch-backgrounds.sh`, and run `python3 themes/make-previews.py` for its preview.
 
 ## Terminal and editor
 
