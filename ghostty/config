@@ -73,6 +73,8 @@ keybind = cmd+ctrl+equal=equalize_splits
 # Jump between shell prompts (needs shell integration)
 keybind = cmd+shift+up=jump_to_prompt:-1
 keybind = cmd+shift+down=jump_to_prompt:1
+# Toggle the window between the translucent background and solid (toggles/toggle.sh opacity presses this)
+keybind = cmd+shift+o=toggle_background_opacity
 
 # --- Drop-down terminal (quick terminal) ---
 # Ctrl+` from any app slides a terminal down from the top, centred left to right; it hides when it loses focus.
