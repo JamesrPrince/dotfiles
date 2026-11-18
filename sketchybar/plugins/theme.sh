@@ -93,9 +93,9 @@ apply() { # apply <id>
     # plugin runner (and sketchybar --reload below) may kill this process group when the plugin exits; reach must outlive it.
     if [ -x /usr/bin/perl ]; then
       nohup /usr/bin/perl -MPOSIX -e 'POSIX::setsid(); exec @ARGV' /bin/bash "$DOT/themes/reach.sh" apply \
-        </dev/null >"$HOME/.config/theme-reach/last.log" 2>&1 &
+        </dev/null >/dev/null 2>&1 &
     else
-      nohup /bin/bash "$DOT/themes/reach.sh" apply </dev/null >"$HOME/.config/theme-reach/last.log" 2>&1 &
+      nohup /bin/bash "$DOT/themes/reach.sh" apply </dev/null >/dev/null 2>&1 &
     fi
     disown 2>/dev/null
   fi

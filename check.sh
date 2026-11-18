@@ -185,6 +185,7 @@ while IFS=$'\t' read -r t rc d; do
   esac
   result "$n" "$rc" "$d"
 done < <(/bin/bash "$DOT/themes/reach.sh" check 2>&1)
+out=$(bash "$DOT/themes/test-reach-lock.sh" 2>&1); result "theme reach: stuck holder tree is killed, quick applies leave one complete last.log" "$([ $? = 0 ] && echo 0 || echo 1)" "$(echo "$out" | grep FAIL | head -2 | tr '\n' ' ')"
 result "theme.sh bg and font answer" "$(bash "$DOT/themes/theme.sh" bg current >/dev/null 2>&1 && bash "$DOT/themes/theme.sh" font bogus 2>&1 | grep -q 'unknown font' && echo 0 || echo 1)"
 
 # --- shell layer: Omarchy zsh + tmux (zsh/omarchy.zsh, tmux/tmux.conf) --------------------------------
