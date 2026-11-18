@@ -27,7 +27,7 @@ My macOS desktop: an [AeroSpace](https://github.com/nikitabobko/AeroSpace) tilin
 - **VPN and IP**: a green padlock while a VPN is connected, a globe otherwise, with the country your traffic leaves from (from [ifconfig.co](https://ifconfig.co), ipinfo.io as fallback). Click for the public IP (click to copy), city, and a connect/disconnect row for each VPN in System Settings.
 - **Clipboard history**: click the copy icon for the last 10 texts you copied; click one to copy it again. Copies a password manager marks as concealed are never kept. History lives in `~/.cache/sketchybar/clipboard.json` (25 entries, readable only by you).
 - **Disk warning**: a red disk item appears only when the startup disk has under 20 GB free.
-- **Full screen**: the bar hides while a window is AeroSpace full screen (`alt-shift-f`) and comes back when you leave it.
+- **Full screen**: the bar hides while a window is AeroSpace full screen (`alt-f`) and comes back when you leave it.
 - **GitHub**: the GitHub icon turns white with a red count when you have unread notifications. Click for the latest 8 (each opens its page), right-click for github.com/notifications. Needs `gh auth login`.
 
 ## Install
@@ -74,6 +74,7 @@ Tap Caps Lock, then one letter. Caps Lock is remapped to F18 with macOS's own `h
 | m | btop (new Ghostty window) | x | Excel |
 | l | lazygit (new Ghostty window) | p | Spotify |
 | d | lazydocker (new Ghostty window) | y | yazi (new Ghostty window) |
+| k | Cosima | | |
 
 Tools and `n` use Ghostty's AppleScript; the first time, macOS asks once to let AeroSpace control Ghostty. A new Ghostty window floats on the current workspace (the first one tiles on workspace 2).
 
@@ -92,7 +93,7 @@ theme.sh next            # alt-shift-t
 theme.sh current         # the active id
 ```
 
-(`theme.sh` is `~/.config/sketchybar/plugins/theme.sh`.) Themes: macchiato (the original), tokyonight, catppuccin, everforest, gruvbox, kanagawa, nord, rosepine (light), matteblack, osakajade, ristretto. The active one is kept in `sketchybar/.theme` (git-ignored).
+(`theme.sh` is `~/.config/sketchybar/plugins/theme.sh`.) Themes (25): macchiato (the original), tokyonight, catppuccin, everforest, gruvbox, kanagawa, nord, rosepine (light), matteblack, osakajade, ristretto, catppuccinlatte, ethereal, flexokilight, hackerman, jadehorse, lasthorizon, lumon, lupine, miasma, retro82, solitude, starship, vantablack, white. The active one is kept in `sketchybar/.theme` (git-ignored).
 
 A switch changes:
 
@@ -153,5 +154,5 @@ Small native programs in `sketchybar/helper/`, compiled by `build.sh` (binaries 
 `alt-shift-/` shows the AeroSpace key cheat sheet in the bar. `alt-shift-t` switches theme and `alt-shift-b` the bar style. Bindings live in `aerospace/aerospace.toml`.
 
 - **Modes**: `alt-shift-;` service mode, `alt-shift-r` resize mode (h/j/k/l or arrows, `b` equal sizes, esc to leave). A pill next to the workspaces shows which mode is on; click it to go back to normal.
-- **Workspaces**: seven (`alt-1` to `alt-7`; 6 Misc, 7 Other). New windows open on a fixed one: 3 Obsidian and Notion, 4 Excel and Outlook, 5 WhatsApp, Slack and Spotify, 6 Telegram. Browsers, terminals and the rest open where you are.
+- **Workspaces**: seven (`alt-1` to `alt-7`; 6 Misc, 7 Other). New windows open on a fixed one: 3 Notion and TextEdit, 4 Excel and Outlook, 5 WhatsApp, Slack and Spotify, 6 Telegram. Browsers, terminals and the rest open where you are.
 - **Floating**: System Settings, Calculator, Activity Monitor, Archive Utility, Finder's Get Info, System Information, Disk Utility and FaceTime float instead of tiling.
