@@ -21,8 +21,6 @@ FLAT_WIFI_BAD=-80         # ... and below this FLAT_CRIT. Wi-Fi off or no IP: FL
 # --- Smart items: when they show ------------------------------------------------------------------
 FLAT_MEET_WINDOW_MIN=30   # next meeting shows this many minutes ahead
 FLAT_MEET_SOON_MIN=5      # inside this it turns FLAT_WARN (and FLAT_CRIT once it starts)
-FLAT_MEET_CHARS=10        # meeting title cap (the time items must end before the right-hand smart items start: see smart_lib.sh)
-FLAT_MUSIC_CHARS=13       # track title cap
 FLAT_BREW_HOURS=4         # `brew outdated` is re-run at most this often, started when the control popup opens (never blocks)
 FLAT_MARKET_MOVE_PCT=1    # |day change| % at which a market price turns FLAT_UP / FLAT_DOWN
 FLAT_MARKET_ALWAYS=1      # market item: 1 = always shown and fetched; 0 = only while a trading window from market_windows.conf is open
@@ -74,3 +72,76 @@ flat_colors() {
 
 # The smart items, in the order zen mode and the demo switch walk them
 SMART_ITEMS="privacy vpn awake badge.slack badge.whatsapp market.1 market.2 market.3 spotify.anchor next_event timer"
+
+# --- Width-aware layout ----------------------------------------------------------------------------
+# Nothing here is a character count for one screen: the room each flexible text gets (window title,
+# meeting title, track title) is worked out in pixels from the display's logical width, and the text is
+# clipped to it (label.width is a hard clip, so even wide glyphs cannot draw past it). Test override:
+# FLAT_DISPLAY_W=1920 in the environment of a plugin run by hand.
+# Measured on the 2560 bar with every smart item on (see smart_lib.sh for the picture):
+FLAT_CLOCK_HALF=87        # the clock block (clock.pad + clock + world clock) is this far either side of the centre
+FLAT_RIGHT_W=793          # market.1's left edge to the bar's right edge: markets, mic, VPN, awake, badges, stats, tray
+FLAT_GAP=16               # least clear pixels between the time items and the right-hand items
+FLAT_TITLE_GAP=20         # least clear pixels between the window title and the clock block
+FLAT_CLAUDE_W=47          # claude's slot: the item (30, 37 with two digits) plus its 10 px gap to the music
+FLAT_TIMER_W=70           # the timer's slot: 10 gap + icon + "25:00"
+FLAT_MEET_OH=85           # meeting item minus its title: 10 gap, icon, "in 12m"
+FLAT_MUSIC_OH=36          # music item minus its title: padding and icon
+FLAT_TITLE_ICON_W=24      # window title: the app icon and its padding, before the text
+FLAT_TEXT_MIN_PX=50       # under this a title is not worth showing (about 6 characters): the next item is shed instead
+
+flat_display_w() {   # logical width of the narrowest display the bar is on
+  local w=${FLAT_DISPLAY_W:-}
+  [ -n "$w" ] || w=$(/usr/local/bin/sketchybar --query displays 2>/dev/null | python3 -c 'import json,sys; print(int(min(d["frame"]["w"] for d in json.load(sys.stdin))))' 2>/dev/null)
+  case $w in ''|*[!0-9]*) w=2560 ;; esac
+  echo "$w"
+}
+
+# flat_cols <text>: display columns (CJK and emoji count two)
+flat_cols() {
+  if ( LC_ALL=C; [[ "$1" =~ ^[\ -~]*$ ]] ); then echo "${#1}"; return; fi
+  python3 -I -c 'import sys,unicodedata as u; print(sum(2 if u.east_asian_width(c) in "WF" else 1 for c in sys.argv[1]))' "$1" 2>/dev/null || echo "${#1}"
+}
+
+# flat_trim <text> <columns>: the text cut to fit, ending in an ellipsis
+flat_trim() {
+  local t=$1 n=$2
+  [ "$n" -gt 0 ] || { echo ""; return; }
+  [ "$(flat_cols "$t")" -le "$n" ] && { echo "$t"; return; }
+  if ( LC_ALL=C; [[ "$t" =~ ^[\ -~]*$ ]] ); then echo "${t:0:$((n - 1))}…"; return; fi
+  python3 -I -c 'import sys,unicodedata as u
+t,n=sys.argv[1],int(sys.argv[2]); o="";c=0
+for ch in t:
+    w=2 if u.east_asian_width(ch) in "WF" else 1
+    if c+w>n-1: break
+    o+=ch;c+=w
+print(o+"\u2026")' "$t" "$n" 2>/dev/null || echo "${t:0:$((n - 1))}…"
+}
+
+# flat_budget: sets FLAT_W, FLAT_MEET_PX and FLAT_MUSIC_PX (px for the title text; 0 = no title, -1 = item
+# hidden). The time items grow right from the clock and the music grows left from the right-hand group, so
+# they share what is between them. Order of giving way when the display is too narrow: the music title,
+# the music item, the meeting title, the meeting item.
+flat_budget() {
+  local free text p
+  FLAT_W=$(flat_display_w)
+  free=$(( FLAT_W - FLAT_RIGHT_W - (FLAT_W / 2 + FLAT_CLOCK_HALF) - FLAT_GAP - FLAT_CLAUDE_W - FLAT_TIMER_W ))
+  text=$(( free - FLAT_MEET_OH - FLAT_MUSIC_OH ))
+  if   [ "$text" -ge $(( 2 * FLAT_TEXT_MIN_PX )) ]; then p=$(( text * 40 / 100 )); FLAT_MUSIC_PX=$p; FLAT_MEET_PX=$(( text - p ))
+  elif [ "$text" -ge "$FLAT_TEXT_MIN_PX" ]; then FLAT_MUSIC_PX=0; FLAT_MEET_PX=$text
+  elif [ $(( text + FLAT_MUSIC_OH )) -ge "$FLAT_TEXT_MIN_PX" ]; then FLAT_MUSIC_PX=-1; FLAT_MEET_PX=$(( text + FLAT_MUSIC_OH ))
+  elif [ $(( text + FLAT_MUSIC_OH )) -ge 0 ]; then FLAT_MUSIC_PX=-1; FLAT_MEET_PX=0
+  else FLAT_MUSIC_PX=-1; FLAT_MEET_PX=-1; fi
+}
+# px -> whole columns of 12 pt Maple Mono (7.2 px each; CJK and emoji take two)
+flat_px_cols() { echo $(( $1 * 10 / 72 )); }
+
+# flat_title_px: room for the window title's text: from the title's own left edge (it sits after the
+# workspaces, whose width varies) to the clock block. 0 or less means icon only.
+flat_title_px() {
+  local w x
+  w=$(flat_display_w)
+  x=$(/usr/local/bin/sketchybar --query window_title 2>/dev/null | python3 -c 'import json,sys; print(int(min(r["origin"][0] for r in json.load(sys.stdin)["bounding_rects"].values())))' 2>/dev/null)
+  case $x in ''|*[!0-9]*) x=718 ;; esac   # the bar answers empty while it reloads: assume the widest workspaces
+  echo $(( w / 2 - FLAT_CLOCK_HALF - FLAT_TITLE_GAP - x - FLAT_TITLE_ICON_W ))
+}

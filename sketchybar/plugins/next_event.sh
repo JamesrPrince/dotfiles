@@ -52,7 +52,9 @@ fi
 
 if [ "$BAR_STYLE" = flat ]; then
   flat_colors
-  [ "${#TITLE}" -gt "$FLAT_MEET_CHARS" ] && TITLE="${TITLE:0:$((FLAT_MEET_CHARS - 1))}…"
+  flat_budget   # the title gets what the display's width leaves (flat_config.sh); -1: no room for the item at all
+  [ "$FLAT_MEET_PX" -lt 0 ] && { smart_hide next_event; exit 0; }
+  TITLE=$(flat_trim "$TITLE" "$(flat_px_cols "$FLAT_MEET_PX")")
   SM_IC=$FLAT_REST; SM_LC=$FLAT_REST
   if   [ "$MINS" -le 0 ]; then WHEN="now"; SM_IC=$FLAT_CRIT; SM_LC=$FLAT_CRIT
   else
@@ -60,7 +62,7 @@ if [ "$BAR_STYLE" = flat ]; then
     [ "$MINS" -le "$FLAT_MEET_SOON_MIN" ] && { SM_IC=$FLAT_WARN; SM_LC=$FLAT_WARN; }
   fi
   source "$HOME/.config/sketchybar/icons.sh"; SM_ICON=$CALENDAR
-  SM_LABEL="$TITLE $WHEN"
+  SM_LABEL="${TITLE:+$TITLE }$WHEN"
   smart_show next_event
   exit 0
 fi

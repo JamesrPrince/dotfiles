@@ -101,7 +101,9 @@ flat_music() {
   if smart_demo music; then t="Midnight City (Extended Mix)"
   elif [ -r "$SMART_DIR/real.music" ]; then IFS='|' read -r _ t < "$SMART_DIR/real.music"; fi
   if [ -n "$t" ]; then
-    [ "${#t}" -gt "$FLAT_MUSIC_CHARS" ] && t="${t:0:$((FLAT_MUSIC_CHARS - 1))}…"
+    flat_budget   # the title gets what the display's width leaves (flat_config.sh); -1: icon and title both give way
+    if [ "$FLAT_MUSIC_PX" -lt 0 ]; then smart_hide spotify.anchor; return; fi
+    t=$(flat_trim "$t" "$(flat_px_cols "$FLAT_MUSIC_PX")")
     SM_ICON=$SPOTIFY; SM_LABEL=$t; smart_show spotify.anchor
   else
     smart_hide spotify.anchor

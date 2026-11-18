@@ -3,10 +3,14 @@
 # next meeting, timer). Source it. An item that has nothing to say takes no space: it stays defined
 # with drawing=on but with zero padding, zero icon and label width and transparent text; showing it
 # animates the widths and colours in. Items that sit at the left end of the right-hand group only
-# push each other leftwards, so the stats and tray never move. Budget on this 2560-wide bar, all of them
-# at once at their caps: the time items end near x=1560, the right-hand ones start near x=1600, so the
-# caps in flat_config.sh (meeting 10, music 13 characters) are what keep them apart. The two time items sit after the
-# clock as zero-width centre items (they draw to the right of the clock without moving it).
+# push each other leftwards, so the stats and tray never move. The meeting and timer sit after the clock as
+# zero-width centre items (they draw to the right of the clock without moving it); the claude count and the music
+# are the left end of the right-hand group. Between them is a budget in pixels that depends on the display's width
+# (flat_config.sh: flat_budget): at 2560 with every smart item on, the timer ends at x=1607 and claude starts
+# at x=1635 (28 px clear), the meeting title gets 12 columns and the music title 8. A narrower display gives the
+# meeting and music titles less, then hides the music, then the meeting; below about 2030 px even the timer and
+# claude cannot both fit beside every other smart item at once. Text is sized in display columns (CJK and emoji
+# are two) and clipped by label.width, so wide glyphs lose their tail instead of drawing over a neighbour.
 #
 # Usage in a plugin:
 #   source plugins/smart_lib.sh
@@ -35,8 +39,8 @@ smart_geom() {
     badge.*)            G_IW=16 G_LP=3 ;;
     market.*)           G_IW=0 G_LP=0 G_PL=4 G_PR=4 ;;
     spotify.anchor)     G_IW=18 G_PL=6 G_PR=6 ;;
-    next_event)         G_PL=8 G_PR=0 ;;
-    timer)              G_PL=8 G_PR=0 ;;
+    next_event)         G_PL=10 G_PR=0 ;;
+    timer)              G_PL=10 G_PR=0 ;;
   esac
 }
 
@@ -48,7 +52,7 @@ smart_show() {
   smart_geom "$n"
   iw=$G_IW; [ -n "$SM_ICON" ] || iw=0; [ -n "$SM_IW" ] && iw=$SM_IW
   if [ -n "$SM_LABEL" ]; then
-    lw=${SM_LW:-$(( (${#SM_LABEL} * G_CW + 9) / 10 + 2 ))}
+    lw=${SM_LW:-$(( ($(flat_cols "$SM_LABEL") * G_CW + 9) / 10 + 2 ))}
     [ "$iw" = 0 ] || lp=$G_LP
     lw=$(( lw + lp ))        # label.width includes the label's own left padding
   fi
@@ -91,7 +95,7 @@ smart_hide() {
 smart_timer_pad() {
   local w=0
   [ -r "$SMART_DIR/w.next_event" ] && read -r w < "$SMART_DIR/w.next_event"
-  if [ "${w:-0}" -gt 0 ]; then echo $(( w + 6 )); else echo 8; fi
+  if [ "${w:-0}" -gt 0 ]; then echo $(( w + 10 )); else echo 10; fi
 }
 # smart_timer_follow: when the meeting changes size, move the timer along (if shown). Appends to the
 # caller's `args` array (bash 3.2 has no namerefs; dynamic scope does the job).

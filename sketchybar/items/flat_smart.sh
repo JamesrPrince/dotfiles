@@ -26,6 +26,9 @@ sym="$FONT:Medium:$FLAT_ICON_FONT_SIZE"
 txt="$TEXT_FONT:Medium:12.0"
 
 sketchybar --add event smart_refresh
+# The window title re-works its room on a smart refresh (the demo switch resizes the workspaces) and when the
+# display changes; the meeting and music do the same below
+sketchybar --subscribe window_title smart_refresh display_change
 
 # --- Mic / camera (existing item, was hidden in flat) ----------------------------------------------
 sketchybar --set privacy position=right "${collapsed[@]}"                      \
@@ -82,14 +85,14 @@ sketchybar --set spotify.anchor position=right "${collapsed[@]}"                
                                 icon=$SPOTIFY icon.font="$sym" label.font="$txt"   \
                                 label.y_offset=0 y_offset=0                       \
                                 popup.height=150 popup.align=right                \
-           --subscribe spotify.anchor smart_refresh
+           --subscribe spotify.anchor smart_refresh display_change
 
 # --- Next meeting and focus timer, after the clock --------------------------------------------------------
 sketchybar --set next_event position=center width=0 "${collapsed[@]}"            \
                             update_freq=$FLAT_POLL_MEETING                      \
                             icon=$CALENDAR icon.font="$sym" label.font="$txt"     \
                             label.max_chars=40                                  \
-           --subscribe next_event smart_refresh                                \
+           --subscribe next_event smart_refresh display_change                  \
            --set timer position=center width=0 "${collapsed[@]}"                \
                        icon=$TIMER_ICON icon.font="$sym" icon.drawing=on        \
                        label.drawing=on label.font="$txt" label.color=$TRANSP    \

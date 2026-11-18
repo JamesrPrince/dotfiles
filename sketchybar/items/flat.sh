@@ -53,7 +53,8 @@ done
 
 # --- Left, after the workspaces: the focused window's app icon and title --------------------------
 # Ghostty has no title bar in this look (macos-titlebar-style = hidden), so the title lives here.
-# max_chars (56) ends the longest title clear of the clock in the centre, with every workspace at its widest.
+# The title is clipped to the room left before the clock, worked out from the display width by
+# plugins/window_title.sh (flat_config.sh: flat_title_px); max_chars is only the first-draw default.
 sketchybar --add item window_title left                              \
            --set window_title script="$PLUGIN_DIR/window_title.sh"   \
                               update_freq=5                          \
@@ -63,7 +64,7 @@ sketchybar --add item window_title left                              \
                               icon.padding_right=6                   \
                               label.font="$TEXT_FONT:Medium:12.0"    \
                               label.color=$WHITE                     \
-                              label.max_chars=56                     \
+                              label.max_chars=40                     \
                               padding_left=12                        \
                               padding_right=0                        \
            --subscribe window_title aerospace_focus_change aerospace_workspace_change front_app_switched
