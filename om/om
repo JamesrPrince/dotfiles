@@ -163,24 +163,72 @@ ask() { local v; printf '%s: ' "$1" >&2; IFS= read -r v; printf '%s' "$v"; }
 
 menu_rows() { "rows_$(echo "$1" | tr - _)"; }
 
-pick() { # pick <menu id> -> prints the chosen action
+pick() { # pick <menu id> <rows> -> prints the chosen action
   local title; title=$(echo "$1" | sed 's/-/ > /g')
   local opts=(--delimiter="$TAB" --with-nth=1 --prompt="om $title > " --layout=reverse --no-info --cycle --bind=esc:abort)
   if [ "$OM_POPUP" = 1 ]; then opts+=(--height=100%); else opts+=(--height=~50%); fi
-  menu_rows "$1" | fzf "${opts[@]}" | cut -f2
+  printf '%s\n' "$2" | fzf "${opts[@]}" | cut -f2
+}
+
+# Popup fit (Alfred-style): omwin centres the popup and sets its height to the menu on screen, through
+# Accessibility. Needs om/omwin built and Accessibility granted to the app Ghostty runs under; if either is
+# missing it does nothing, silently, and popup() has already placed the window as well as Ghostty allows.
+OMWIN="$DOT/om/omwin"; OM_GPID=""; OM_CUR=""; OM_WATCH=""; OM_WATCH_AT=0
+ghostty_pid() { # the Ghostty process above this one
+  local p=$$ c i
+  for i in 1 2 3 4 5 6 7 8; do
+    p=$(ps -o ppid= -p "$p" 2>/dev/null | tr -d ' '); [ -n "$p" ] && [ "$p" -gt 1 ] || return 1
+    c=$(ps -o comm= -p "$p" 2>/dev/null)
+    case "$c" in *[Gg]hostty*) echo "$p"; return 0 ;; esac
+  done; return 1
+}
+wait_rows() { # the terminal learns its new size a moment after the window changes: fzf must start after it
+  # at most about 0.15 s; past that fzf starts anyway and redraws itself when the size arrives
+  local i s; for i in 1 2 3 4 5 6 7 8; do
+    s=$(stty size </dev/tty 2>/dev/null); [ "${s%% *}" = "$1" ] && return 0; sleep 0.01
+  done; return 0
+}
+fit_popup() { # fit_popup <rows>: clamp to 4..22 and resize the popup; remembers the height it set
+  [ "$OM_POPUP" = 1 ] && [ -x "$OMWIN" ] && [ "$OM_GPID" != none ] || return 0
+  [ -n "$OM_GPID" ] || OM_GPID=$(ghostty_pid) || { OM_GPID=none; return 0; }
+  [ -n "$OM_CUR" ] || OM_CUR=$(stty size </dev/tty 2>/dev/null | awk '{print $1}')
+  local r=$1; [ "$r" -lt 4 ] && r=4; [ "$r" -gt 22 ] && r=22
+  [ -n "$OM_CUR" ] && [ "$OM_CUR" -gt 0 ] || return 0
+  if [ "$r" != "$OM_CUR" ] || [ -z "$OM_FITTED" ]; then
+    # Every fit returns at once (omwin stops itself after 0.25 s). A menu change is one fit, no retry. The
+    # first fit of a new window may retry: the window may not exist yet (exit 1, cheap, up to 6 tries) or the
+    # fit may miss (any other exit, dear, 2 tries); worst case about 0.8 s, once. After it a background omwin
+    # guards the placement for 1 s, because AeroSpace can tile a new window late; the next fit ends that guard.
+    # (the guard is gone by itself after 1.5 s, so its pid is only trusted for 2 s: never kill a reused pid)
+    [ -n "$OM_WATCH" ] && { [ $((SECONDS - OM_WATCH_AT)) -le 2 ] && kill "$OM_WATCH" 2>/dev/null; OM_WATCH=""; }
+    if [ -n "$OM_FITTED" ]; then
+      "$OMWIN" fit "$OM_GPID" "$r" "$OM_CUR" >/dev/null 2>&1 && { OM_CUR=$r; wait_rows "$r"; }
+    else
+      local spent=0 rc
+      while [ $spent -lt 6 ]; do
+        "$OMWIN" fit "$OM_GPID" "$r" "$OM_CUR" >/dev/null 2>&1; rc=$?
+        [ $rc = 0 ] && { OM_CUR=$r; wait_rows "$r"; break; }
+        [ $rc = 1 ] && spent=$((spent + 1)) || spent=$((spent + 3)); sleep 0.05
+      done
+      OM_FITTED=1 # never pay the first-fit retries twice, even when it missed
+      "$OMWIN" fit "$OM_GPID" "$r" "$r" settle >/dev/null 2>&1 & OM_WATCH=$!; OM_WATCH_AT=$SECONDS; disown 2>/dev/null
+    fi
+  fi
+  return 0
 }
 
 run_action() {
   local a="$1" wait=0
   case "$a" in "!"*) wait=1; a="${a#!}" ;; esac
+  [ $wait = 1 ] && fit_popup 22
   eval "$a"; local rc=$?
   if [ $wait = 1 ] && [ "$OM_POPUP" = 1 ]; then printf '\n[enter to close] '; read -r _; fi
   return $rc
 }
 
 loop() { # loop <menu id>: Esc returns to the caller
-  local sel
-  while sel=$(pick "$1") && [ -n "$sel" ]; do
+  local sel rows
+  while rows=$(menu_rows "$1") && fit_popup $(( $(printf '%s\n' "$rows" | grep -c .) + 2 )) && sel=$(pick "$1" "$rows") && [ -n "$sel" ]; do
     case "$sel" in
       m:*) loop "${sel#m:}" ;;
       *) run_action "$sel"; return 0 ;;
@@ -351,8 +399,28 @@ do_update() {
 popup() { # a Ghostty window with the menu in it
   [ -d "$GHOSTTY" ] || die "Ghostty is not installed"
   local cmd="OM_POPUP=1 $(quote "$SELF") --inline" a; for a in "$@"; do cmd="$cmd $(quote "$a")"; done
-  open -na Ghostty --args --title=om --window-width=70 --window-height=22 --confirm-close-surface=false \
+  # The window is as tall as the menu it opens (its rows plus the prompt and its rule), between 4 and 22 rows:
+  # Ghostty cannot resize a window once it is open, so a longer submenu scrolls inside it. An action
+  # (a picker, a command with output) keeps the full 22. Every height shares one top edge (popup_pos).
+  local rows=22 r n
+  r=$(resolve "$@" 2>/dev/null)
+  case "$r" in menu:*)
+    n=$(menu_rows "${r#menu:}" | grep -c .); rows=$((n + 2))
+    [ "$rows" -lt 4 ] && rows=4; [ "$rows" -gt 22 ] && rows=22 ;;
+  esac
+  # $(popup_pos) is unquoted on purpose: two flags, or nothing when the screen size is unknown
+  open -na Ghostty --args --title=om --window-width=70 --window-height=$rows $(popup_pos) --confirm-close-surface=false \
        --quit-after-last-window-closed=true --window-save-state=never -e /bin/bash -c "$cmd"
+}
+popup_pos() { # Ghostty flags that centre the popup on the main display, like Alfred
+  # 70x22 cells are 576x390 points at the default font (OM_POPUP_W/H override, e.g. after `om font`).
+  # The screen size comes from SketchyBar, in the same points; without it Ghostty picks the place.
+  # aerospace.toml floats the window by its title "om", so it is never tiled.
+  local sk; sk=$(command -v sketchybar || echo /usr/local/bin/sketchybar)
+  "$sk" --query displays 2>/dev/null | awk -F: -v pw="${OM_POPUP_W:-576}" -v ph="${OM_POPUP_H:-390}" '
+    /"w"/ && !w { gsub(/[^0-9.]/, "", $2); w = $2 + 0 }
+    /"h"/ && !h { gsub(/[^0-9.]/, "", $2); h = $2 + 0 }
+    END { if (w > pw + 0 && h > ph + 0) printf "--window-position-x=%d --window-position-y=%d", (w - pw) / 2, (h - ph) / 2 }'
 }
 
 case "$1" in

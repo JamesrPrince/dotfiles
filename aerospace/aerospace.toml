@@ -165,6 +165,14 @@ gaps.outer.right =      8
     if.window-title-regex-substring = '^claude-console$'
     run = 'layout floating'
 
+# The Omarchy menu popup (om --popup, alt-space and the other om-key.sh keys) is a small Ghostty
+# window with the pinned title "om". It floats where Ghostty opens it (centred), like Alfred;
+# without this rule ghostty-on-detect.sh tiles it and it fills the workspace.
+[[on-window-detected]]
+    if.app-id = 'com.mitchellh.ghostty'
+    if.window-title-regex-substring = '^om$'
+    run = 'layout floating'
+
 # Ghostty native tabs are extra AX windows (AeroSpace #68; ghostty.org/docs/help/macos-tiling-wms).
 # Every real Ghostty window tiles (alt-hjkl and alt-shift-hjkl need a tiled window): the first
 # on workspace 2, later ones where they open. Only the quick terminal and native tabs float,

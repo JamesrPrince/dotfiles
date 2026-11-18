@@ -21,6 +21,7 @@ sketchybar/helper/SketchyBarBluetooth.app/Contents/_CodeSignature/
 themes/backgrounds/
 nvim/lua/plugins/theme.lua
 themes/setwall
+om/omwin
 sketchybar/.barstyle
 sketchybar/.worldclock.json
 sketchybar/.alfred-themes

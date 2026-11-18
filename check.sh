@@ -239,6 +239,7 @@ done
 
 # keys and tools
 result "om-key.sh is executable and valid bash" "$([ -x "$DOT/aerospace/om-key.sh" ] && bash -n "$DOT/aerospace/om-key.sh" && echo 0 || echo 1)" ""
+result "om popup helper (om/omwin) is built and om/om is valid bash" "$([ -x "$DOT/om/omwin" ] && bash -n "$DOT/om/om" && echo 0 || echo 1)" "swiftc -O om/omwin.swift -o om/omwin"
 result "Maccy and Handy are installed" "$([ -d /Applications/Maccy.app ] && [ -d /Applications/Handy.app ] && echo 0 || echo 1)" ""
 
 echo

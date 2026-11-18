@@ -88,6 +88,7 @@ else echo "alfred  not found, skipped the om workflow"; fi
 
 # Theme engine: wallpapers (git-ignored), the wallpaper tool, then sync every themed part to the active theme.
 [ -d "$DOT/themes/backgrounds" ] || "$DOT/themes/fetch-backgrounds.sh" || echo "wallpapers: fetch failed, run themes/fetch-backgrounds.sh later"
+[ -x "$DOT/om/omwin" ] && [ "$DOT/om/omwin" -nt "$DOT/om/omwin.swift" ] || swiftc -O "$DOT/om/omwin.swift" -o "$DOT/om/omwin" || echo "omwin: needs swiftc (xcode-select --install); the om popup then sits where Ghostty puts it"
 [ -x "$DOT/themes/setwall" ] || swiftc -O "$DOT/themes/setwall.swift" -o "$DOT/themes/setwall" || echo "setwall: needs swiftc (xcode-select --install)"
 THEME_REACH_SKIP=1 /bin/bash "$DOT/sketchybar/plugins/theme.sh" set "$(/bin/bash "$DOT/sketchybar/plugins/theme.sh" current)" || true
 
