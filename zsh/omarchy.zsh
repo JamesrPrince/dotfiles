@@ -293,8 +293,8 @@ if _oz_has fzf && [[ -t 0 ]]; then   # key bindings need a real line editor (not
   function fzf-file-widget    { _oz_fzf_load && zle fzf-file-widget; }
   function fzf-cd-widget      { _oz_fzf_load && zle fzf-cd-widget; }
   zle -N fzf-history-widget; zle -N fzf-file-widget; zle -N fzf-cd-widget
-  bindkey -M emacs '^R' fzf-history-widget '^T' fzf-file-widget '\ec' fzf-cd-widget 'ç' fzf-cd-widget
-  bindkey -M viins '^R' fzf-history-widget '^T' fzf-file-widget '\ec' fzf-cd-widget
+  bindkey -M emacs '^R' fzf-history-widget '^T' fzf-file-widget '\ec' fzf-cd-widget '\eC' fzf-cd-widget 'ç' fzf-cd-widget
+  bindkey -M viins '^R' fzf-history-widget '^T' fzf-file-widget '\ec' fzf-cd-widget '\eC' fzf-cd-widget
 fi
 
 # ---- reports ---------------------------------------------------------------
