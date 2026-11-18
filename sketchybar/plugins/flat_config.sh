@@ -21,8 +21,8 @@ FLAT_WIFI_BAD=-80         # ... and below this FLAT_CRIT. Wi-Fi off or no IP: FL
 # --- Smart items: when they show ------------------------------------------------------------------
 FLAT_MEET_WINDOW_MIN=30   # next meeting shows this many minutes ahead
 FLAT_MEET_SOON_MIN=5      # inside this it turns FLAT_WARN (and FLAT_CRIT once it starts)
-FLAT_MEET_CHARS=12        # meeting title cap (the bar has ~120 px between the clock and the right-hand smart items: see smart_lib.sh)
-FLAT_MUSIC_CHARS=16       # track title cap
+FLAT_MEET_CHARS=10        # meeting title cap (the time items must end before the right-hand smart items start: see smart_lib.sh)
+FLAT_MUSIC_CHARS=13       # track title cap
 FLAT_BREW_HOURS=4         # `brew outdated` is re-run at most this often, started when the control popup opens (never blocks)
 FLAT_MARKET_MOVE_PCT=1    # |day change| % at which a market price turns FLAT_UP / FLAT_DOWN
 FLAT_MARKET_ALWAYS=1      # market item: 1 = always shown and fetched; 0 = only while a trading window from market_windows.conf is open

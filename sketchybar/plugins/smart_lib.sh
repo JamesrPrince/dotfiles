@@ -4,8 +4,8 @@
 # with drawing=on but with zero padding, zero icon and label width and transparent text; showing it
 # animates the widths and colours in. Items that sit at the left end of the right-hand group only
 # push each other leftwards, so the stats and tray never move. Budget on this 2560-wide bar, all of them
-# at once at their caps: the time items end near x=1565, the right-hand ones start near x=1580, so the
-# caps in flat_config.sh (meeting 12, music 16 characters) are what keep them apart. The two time items sit after the
+# at once at their caps: the time items end near x=1560, the right-hand ones start near x=1600, so the
+# caps in flat_config.sh (meeting 10, music 13 characters) are what keep them apart. The two time items sit after the
 # clock as zero-width centre items (they draw to the right of the clock without moving it).
 #
 # Usage in a plugin:
