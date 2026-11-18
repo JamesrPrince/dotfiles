@@ -154,5 +154,5 @@ Small native programs in `sketchybar/helper/`, compiled by `build.sh` (binaries 
 `alt-shift-/` shows the AeroSpace key cheat sheet in the bar. `alt-shift-t` switches theme and `alt-shift-b` the bar style. Bindings live in `aerospace/aerospace.toml`.
 
 - **Modes**: `alt-shift-;` service mode, `alt-shift-r` resize mode (h/j/k/l or arrows, `b` equal sizes, esc to leave). A pill next to the workspaces shows which mode is on; click it to go back to normal.
-- **Workspaces**: seven (`alt-1` to `alt-7`; 6 Misc, 7 Other). New windows open on a fixed one: 3 Notion and TextEdit, 4 Excel and Outlook, 5 WhatsApp, Slack and Spotify, 6 Telegram. Browsers, terminals and the rest open where you are.
+- **Workspaces**: seven (`alt-1` to `alt-7`; 6 Misc, 7 Other). New windows open on a fixed one: 1 Brave and Safari; 2 Claude, Cosima, OmniRoute, VS Code Insiders and Warp; 3 Notion and TextEdit; 4 Excel, Outlook, Mail, LibreOffice and Preview; 5 WhatsApp, Slack, Spotify and IINA; 6 Telegram. Everything else opens where you are.
 - **Floating**: System Settings, Calculator, Activity Monitor, Archive Utility, Finder's Get Info, System Information, Disk Utility and FaceTime float instead of tiling.
