@@ -86,6 +86,11 @@ apply() { # apply <id>
   nvim_on
   wall_on
   alfred_on
+  # Full reach (VS Code Insiders, tmux, delta, macOS accent and light/dark). themes/theme.sh runs it itself.
+  if [ -z "$THEME_REACH_SKIP" ] && [ -f "$DOT/themes/reach.sh" ]; then
+    mkdir -p "$HOME/.config/theme-reach"
+    /bin/bash "$DOT/themes/reach.sh" apply >"$HOME/.config/theme-reach/last.log" 2>&1 &
+  fi
   sketchybar --reload
 }
 

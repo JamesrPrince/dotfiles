@@ -89,11 +89,40 @@ else echo "alfred  not found, skipped the om workflow"; fi
 # Theme engine: wallpapers (git-ignored), the wallpaper tool, then sync every themed part to the active theme.
 [ -d "$DOT/themes/backgrounds" ] || "$DOT/themes/fetch-backgrounds.sh" || echo "wallpapers: fetch failed, run themes/fetch-backgrounds.sh later"
 [ -x "$DOT/themes/setwall" ] || swiftc -O "$DOT/themes/setwall.swift" -o "$DOT/themes/setwall" || echo "setwall: needs swiftc (xcode-select --install)"
-/bin/bash "$DOT/sketchybar/plugins/theme.sh" set "$(/bin/bash "$DOT/sketchybar/plugins/theme.sh" current)" || true
+THEME_REACH_SKIP=1 /bin/bash "$DOT/sketchybar/plugins/theme.sh" set "$(/bin/bash "$DOT/sketchybar/plugins/theme.sh" current)" || true
+
+# theme reach: VS Code Insiders, Claude Code, tmux, delta, macOS accent + light/dark follow the theme too.
+mkdir -p "$HOME/.config/theme-reach"
+/bin/bash "$DOT/themes/reach.sh" apply || true
 
 # Bar style last: a fresh install has no .barstyle and starts in centre (top gap 57), while the committed
 # aerospace.toml carries the flat gap (36). `set` writes the matching gap and reloads AeroSpace and the bar.
 /bin/bash "$DOT/sketchybar/plugins/barstyle.sh" set "$(/bin/bash "$DOT/sketchybar/plugins/barstyle.sh" get)" || true
+
+# keys and tools: Maccy (clipboard) and Handy (dictation) come from the Brewfile; om-key.sh is the Alt+Space shortcut runner.
+chmod +x "$DOT/aerospace/om-key.sh" 2>/dev/null
+for app in Maccy Handy; do [ -d "/Applications/$app.app" ] && echo "tools   $app installed" || echo "tools   $app missing: brew bundle --file $DOT/Brewfile"; done
+
+# om menu
+mkdir -p "$HOME/.local/bin" && ln -sfn "$DOT/om/om" "$HOME/.local/bin/om" && echo "linked  ~/.local/bin/om -> $DOT/om/om"
+if [ ! -d "$HOME/Applications/GitHub.app" ]; then
+  while IFS='|' read -r n u; do "$DOT/om/om" install webapp "$n" "$u" || true; done <<'WEB'
+Claude Web|https://claude.ai
+ChatGPT Web|https://chatgpt.com
+WhatsApp|https://web.whatsapp.com
+Slack Web|https://app.slack.com/client
+Gmail|https://mail.google.com
+Google Calendar|https://calendar.google.com
+GitHub|https://github.com
+YouTube|https://www.youtube.com
+WEB
+fi
+
+# shell layer: Omarchy aliases/functions/fzf keys for zsh, and tmux (prefix Ctrl+Space; theme.conf comes from the theme story)
+link zsh/omarchy.zsh "$HOME/.config/zsh/omarchy.zsh"
+link tmux/tmux.conf "$HOME/.config/tmux/tmux.conf"
+for t in tmux tldr fzf fd bat; do command -v $t >/dev/null && echo "shell   $t installed" || echo "shell   $t missing: brew bundle --file $DOT/Brewfile"; done
+# end shell layer
 
 echo
 echo "Done. Verify with: ~/dotfiles/check.sh"

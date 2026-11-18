@@ -1,0 +1,374 @@
+#!/bin/bash
+# om: one menu for the whole desktop, after Omarchy 4.5's menu (Super+Space there).
+#   om                      the root menu (inline in a terminal, a Ghostty window when there is no terminal)
+#   om <path>               jump to a submenu or run a row:  om style theme | om trigger capture | om system lock
+#   om --popup [path]       always open the menu in a floating Ghostty window (what the hotkey calls)
+#   om update [--dry-run]   snapshot (tmutil localsnapshot), brew update and upgrade, dotfiles pull
+#   om install webapp <name> <url>     standalone app window in ~/Applications (Brave or Chrome --app)
+#   om install tui <name> <command>    a terminal app in its own Ghostty window, in ~/Applications
+#   om install package [name]          brew formula or cask (picker when no name)
+#   om remove webapp|tui|package [name]
+#   om list                 every row path, one per line (used by check.sh)
+# Rows are hidden when the tool behind them is missing. Esc goes up one level, Esc at the root quits.
+export PATH="/usr/local/bin:/opt/homebrew/bin:$HOME/.local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+SELF="$(cd -P "$(dirname "$(readlink "${BASH_SOURCE[0]}" || echo "${BASH_SOURCE[0]}")")" && pwd -P)/om"
+DOT="$(cd -P "$(dirname "$SELF")/.." && pwd -P)"
+THEME="$HOME/dotfiles/themes/theme.sh"
+STATE="$HOME/.local/state/om"; mkdir -p "$STATE"
+APPS="$HOME/Applications"
+GHOSTTY=/Applications/Ghostty.app
+OMARCHY_MANUAL="https://github.com/omacom/omarchy/tree/quattro/manual"
+TAB=$'\t'
+
+die() { echo "om: $*" >&2; exit 1; }
+has() { command -v "$1" >/dev/null 2>&1; }
+slug() { printf '%s' "$1" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+|-+$//g'; }
+toast() { sketchybar --trigger capture_done MSG="$1" >/dev/null 2>&1 || true; }
+
+# ---------------------------------------------------------------- rows
+# row "Label" "action" ["need command"]   action: m:<menu id> | !<cmd> (show output, wait) | <cmd>
+row() { if [ -n "$3" ]; then eval "$3" >/dev/null 2>&1 || return 0; fi; printf '%s\t%s\n' "$1" "$2"; }
+theme_has() { grep -qE "^[[:space:]]*$1\)" "$THEME" 2>/dev/null; }
+quote() { printf '%q' "$1"; }
+
+rows_root() {
+  row "Apps" m:apps
+  row "Learn" m:learn
+  row "Trigger" m:trigger
+  row "Style" m:style
+  row "Setup" m:setup
+  row "Install" m:install
+  row "Remove" m:remove
+  row "Update" m:update
+  row "System" m:system
+}
+
+rows_apps() {
+  { ls -1 /Applications "$APPS" /System/Applications /Applications/Utilities 2>/dev/null | grep '\.app$' | sed 's/\.app$//'; } \
+    | sort -fu | while IFS= read -r a; do row "$a" "open -a $(quote "$a")"; done
+}
+
+rows_learn() {
+  row "Keybindings" "python3 $HOME/.config/sketchybar/plugins/keys.py toggle" "[ -f $HOME/.config/sketchybar/plugins/keys.py ]"
+  row "Desktop manual (dotfiles README)" "!bat --paging=always $(quote "$DOT/README.md")" "has bat"
+  row "Desktop manual (dotfiles README)" "!less $(quote "$DOT/README.md")" "! has bat"
+  row "Omarchy manual" "open $OMARCHY_MANUAL"
+  row "Command cheat sheets (tldr)" "!tldr --list | fzf --prompt='tldr > ' | xargs -r tldr" "has tldr"
+  row "Neovim help" "nvim +help" "has nvim"
+}
+
+rows_trigger() { row "Capture" m:trigger-capture; row "Toggle" m:trigger-toggle; }
+
+rows_trigger_capture() {
+  local c="$DOT/capture/capture.sh"
+  row "Screenshot region (clipboard)" "/bin/bash $c region" "[ -f $c ]"
+  row "Screenshot region to file" "/bin/bash $c region-file" "[ -f $c ]"
+  row "Screenshot window" "/bin/bash $c window" "[ -f $c ]"
+  row "Capture text (OCR)" "/bin/bash $c text" "[ -f $c ]"
+  row "Colour picker" "/bin/bash $c colour" "[ -f $c ]"
+  if rec_running; then row "Screen record: stop" "do_record stop"; else row "Screen record: start" "do_record start"; fi
+}
+
+rec_running() { [ -f "$STATE/record.pid" ] && kill -0 "$(cat "$STATE/record.pid")" 2>/dev/null; }
+do_record() {
+  case "$1" in
+    start) local d="$HOME/Movies/Screen Recordings"; mkdir -p "$d"
+           local f="$d/screenrecord-$(date +%Y-%m-%d_%H-%M-%S).mov"
+           nohup /usr/sbin/screencapture -v -x "$f" >/dev/null 2>&1 & echo $! > "$STATE/record.pid"; toast "Recording started" ;;
+    stop)  rec_running && kill -INT "$(cat "$STATE/record.pid")"; rm -f "$STATE/record.pid"; toast "Recording saved to Movies" ;;
+  esac
+}
+
+caf_running() { [ -f "$STATE/caffeinate.pid" ] && kill -0 "$(cat "$STATE/caffeinate.pid")" 2>/dev/null; }
+do_caffeinate() {
+  if caf_running; then kill "$(cat "$STATE/caffeinate.pid")"; rm -f "$STATE/caffeinate.pid"; toast "Awake: off"
+  else nohup /usr/bin/caffeinate -dims >/dev/null 2>&1 & echo $! > "$STATE/caffeinate.pid"; toast "Awake: on"; fi
+}
+DND_SHORTCUT="Toggle Do Not Disturb"
+dnd_available() { has shortcuts && shortcuts list 2>/dev/null | grep -qx "$DND_SHORTCUT"; }
+rows_trigger_toggle() {
+  local st g b; st=$(/bin/bash "$DOT/toggles/toggle.sh" status 2>/dev/null | tr '\n' ' ')
+  g=$(echo "$st" | tr ' ' '\n' | sed -n 's/^gaps=//p'); b=$(echo "$st" | tr ' ' '\n' | sed -n 's/^bar=//p')
+  row "Window gaps${g:+ ($g)}" "/bin/bash $DOT/toggles/toggle.sh gaps toggle" "[ -f $DOT/toggles/toggle.sh ]"
+  row "Bar${b:+ ($b)}" "/bin/bash $DOT/toggles/toggle.sh bar toggle" "[ -f $DOT/toggles/toggle.sh ]"
+  row "Ghostty opacity" "/bin/bash $DOT/toggles/toggle.sh opacity toggle" "[ -f $DOT/toggles/toggle.sh ]"
+  row "Bar style (next)" "/bin/bash $HOME/.config/sketchybar/plugins/barstyle.sh next" "[ -f $HOME/.config/sketchybar/plugins/barstyle.sh ]"
+  row "Keep awake: caffeinate ($(caf_running && echo on || echo off))" "do_caffeinate"
+  row "Night shift" "nightlight toggle" "has nightlight"
+  row "Do not disturb" "shortcuts run $(quote "$DND_SHORTCUT")" "dnd_available"
+}
+
+rows_style() {
+  row "Theme" m:style-theme
+  row "Font" "!/bin/bash $THEME font" "theme_has font"
+  row "Background" "!/bin/bash $THEME bg" "theme_has bg"
+  row "Bar style (next)" "/bin/bash $HOME/.config/sketchybar/plugins/barstyle.sh next" "[ -f $HOME/.config/sketchybar/plugins/barstyle.sh ]"
+}
+rows_style_theme() {
+  local cur; cur=$(/bin/bash "$THEME" current 2>/dev/null)
+  /bin/bash "$THEME" list --plain 2>/dev/null | while IFS="$TAB" read -r id name; do
+    row "$name$([ "$id" = "$cur" ] && echo '  (active)')" "/bin/bash $THEME set $(quote "$id")"
+  done
+}
+
+rows_setup() {
+  row "Audio" "open x-apple.systempreferences:com.apple.Sound-Settings.extension"
+  row "Wi-Fi" "open x-apple.systempreferences:com.apple.wifi-settings-extension"
+  row "Bluetooth" "open x-apple.systempreferences:com.apple.BluetoothSettings"
+  row "Displays" "open x-apple.systempreferences:com.apple.Displays-Settings.extension"
+  row "Keyboard" "open x-apple.systempreferences:com.apple.Keyboard-Settings.extension"
+  row "Battery and power" "open x-apple.systempreferences:com.apple.Battery-Settings.extension"
+  row "Reload bar" "sketchybar --reload" "has sketchybar"
+  row "Reload AeroSpace config" "aerospace reload-config" "has aerospace"
+  row "Speed settings (status)" "!/bin/bash $DOT/snappy.sh status" "[ -f $DOT/snappy.sh ]"
+  row "Check the desktop" "!/bin/bash $DOT/check.sh" "[ -f $DOT/check.sh ]"
+  row "Edit AeroSpace config" "!${EDITOR:-nvim} $DOT/aerospace/aerospace.toml"
+  row "Edit Ghostty config" "!${EDITOR:-nvim} $DOT/ghostty/config"
+  row "Edit this menu" "!${EDITOR:-nvim} $SELF"
+}
+
+rows_install() {
+  row "Web app" "!do_prompt_install webapp"
+  row "TUI" "!do_prompt_install tui"
+  row "Package (brew)" "!do_install package" "has brew"
+}
+rows_remove() {
+  row "Web app" "m:remove-webapp"
+  row "TUI" "m:remove-tui"
+  row "Package (brew)" "!do_remove package" "has brew"
+}
+rows_remove_webapp() { managed_list om-webapp | while IFS= read -r n; do row "$n" "!do_remove webapp $(quote "$n")"; done; }
+rows_remove_tui()    { managed_list om-tui    | while IFS= read -r n; do row "$n" "!do_remove tui $(quote "$n")"; done; }
+
+rows_update() {
+  row "Update everything" "!do_update"
+  row "Dry run (print the steps)" "!do_update --dry-run"
+  row "Brew only" "!brew update && brew upgrade" "has brew"
+  row "Dotfiles pull only" "!git -C $DOT pull --ff-only"
+}
+
+rows_system() {
+  row "Lock" "/usr/bin/pmset displaysleepnow"
+  row "Sleep" "/usr/bin/pmset sleepnow"
+  row "Restart" "!confirm 'Restart this Mac?' && osascript -e 'tell app \"System Events\" to restart'"
+  row "Shutdown" "!confirm 'Shut down this Mac?' && osascript -e 'tell app \"System Events\" to shut down'"
+}
+
+# ---------------------------------------------------------------- picker
+confirm() { # confirm "question": Yes only on an explicit pick
+  local a; a=$(printf 'No\nYes\n' | fzf --prompt="$1 > " --height=~10 --layout=reverse --no-info) || return 1
+  [ "$a" = Yes ]
+}
+ask() { local v; printf '%s: ' "$1" >&2; IFS= read -r v; printf '%s' "$v"; }
+
+menu_rows() { "rows_$(echo "$1" | tr - _)"; }
+
+pick() { # pick <menu id> -> prints the chosen action
+  local title; title=$(echo "$1" | sed 's/-/ > /g')
+  local opts=(--delimiter="$TAB" --with-nth=1 --prompt="om $title > " --layout=reverse --no-info --cycle --bind=esc:abort)
+  if [ "$OM_POPUP" = 1 ]; then opts+=(--height=100%); else opts+=(--height=~50%); fi
+  menu_rows "$1" | fzf "${opts[@]}" | cut -f2
+}
+
+run_action() {
+  local a="$1" wait=0
+  case "$a" in "!"*) wait=1; a="${a#!}" ;; esac
+  eval "$a"; local rc=$?
+  if [ $wait = 1 ] && [ "$OM_POPUP" = 1 ]; then printf '\n[enter to close] '; read -r _; fi
+  return $rc
+}
+
+loop() { # loop <menu id>: Esc returns to the caller
+  local sel
+  while sel=$(pick "$1") && [ -n "$sel" ]; do
+    case "$sel" in
+      m:*) loop "${sel#m:}" ;;
+      *) run_action "$sel"; return 0 ;;
+    esac
+  done
+}
+
+match_rows() { # match_rows <rows> <slug> exact|prefix: the actions whose label slug matches
+  local l a s
+  while IFS="$TAB" read -r l a; do
+    s=$(slug "$l")
+    if [ "$3" = exact ]; then [ "$s" = "$2" ] && echo "$a"; else [[ "$s" == "$2"* ]] && echo "$a"; fi
+  done <<< "$1"
+}
+
+resolve() { # resolve <tokens...>: walk the tree; print "menu:<id>" or "run:<action>"
+  local cur=root t rows hit n
+  for t in "$@"; do
+    t=$(slug "$t"); rows=$(menu_rows "$cur")
+    hit=$(match_rows "$rows" "$t" exact)
+    [ -z "$hit" ] && hit=$(match_rows "$rows" "$t" prefix)
+    n=$(printf '%s\n' "$hit" | grep -c .)
+    [ "$n" = 0 ] && die "no row '$t' under '${cur//-/ > }' (try: om list)"
+    [ "$n" -gt 1 ] && die "'$t' matches $n rows under '${cur//-/ > }'"
+    case "$hit" in m:*) cur="${hit#m:}" ;; *) echo "run:$hit"; return 0 ;; esac
+  done
+  echo "menu:$cur"
+}
+
+walk() { # walk <menu id> <path prefix>
+  local id="$1" pre="$2" l a
+  menu_rows "$id" | while IFS="$TAB" read -r l a; do
+    case "$a" in m:*) echo "$pre$(slug "$l")/"; walk "${a#m:}" "$pre$(slug "$l")/" ;; *) echo "$pre$(slug "$l")" ;; esac
+  done
+}
+list_all() { walk root ""; }
+
+# ---------------------------------------------------------------- installers
+managed_list() { # managed_list <marker>: names of om-made apps
+  local d; for d in "$APPS"/*.app; do [ -f "$d/Contents/Resources/$1" ] && basename "$d" .app; done 2>/dev/null
+}
+
+browser_bin() {
+  local b
+  for b in "${OM_BROWSER:-}" "Google Chrome" "Brave Browser"; do
+    [ -n "$b" ] && [ -x "/Applications/$b.app/Contents/MacOS/$b" ] && { echo "/Applications/$b.app/Contents/MacOS/$b"; return 0; }
+  done; return 1
+}
+
+make_icon() { # make_icon <app dir> <url>: favicon to icns, best effort
+  local app="$1" host tmp; host=$(echo "$2" | sed -E 's#^[a-z]+://([^/:]+).*#\1#')
+  tmp=$(mktemp -d) || return 1
+  if curl -fsSL --max-time 8 "https://www.google.com/s2/favicons?domain=$host&sz=128" -o "$tmp/i.png" 2>/dev/null \
+     && sips -g pixelWidth "$tmp/i.png" >/dev/null 2>&1; then
+    mkdir "$tmp/i.iconset"
+    sips -z 16 16 "$tmp/i.png" --out "$tmp/i.iconset/icon_16x16.png" >/dev/null 2>&1
+    sips -z 32 32 "$tmp/i.png" --out "$tmp/i.iconset/icon_16x16@2x.png" >/dev/null 2>&1
+    cp "$tmp/i.iconset/icon_16x16@2x.png" "$tmp/i.iconset/icon_32x32.png"
+    sips -z 64 64 "$tmp/i.png" --out "$tmp/i.iconset/icon_32x32@2x.png" >/dev/null 2>&1
+    sips -z 128 128 "$tmp/i.png" --out "$tmp/i.iconset/icon_128x128.png" >/dev/null 2>&1
+    iconutil -c icns "$tmp/i.iconset" -o "$app/Contents/Resources/app.icns" >/dev/null 2>&1
+  fi
+  rm -rf "${tmp:?}"; [ -f "$app/Contents/Resources/app.icns" ]
+}
+
+make_bundle() { # make_bundle <name> <marker> <marker content> <launcher body>
+  local name="$1" app="$APPS/$1.app" id
+  id="local.om.$(slug "$name")"
+  case "$name" in ""|.*|*[!A-Za-z0-9\ ._-]*) die "name '$name': letters, digits, space, dot, dash and underscore only" ;; esac
+  if [ -e "$app" ] && [ ! -f "$app/Contents/Resources/om-webapp" ] && [ ! -f "$app/Contents/Resources/om-tui" ]; then
+    die "$app exists and was not made by om; pick another name"
+  fi
+  rm -rf "${app:?}"; mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
+  cat > "$app/Contents/Info.plist" <<PL
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>CFBundleName</key><string>$name</string>
+<key>CFBundleDisplayName</key><string>$name</string>
+<key>CFBundleIdentifier</key><string>$id</string>
+<key>CFBundleExecutable</key><string>launcher</string>
+<key>CFBundleIconFile</key><string>app</string>
+<key>CFBundlePackageType</key><string>APPL</string>
+<key>CFBundleVersion</key><string>1</string>
+<key>LSMinimumSystemVersion</key><string>12.0</string>
+</dict></plist>
+PL
+  printf '#!/bin/bash\n%s\n' "$4" > "$app/Contents/MacOS/launcher"; chmod +x "$app/Contents/MacOS/launcher"
+  printf '%s\n' "$3" > "$app/Contents/Resources/$2"
+  echo "$app"
+}
+
+install_webapp() {
+  local name="$1" url="$2" bin app
+  [ -n "$name" ] && [ -n "$url" ] || die "usage: om install webapp <name> <url>"
+  case "$url" in http://*|https://*) ;; *) url="https://$url" ;; esac
+  bin=$(browser_bin) || die "no Chrome or Brave in /Applications"
+  mkdir -p "$APPS"
+  app=$(make_bundle "$name" om-webapp "$url" "exec $(quote "$bin") --app=$(quote "$url") \"\$@\"") || exit 1
+  make_icon "$app" "$url" || echo "om: no icon fetched, the browser's icon is used" >&2
+  touch "$app"
+  /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "$app" >/dev/null 2>&1
+  echo "web app  $app  ->  $url"
+}
+
+install_tui() {
+  local name="$1"; shift; local cmd="$*" app
+  [ -n "$name" ] && [ -n "$cmd" ] || die "usage: om install tui <name> <command>"
+  mkdir -p "$APPS"
+  app=$(make_bundle "$name" om-tui "$cmd" "exec open -na Ghostty --args --title=$(quote "$name") --confirm-close-surface=false -e /bin/zsh -lc $(quote "$cmd")") || exit 1
+  echo "tui  $app  ->  $cmd"
+}
+
+do_prompt_install() {
+  case "$1" in
+    webapp) install_webapp "$(ask 'Name')" "$(ask 'URL')" ;;
+    tui)    install_tui "$(ask 'Name')" "$(ask 'Command')" ;;
+  esac
+}
+
+do_install() {
+  case "$1" in
+    webapp) shift; install_webapp "$@" ;;
+    tui)    shift; install_tui "$@" ;;
+    package) shift; local p="$1" kind
+      if [ -z "$p" ]; then
+        p=$({ brew formulae | sed "s/^/formula$TAB/"; brew casks | sed "s/^/cask$TAB/"; } | fzf --prompt='brew install > ' --delimiter="$TAB" --with-nth=2..) || return 0
+        kind=${p%%"$TAB"*}; p=${p#*"$TAB"}
+        if [ "$kind" = cask ]; then brew install --cask "$p"; else brew install "$p"; fi
+      else brew install "$p"; fi ;;
+    *) die "usage: om install webapp <name> <url> | tui <name> <command> | package [name]" ;;
+  esac
+}
+
+do_remove() {
+  case "$1" in
+    webapp|tui) local m=om-webapp n="$2"; [ "$1" = tui ] && m=om-tui
+      [ -n "$n" ] || n=$(managed_list $m | fzf --prompt="remove $1 > ") || return 0
+      [ -f "$APPS/$n.app/Contents/Resources/$m" ] || die "'$n' is not an om-made $1"
+      confirm "Remove $1 '$n'?" || { echo cancelled; return 0; }
+      rm -rf "${APPS:?}/${n:?}.app"; echo "removed $n" ;;
+    package) local p="$2"
+      [ -n "$p" ] || p=$(brew leaves | fzf --prompt='brew uninstall > ') || return 0
+      confirm "Uninstall brew package '$p'?" || { echo cancelled; return 0; }
+      brew uninstall "$p" 2>&1 || brew uninstall --cask "$p" ;;
+    *) die "usage: om remove webapp|tui|package [name]" ;;
+  esac
+}
+
+# ---------------------------------------------------------------- update
+do_update() {
+  local dry=0; [ "$1" = --dry-run ] && dry=1
+  local steps=("tmutil localsnapshot" "brew update" "brew upgrade" "git -C $DOT pull --ff-only")
+  local i=1 s
+  for s in "${steps[@]}"; do
+    if [ $dry = 1 ]; then printf 'step %d (dry run): %s\n' $i "$s"
+    else
+      printf 'step %d: %s\n' $i "$s"
+      if [ "$i" = 1 ]; then
+        $s || { echo "om: the snapshot failed, stopping before any change. Run 'tmutil localsnapshot' to see why." >&2; return 1; }
+      else $s || echo "om: step $i failed, continuing" >&2; fi
+    fi; i=$((i+1))
+  done
+  if [ $dry = 1 ]; then echo "dry run: nothing was changed"; else echo "update done"; fi
+}
+
+# ---------------------------------------------------------------- entry
+popup() { # a Ghostty window with the menu in it
+  [ -d "$GHOSTTY" ] || die "Ghostty is not installed"
+  local cmd="OM_POPUP=1 $(quote "$SELF") --inline" a; for a in "$@"; do cmd="$cmd $(quote "$a")"; done
+  open -na Ghostty --args --title=om --window-width=70 --window-height=22 --confirm-close-surface=false \
+       --quit-after-last-window-closed=true --window-save-state=never -e /bin/bash -c "$cmd"
+}
+
+case "$1" in
+  update) shift; do_update "$@"; exit $? ;;
+  install) shift; if [ $# -gt 0 ]; then do_install "$@"; exit $?; fi; set -- install ;;
+  remove) shift; if [ $# -gt 0 ]; then do_remove "$@"; exit $?; fi; set -- remove ;;
+  list) list_all; exit 0 ;;
+  --popup) shift; popup "$@"; exit 0 ;;
+  --inline) shift ;;
+  -h|--help) sed -n '2,12p' "$SELF" | sed 's/^# \{0,1\}//'; exit 0 ;;
+  *) if { [ ! -t 1 ] || [ ! -t 0 ]; } && [ "$OM_POPUP" != 1 ]; then popup "$@"; exit 0; fi ;;
+esac
+
+has fzf || die "fzf is not installed (brew bundle --file $DOT/Brewfile)"
+if [ $# -eq 0 ]; then loop root
+else
+  r=$(resolve "$@") || exit 1
+  case "$r" in menu:*) loop "${r#menu:}" ;; run:*) run_action "${r#run:}" ;; esac
+fi

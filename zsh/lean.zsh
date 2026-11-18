@@ -48,6 +48,15 @@ unset _lean_cache _lean_dump _lean_fresh
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 zstyle ':completion:*' menu select
 
+# Omarchy shell layer (aliases, functions, fzf keys). Loaded here so it comes before
+# the plugins; James's own aliases win on a clash (omarchy-clashes lists them).
+_oz="${${(%):-%x}:h}/omarchy.zsh"
+if [[ -r $_oz ]]; then
+  [[ ! -e $_oz.zwc || $_oz -nt $_oz.zwc ]] && zcompile "$_oz" 2>/dev/null
+  source "$_oz"
+fi
+unset _oz
+
 # Plugins from Homebrew (syntax highlighting last)
 _lean_share=("${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/share}" /usr/local/share /opt/homebrew/share)
 for _p in zsh-autosuggestions zsh-syntax-highlighting; do

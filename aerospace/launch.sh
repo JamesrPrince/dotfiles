@@ -43,6 +43,7 @@ case "$1" in
   new)     ghostty_window "" ;;
   finder)  open -b com.apple.finder ;;
   code)    open -b com.microsoft.VSCodeInsiders ;;
+  clarity) open -b app.clarity.mac ;;
   btop)    ghostty_window "/usr/local/bin/btop" ;;
   lazygit) ghostty_window "/usr/local/bin/lazygit" ;;
   lazydocker) ghostty_window "/usr/local/bin/lazydocker" ;;
@@ -61,6 +62,7 @@ ghostty|Ghostty
 new|New Ghostty window
 finder|Finder
 code|VS Code
+clarity|Clarity
 btop|btop
 lazygit|lazygit
 lazydocker|lazydocker

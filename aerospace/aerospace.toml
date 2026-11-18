@@ -297,11 +297,18 @@ gaps.outer.right =      8
     alt-minus = 'resize smart -50'
     alt-equal = 'resize smart +50'
 
-    # Toggle the focused window between floating and tiling
-    alt-shift-space = ['layout floating tiling', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_layout_change']
-
-    # The layout pill's script also hides the bar while a window is full screen
-    alt-shift-f = ['fullscreen', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_layout_change']
+    # Omarchy's Super bindings live on Alt (the AeroSpace modifier); Cmd shortcuts are untouched.
+    # Window keys, as Omarchy 4.5 (default/hypr/bindings/tiling.lua):
+    # Close window (SUPER+W)
+    alt-w = 'close'
+    # Full screen (SUPER+F); the layout pill's script also hides the bar while a window is full screen
+    alt-f = ['fullscreen', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_layout_change']
+    # Toggle the focused window between floating and tiling (SUPER+T)
+    alt-t = ['layout floating tiling', 'exec-and-forget /usr/local/bin/sketchybar --trigger aerospace_layout_change']
+    # Toggle top bar (SUPER+SHIFT+SPACE)
+    alt-shift-space = 'exec-and-forget /usr/local/bin/sketchybar --bar hidden=toggle'
+    # File manager (SUPER+SHIFT+F)
+    alt-shift-f = 'exec-and-forget ~/dotfiles/aerospace/launch.sh finder'
 
     alt-1 = 'workspace 1'
     alt-2 = 'workspace 2'
@@ -345,18 +352,29 @@ gaps.outer.right =      8
     alt-shift-slash = 'exec-and-forget /usr/bin/python3 ~/.config/sketchybar/plugins/keys.py toggle'
 
     # Next theme: bar, borders, Ghostty, Neovim and wallpaper switch together (theme.sh set <name> picks one)
-    alt-shift-t = 'exec-and-forget /bin/bash ~/.config/sketchybar/plugins/theme.sh next'
+    alt-shift-t = 'exec-and-forget /bin/bash ~/dotfiles/themes/theme.sh next'
 
     # Next bar style (barstyle.sh, flat or floating)
     alt-shift-b = 'exec-and-forget /bin/bash ~/.config/sketchybar/plugins/barstyle.sh next'
 
+    # Omarchy menu and panel keys (default/hypr/bindings/utilities.lua), Super -> Alt.
+    # `om <path>` jumps into the menu tree; om-key.sh finds om on PATH or in ~/dotfiles.
+    # Alt-Space is free: Spotlight is off, Alfred is Cmd-Space, Spotlight-in-Finder is Cmd-Option-Space.
+    alt-space = 'exec-and-forget ~/dotfiles/aerospace/om-key.sh'
+    ctrl-alt-space = 'exec-and-forget ~/dotfiles/aerospace/om-key.sh style background'
+    ctrl-alt-shift-space = 'exec-and-forget ~/dotfiles/aerospace/om-key.sh style theme'
+    ctrl-alt-c = 'exec-and-forget ~/dotfiles/aerospace/om-key.sh trigger capture'
+    ctrl-alt-o = 'exec-and-forget ~/dotfiles/aerospace/om-key.sh trigger toggle'
+    alt-esc = 'exec-and-forget ~/dotfiles/aerospace/om-key.sh system'
+    # Clipboard manager (SUPER+CTRL+V): Maccy's popup (its own hotkey stays Cmd-Shift-C)
+    ctrl-alt-v = 'exec-and-forget open -b org.p0deje.Maccy'
+    # Dictation: Omarchy holds Right Alt for push-to-talk; Handy owns that key (hold Right Option), no binding here.
+
     # App launchers: ctrl-alt-<letter> opens or focuses the app (by bundle id)
     ctrl-alt-b = 'exec-and-forget open -b com.brave.Browser'
     ctrl-alt-s = 'exec-and-forget open -b com.apple.Safari'
-    ctrl-alt-o = 'exec-and-forget open -b app.clarity.mac' # Clarity (replaces Obsidian)
     ctrl-alt-t = 'exec-and-forget open -b com.mitchellh.ghostty'
     ctrl-alt-w = 'exec-and-forget open -b dev.warp.Warp-Stable'
-    ctrl-alt-c = 'exec-and-forget open -b com.microsoft.VSCodeInsiders'
     ctrl-alt-a = 'exec-and-forget open -b com.anthropic.claudefordesktop'
     ctrl-alt-x = 'exec-and-forget open -b com.microsoft.Excel'
     ctrl-alt-e = 'exec-and-forget open -b com.microsoft.Outlook'
@@ -383,6 +401,7 @@ gaps.outer.right =      8
     e = ['exec-and-forget ~/dotfiles/aerospace/launch.sh outlook', 'mode main']
     x = ['exec-and-forget ~/dotfiles/aerospace/launch.sh excel', 'mode main']
     p = ['exec-and-forget ~/dotfiles/aerospace/launch.sh spotify', 'mode main']
+    k = ['exec-and-forget ~/dotfiles/aerospace/launch.sh clarity', 'mode main'] # Clarity (was ctrl-alt-o)
     esc = 'mode main'
     f18 = 'mode main'
 

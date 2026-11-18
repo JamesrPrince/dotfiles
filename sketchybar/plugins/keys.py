@@ -137,6 +137,14 @@ def describe(cmds, cache):
     # Bar refresh triggers and the way back to main are plumbing, not what the key does
     cmds = [c for c in cmds if c != "mode main" and "sketchybar --trigger" not in c]
     c = " ".join(cmds).strip()
+    if m := re.search(r"om-key\.sh(?: (?:\w+ )*(\w+))?$", c):
+        return "Layout", "Omarchy menu" if not m.group(1) else "Menu: " + m.group(1)
+    if c == "close":
+        return "Layout", "Close window"
+    if "org.p0deje.Maccy" in c:
+        return "Apps", "Clipboard (Maccy)"
+    if "bar hidden=toggle" in c:
+        return "Layout", "Toggle top bar"
     if m := re.match(r"exec-and-forget open (?:-\w+ )*-b (\S+)", c):
         return "Apps", app_name(m.group(1).strip("'\""), cache)
     if m := re.match(r"exec-and-forget open (?:-\w+ )*-a (?:\"([^\"]+)\"|'([^']+)'|(\S+))", c):
@@ -506,15 +514,23 @@ def check():
                 shown += key.split(" ")
                 if m := re.match(r"^(.*?)(\d)–(\d)$", key):
                     shown += [m.group(1) + str(d) for d in range(int(m.group(2)), int(m.group(3)) + 1)]
-    total = missing = 0
+    total = missing = clashes = 0
     for mode, bindings in parse_bindings().items():
+        seen = set()
         for key, _cmds in bindings:
             total += 1
             ok = pretty_key(key) in shown
             missing += not ok
-            print("%-8s %-20s %s" % (mode, pretty_key(key), "ok" if ok else "MISSING"))
-    print("%d bindings, %d missing, %d pages" % (total, missing, len(pages)))
-    sys.exit(1 if missing else 0)
+            # A clash: the same key twice in one mode (case and modifier order ignored),
+            # or a Cmd binding (Cmd shortcuts belong to macOS and the apps, never to AeroSpace).
+            *mods, base = key.lower().split("-")
+            norm = "-".join(sorted(mods) + [base])
+            clash = norm in seen or "cmd" in mods
+            seen.add(norm)
+            clashes += clash
+            print("%-8s %-20s %s" % (mode, pretty_key(key), "CLASH" if clash else "ok" if ok else "MISSING"))
+    print("%d bindings, %d missing, %d clashes, %d pages" % (total, missing, clashes, len(pages)))
+    sys.exit(1 if missing or clashes else 0)
 
 
 def main():

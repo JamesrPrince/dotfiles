@@ -35,3 +35,25 @@ cask "font-sketchybar-app-font"
 #   curl -L https://github.com/fastfetch-cli/fastfetch/releases/latest/download/fastfetch-macos-universal.tar.gz | tar xz
 #   then copy the fastfetch binary from the extracted folder to /usr/local/bin/
 # On Apple Silicon `brew install fastfetch` is fine.
+
+# keys and tools
+cask "maccy"                   # clipboard history, opened by Alt+Ctrl+V
+cask "handy"                   # local push-to-talk dictation (Right Option); pick a small model in its Settings
+
+# om menu
+# fzf is the picker (already above). Night shift row appears once this is installed:
+tap "smudge/smudge"
+brew "smudge/smudge/nightlight"
+
+# theme reach (theme.sh font: the ruled list, Nerd Font builds)
+cask "font-jetbrains-mono-nerd-font"
+cask "font-caskaydia-mono-nerd-font"
+cask "font-fira-code-nerd-font"
+cask "font-meslo-lg-nerd-font"
+
+# shell layer: Omarchy terminal habits (zsh/omarchy.zsh, tmux/tmux.conf)
+brew "tmux"
+brew "tlrc"                    # tldr pages client; run `tldr --update` once
+brew "fd"                      # fzf file and directory lists
+brew "eza"
+brew "zoxide"

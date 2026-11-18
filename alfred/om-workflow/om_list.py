@@ -2,7 +2,7 @@
 """Alfred script filter for the `om` keyword: themes and desktop actions. Alfred filters by typing."""
 import json, os, subprocess
 HOME = os.path.expanduser("~")
-theme = HOME + "/.config/sketchybar/plugins/theme.sh"
+theme = HOME + "/dotfiles/themes/theme.sh"
 # themes/<id>/preview-thumb.png is the row's icon and preview.png opens with Quick Look (shift or cmd-Y);
 # both come from themes/make-previews.py. The dotfiles folder is behind the sketchybar symlink.
 THEMES = os.path.realpath(HOME + "/.config/sketchybar/../themes")

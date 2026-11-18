@@ -161,6 +161,62 @@ result "launch mode exists and Caps Lock is F18" "$(aerospace list-modes | grep 
 out=$(bash "$DOT/snappy.sh" status 2>&1); rc=$?
 result "snappy.sh status: key repeat and animation settings at target" "$rc" "$(echo "$out" | grep DIFF | head -2 | tr '\n' ' ')"
 
+# om menu
+OM="$DOT/om/om"
+out=$(bash "$OM" list 2>&1); n=$(echo "$out" | grep -c '^[a-z-]*/$'); top=$(echo "$out" | grep -c '^[a-z-]*/\?$')
+dry=$(bash "$OM" update --dry-run 2>&1)
+miss=""; for a in "Claude Web" "ChatGPT Web" WhatsApp "Slack Web" Gmail "Google Calendar" GitHub YouTube; do [ -x "$HOME/Applications/$a.app/Contents/MacOS/launcher" ] || miss="$miss $a"; done
+result "om menu tree: 9 top branches, update dry run has the snapshot, 8 web apps in ~/Applications" "$(
+  [ "$(echo "$out" | grep -c '^\(apps\|learn\|trigger\|style\|setup\|install\|remove\|update\|system\)/$')" = 9 ] \
+  && echo "$dry" | grep -q 'tmutil localsnapshot' && [ -z "$miss" ] && [ -L "$HOME/.local/bin/om" ] && echo 0 || echo 1)" "missing:$miss"
+
+# --- theme reach ------------------------------------------------------------------------------------
+# theme reach: every target of the theme switch holds what the active theme calls for (read-only).
+while IFS=$'\t' read -r t rc d; do
+  case "$t" in
+    vscode) n="theme reach: VS Code Insiders colour theme matches the theme" ;;
+    claude) n="theme reach: Claude Code theme matches light/dark" ;;
+    tmux)   n="theme reach: ~/.config/tmux/theme.conf carries the theme accent" ;;
+    delta)  n="theme reach: delta colours (~/.config/git/config) carry the theme accent" ;;
+    macos)  n="theme reach: macOS accent and light/dark match the theme" ;;
+    font)   n="theme reach: chosen font agrees across Ghostty and VS Code Insiders" ;;
+    bg)     n="theme reach: wallpaper folder for the active theme is not empty" ;;
+    *) continue ;;
+  esac
+  result "$n" "$rc" "$d"
+done < <(/bin/bash "$DOT/themes/reach.sh" check 2>&1)
+result "theme.sh bg and font answer" "$(bash "$DOT/themes/theme.sh" bg current >/dev/null 2>&1 && bash "$DOT/themes/theme.sh" font bogus 2>&1 | grep -q 'unknown font' && echo 0 || echo 1)"
+
+# --- shell layer: Omarchy zsh + tmux (zsh/omarchy.zsh, tmux/tmux.conf) --------------------------------
+out=$(zsh -i -c exit 2>&1); result "zsh -i -c exit is clean (shell layer)" "$([ -z "$out" ] && echo 0 || echo 1)" "$(echo "$out" | head -1)"
+out=$(zsh -i -c 'for a in lsa lta ff g gcm cx t ic ix icx decompress; do [[ -n ${aliases[$a]} ]] || echo "alias $a"; done; for f in eff sff tdl tds tdlm tsl compress ga gd fip dip lip ssh n zd; do (( $+functions[$f] )) || echo "fn $f"; done' 2>&1)
+result "Omarchy aliases and functions resolve" "$([ -z "$out" ] && echo 0 || echo 1)" "$(echo "$out" | head -3 | tr '\n' ' ')"
+out=$(python3 - <<'PYEOF' 2>&1
+import pty, os, select
+pid, fd = pty.fork()
+if pid == 0:
+    os.execvp("zsh", ["zsh", "-i", "-c", 'bindkey | grep -c fzf'])
+buf = b""
+while select.select([fd], [], [], 10)[0]:
+    try: d = os.read(fd, 4096)
+    except OSError: break
+    if not d: break
+    buf += d
+os.waitpid(pid, 0)
+print(buf.decode(errors="replace").strip())
+PYEOF
+)
+result "fzf key bindings on Ctrl+R, Ctrl+T, Alt+C (pty shell)" "$([ "${out%$'\r'}" -ge 3 ] 2>/dev/null && echo 0 || echo 1)" "bound: $out"
+if command -v tmux >/dev/null; then
+  tmux -L chk-shell kill-server 2>/dev/null
+  out=$(tmux -L chk-shell -f "$DOT/tmux/tmux.conf" new -d -s t 'sleep 20' 2>&1 && tmux -L chk-shell show -gv prefix 2>&1)
+  tmux -L chk-shell kill-server 2>/dev/null
+  result "tmux.conf loads, prefix is C-Space" "$([ "$out" = C-Space ] && echo 0 || echo 1)" "$(echo "$out" | head -1)"
+  grep -q 'source-file -q ~/.config/tmux/theme.conf' "$DOT/tmux/tmux.conf"; result "tmux.conf has the theme include line" $?
+else result "tmux.conf loads, prefix is C-Space" 1 "tmux not installed"; fi
+result "tldr works (tlrc)" "$(command -v tldr >/dev/null && tldr --version >/dev/null 2>&1 && echo 0 || echo 1)" "brew install tlrc"
+# end shell layer
+
 # --- optional, switching checks --------------------------------------------------------------------
 for arg in "$@"; do
   case "$arg" in
@@ -179,6 +235,10 @@ for arg in "$@"; do
     *) echo "usage: check.sh [--themes] [--styles] [--smart]" >&2; exit 2 ;;
   esac
 done
+
+# keys and tools
+result "om-key.sh is executable and valid bash" "$([ -x "$DOT/aerospace/om-key.sh" ] && bash -n "$DOT/aerospace/om-key.sh" && echo 0 || echo 1)" ""
+result "Maccy and Handy are installed" "$([ -d /Applications/Maccy.app ] && [ -d /Applications/Handy.app ] && echo 0 || echo 1)" ""
 
 echo
 [ "$fail" = 0 ] && echo "ALL PASS" || echo "FAILED"
