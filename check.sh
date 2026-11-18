@@ -158,6 +158,8 @@ result "theme.sh list returns $(ls ~/dotfiles/themes/*/colors.toml | wc -l | tr 
 out=$(python3 "$DOT/alfred/gen-themes.py" --check 2>&1); result "one valid Alfred theme file per theme" $? "$(echo "$out" | head -1)"
 cur=$(bash "$CONF/plugins/theme.sh" current)
 result "launch mode exists and Caps Lock is F18" "$(aerospace list-modes | grep -qx launch && hidutil property --get UserKeyMapping | grep -q 30064771181 && echo 0 || echo 1)"
+out=$(bash "$DOT/snappy.sh" status 2>&1); rc=$?
+result "snappy.sh status: key repeat and animation settings at target" "$rc" "$(echo "$out" | grep DIFF | head -2 | tr '\n' ' ')"
 
 # --- optional, switching checks --------------------------------------------------------------------
 for arg in "$@"; do
