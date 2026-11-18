@@ -193,7 +193,7 @@ gaps.outer.right =      8
     run = 'move-node-to-workspace 2'
 
 [[on-window-detected]]
-    if.app-id = 'app.clarity.mac'
+    if.app-id = 'app.cosima.mac'
     run = 'move-node-to-workspace 2'
 
 [[on-window-detected]]
@@ -401,7 +401,7 @@ gaps.outer.right =      8
     e = ['exec-and-forget ~/dotfiles/aerospace/launch.sh outlook', 'mode main']
     x = ['exec-and-forget ~/dotfiles/aerospace/launch.sh excel', 'mode main']
     p = ['exec-and-forget ~/dotfiles/aerospace/launch.sh spotify', 'mode main']
-    k = ['exec-and-forget ~/dotfiles/aerospace/launch.sh clarity', 'mode main'] # Clarity (was ctrl-alt-o)
+    k = ['exec-and-forget ~/dotfiles/aerospace/launch.sh cosima', 'mode main'] # Cosima (was ctrl-alt-o)
     esc = 'mode main'
     f18 = 'mode main'
 
