@@ -22,7 +22,7 @@ VSCODE = {
     "macchiato": ("CatppuccinMacchiato", "catppuccin.catppuccin-vsc"),   # not an Omarchy theme
     "catppuccin": ("CatppuccinMocha", "catppuccin.catppuccin-vsc"),
     "catppuccinlatte": ("CatppuccinLatte", "catppuccin.catppuccin-vsc"),
-    "everforest": ("EverforestDark", "reesew.everforest-theme"),
+    "everforest": ("EverforestDark", "sainnhe.everforest"),
     "flexokilight": ("flexoki-light", "shadesOfBuntu.flexoki-light"),
     "gruvbox": ("GruvboxDarkMedium", "jdinhlife.gruvbox"),
     "hackerman": ("Hackerman", "Bjarne.hackerman-omarchy"),
@@ -172,7 +172,7 @@ def vscode():
     label = None
     if pick:
         name, ext = pick
-        if not ext_installed(ext):
+        if not ext_installed(ext) and not os.environ.get("THEME_REACH_NO_INSTALL"):   # NO_INSTALL=1: never fetch an extension
             try:
                 subprocess.run([CODE_BIN, "--install-extension", ext], capture_output=True, timeout=120)
             except (OSError, subprocess.SubprocessError):
@@ -281,12 +281,16 @@ def delta():
     old = open(conf).read() if os.path.exists(conf) else ""
     begin, end = "# >>> theme reach: delta (managed block)\n", "# <<< theme reach: delta\n"
     block = begin + text + end
-    if begin in old and end in old:          # replace our block only; everything else in the file is the user's
-        new = old[:old.index(begin)] + block + old[old.index(end) + len(end):]
+    # The block goes FIRST in the file. A key a user adds at the end, with no section header of its own,
+    # then belongs to the user's last section (or is a plain git error), never silently to [delta].
+    if begin in old and end in old:
+        b, e = old.index(begin), old.index(end) + len(end)
+        rest = old[:b] + old[e:]             # everything outside our block, byte for byte
+        new = block + rest   # block always at the top (moves a block an older run left at the end)
     elif not old.strip() or old.startswith("# Written by ~/dotfiles/themes/reach.py"):
         new = block                          # empty, or the whole-file version this replaced
     else:
-        new = old.rstrip("\n") + "\n\n" + block
+        new = block + "\n" + old
     if new != old:
         if old:
             backup_once(conf)

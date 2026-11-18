@@ -9,12 +9,19 @@ source "$HOME/.config/sketchybar/colors.sh"
 export THEME THEME_MODE ACCENT
 mkdir -p "$HOME/.config/theme-reach"
 if [ "${1:-apply}" = apply ]; then
-  lock="$HOME/.config/theme-reach/lock"; n=0
+  lock="$HOME/.config/theme-reach/lock"; n=0; waited=0
   until mkdir "$lock" 2>/dev/null; do
-    # a lock is cleared only when the run that holds it is gone (its PID is inside), never on a timer
+    # a lock is cleared only when the run that holds it is gone: its PID is inside, must be alive AND
+    # still be a reach.sh (a reused PID belongs to some other process: stale). Never on a short timer;
+    # a holder that outlives 90 s is taken to be stuck and is replaced.
     owner=$(cat "$lock/pid" 2>/dev/null)
-    if [ -n "$owner" ]; then kill -0 "$owner" 2>/dev/null || rm -rf "${lock:?}"
+    if [ -n "$owner" ]; then
+      case "$(ps -p "$owner" -o command= 2>/dev/null)" in
+        *reach.sh*) ;;                                  # a live reach run: wait for it
+        *) rm -rf "${lock:?}" ;;                        # dead, or the PID now runs something else
+      esac
     else n=$((n+1)); [ $n -gt 10 ] && { rm -rf "${lock:?}"; n=0; }; fi   # no PID after 10 s: a dead run from before
+    waited=$((waited+1)); [ $waited -gt 90 ] && { rm -rf "${lock:?}"; waited=0; }
     sleep 1
   done
   echo $$ > "$lock/pid"
