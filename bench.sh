@@ -7,14 +7,18 @@ export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"
 DOT="$(cd "$(dirname "$0")" && pwd)"
 AERO=$(command -v aerospace || true)
 
-now_ms() { python3 -c 'import time;print(int(time.time()*1000))'; }
 median5() { # median5 <cmd...>: median wall ms of 5 runs
-  local i t0 t1 list=""
-  for i in 1 2 3 4 5; do
-    t0=$(now_ms); "$@" >/dev/null 2>&1; t1=$(now_ms)
-    list="$list $((t1-t0))"
-  done
-  echo $list | tr ' ' '\n' | sort -n | sed -n 3p
+  # One python3 process holds the clock for all five runs, so its own start (about 60 ms here) is never
+  # inside a timed run. Rows saved before 2026-11-18 22:15 used a python3 call per reading and read that much high.
+  python3 - "$@" <<'PY' 2>/dev/null || echo n/a
+import subprocess, sys, time
+ts = []
+for _ in range(5):
+    t = time.perf_counter()
+    subprocess.run(sys.argv[1:], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    ts.append((time.perf_counter() - t) * 1000)
+print(round(sorted(ts)[2]))
+PY
 }
 row() { printf '%s\t%s\t%s\n' "$1" "$2" "$3"; }
 
