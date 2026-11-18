@@ -9,10 +9,26 @@ HELPER="$HOME/.config/sketchybar/helper/brightness"
 LAST="${TMPDIR:-/tmp}/sketchybar_brightness_last"
 WIDTH=70
 
-# Called by the slider every 2s. One tiny helper call and a string compare; nothing
-# else runs unless the value changed since the last look.
+WATCH="$HOME/.config/sketchybar/helper/brightnesswatch"
+
+# The brightness_change event comes from helper/brightnesswatch (DisplayServices' own change
+# notification), started here once the bar has loaded. Classic style only: the flat bar has no
+# brightness slider (flat_hide.sh turns the item off), so nothing runs there.
+is_flat() { local s=; [ -r "$HOME/.config/sketchybar/.barstyle" ] && read -r s < "$HOME/.config/sketchybar/.barstyle"; [ "$s" = flat ]; }
+
+watch() {
+  is_flat && { pkill -x brightnesswatch 2>/dev/null; exit 0; }   # a switch to flat stops it
+  [ -x "$WATCH" ] || exit 0
+  nohup "$WATCH" >/dev/null 2>&1 &   # a no-op if one already runs (it holds a lock)
+  exit 0
+}
+
+# Safety net, every 60s (the event does the real work): a helper call and a string compare to catch
+# a change the watcher missed, and a respawn of the watcher if it died. Nothing else runs unless the
+# value changed since the last look.
 poll() {
   local b last
+  [ -x "$WATCH" ] && ! is_flat && ! pgrep -xq brightnesswatch && { nohup "$WATCH" >/dev/null 2>&1 & }
   b=$("$HELPER" 2>/dev/null) || exit 0
   [ -n "$b" ] && [ "$b" -ge 0 ] 2>/dev/null || exit 0
   last=; [ -r "$LAST" ] && read -r last < "$LAST"   # builtin read: no cat process
@@ -24,6 +40,7 @@ poll() {
 }
 
 brightness_change() {
+  echo "$INFO" > "$LAST"   # so the safety poll does not report the same change again
   sketchybar --set $NAME slider.percentage=$INFO \
              --animate tanh 30 --set $NAME slider.width=$WIDTH
 
@@ -48,6 +65,7 @@ toggle() {
 }
 
 [ "$1" = "toggle" ] && { toggle; exit 0; }
+[ "$1" = "watch" ] && watch
 
 case "$SENDER" in
   "routine"|"forced") poll ;;

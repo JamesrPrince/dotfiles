@@ -31,7 +31,7 @@ spotify_anchor=(
 # past the icon to line up with the label.
 spotify_progress=(
   script="$PLUGIN_DIR/spotify.sh"
-  update_freq=2
+  update_freq=5   # track position has no event; spotify_change resyncs it on every track, seek and pause
   updates=when_shown
   drawing=off
   width=0
@@ -106,7 +106,7 @@ spotify_state=(
   slider.percentage=40
   slider.width=115
   script="$PLUGIN_DIR/spotify.sh"
-  update_freq=1
+  update_freq=2   # popup only (when_shown): track position has no event; spotify_change resyncs it
   updates=when_shown
 )
 
@@ -181,6 +181,7 @@ spotify_controls=(
 sketchybar --add event spotify_change $SPOTIFY_EVENT             \
            --add slider spotify.progress left 120                \
            --set spotify.progress "${spotify_progress[@]}"       \
+           --subscribe spotify.progress spotify_change           \
            --add item spotify.anchor left                        \
            --set spotify.anchor "${spotify_anchor[@]}"           \
            --subscribe spotify.anchor mouse.entered mouse.exited \
@@ -200,7 +201,7 @@ sketchybar --add event spotify_change $SPOTIFY_EVENT             \
                                                                  \
            --add slider spotify.state popup.spotify.anchor       \
            --set spotify.state "${spotify_state[@]}"             \
-           --subscribe spotify.state mouse.clicked               \
+           --subscribe spotify.state mouse.clicked spotify_change \
                                                                  \
            --add item spotify.shuffle popup.spotify.anchor       \
            --set spotify.shuffle "${spotify_shuffle[@]}"         \

@@ -2,15 +2,16 @@
 # Brightness icon and slider, built like the volume item (items/volume.sh): the slider
 # slides out when the brightness changes and hides again after 2s. Click the icon to
 # show or hide it; dragging the slider sets the built-in display (helper/brightness).
-# macOS sends no brightness event, so plugins/brightness_bar.sh polls the helper
-# every 2s and only raises brightness_change when the value moved.
+# brightness_change is raised by helper/brightnesswatch, which listens for DisplayServices' own
+# brightness notification (started by `brightness_bar.sh watch` after the bar loads). The slider
+# still polls every 60s as a safety net: it catches a missed change and restarts the watcher.
 
 sketchybar --add event brightness_change
 
 brightness_slider=(
   script="$PLUGIN_DIR/brightness_bar.sh"
   updates=on
-  update_freq=2
+  update_freq=60
   label.drawing=off
   icon.drawing=off
   slider.highlight_color=$YELLOW
@@ -35,6 +36,8 @@ brightness_icon=(
   label.align=left
   label.font="$FONT:Regular:14.0"
 )
+
+AFTER_LOAD+=("$PLUGIN_DIR/brightness_bar.sh watch")
 
 sketchybar --add slider brightness right            \
            --set brightness "${brightness_slider[@]}" \

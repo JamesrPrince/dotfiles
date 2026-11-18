@@ -56,7 +56,7 @@ done
 # max_chars keeps the longest title well clear of the clock in the centre.
 sketchybar --add item window_title left                              \
            --set window_title script="$PLUGIN_DIR/window_title.sh"   \
-                              update_freq=3                          \
+                              update_freq=5                          \
                               icon.font="sketchybar-app-font:Regular:14.0" \
                               icon.color=$GREY                       \
                               icon.padding_left=0                    \

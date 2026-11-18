@@ -7,6 +7,7 @@ cd "$(dirname "$0")"
 clang -O2 -framework IOKit -o smc smc.c
 clang -O2 -o cpu cpu.c
 clang -O2 -F /System/Library/PrivateFrameworks -framework DisplayServices -framework CoreGraphics -o brightness brightness.c
+clang -O2 -F /System/Library/PrivateFrameworks -framework DisplayServices -framework CoreGraphics -framework CoreFoundation -o brightnesswatch brightnesswatch.c
 clang -O2 -framework CoreAudio -framework CoreFoundation -o audio audio.c
 clang -O2 -framework CoreMediaIO -framework CoreFoundation -o camera camera.c
 swiftc -O -o wifi wifi.swift
@@ -30,4 +31,4 @@ mkdir -p SketchyBarBluetooth.app/Contents/MacOS
 swiftc -O -o SketchyBarBluetooth.app/Contents/MacOS/btctl btctl.swift
 codesign -s - --force SketchyBarBluetooth.app
 
-echo "Helpers built: smc cpu brightness audio camera wifi clip SketchyBarCal.app SketchyBarWiFi.app SketchyBarBluetooth.app"
+echo "Helpers built: smc cpu brightness brightnesswatch audio camera wifi clip SketchyBarCal.app SketchyBarWiFi.app SketchyBarBluetooth.app"

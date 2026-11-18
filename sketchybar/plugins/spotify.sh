@@ -118,8 +118,10 @@ scrubbing() {
 }
 
 scroll() {
+  pgrep -xq Spotify || exit 0   # never asks Spotify (which would launch it) unless it runs
   DURATION_MS=$(osascript -e 'tell application "Spotify" to get duration of current track')
   DURATION=$((DURATION_MS/1000))
+  [ "$DURATION" -gt 0 ] 2>/dev/null || exit 0
 
   FLOAT="$(osascript -e 'tell application "Spotify" to get player position')"
   TIME=${FLOAT%.*}
@@ -207,6 +209,13 @@ case "$SENDER" in
   "routine") routine
   ;;
   "forced") exit 0
+  ;;
+  # Spotify's own event (track, play/pause, seek): the position items resync, the rest redraws
+  "spotify_change") case "$NAME" in
+      "spotify.progress") progress ;;
+      "spotify.state") scroll ;;
+      *) update ;;
+    esac
   ;;
   "smart_refresh") flat_music
   ;;

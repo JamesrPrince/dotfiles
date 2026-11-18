@@ -3,8 +3,11 @@
 export PATH="/usr/local/bin:$PATH"
 # Flat style: the focused window's app icon and title, right of the workspaces. Ghostty has no
 # title bar in this look, so this is where a window says what it is doing.
-# Runs on focus and workspace changes, and every few seconds, because a terminal retitles itself
-# without any event. The bar is only told when the text changed.
+# Runs on every AeroSpace focus / workspace change and every front-app switch (events), so a new
+# window shows at once. It also runs every 5 s, for the one case with no event: a window retitling
+# itself (a terminal's cwd, a browser tab) without focus moving; macOS announces that only through
+# the Accessibility API, which a script started by the bar has no permission for. The bar is only
+# told when the text changed.
 
 [ -f "${TMPDIR:-/tmp}/sketchybar_zen" ] && exit 0
 NAME="${NAME:-window_title}"
