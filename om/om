@@ -59,24 +59,11 @@ rows_learn() {
 
 rows_trigger() { row "Capture" m:trigger-capture; row "Toggle" m:trigger-toggle; }
 
+# Screenshots, OCR and screen recording belong to CleanShot X (Cmd-Shift-3/4/5); only the
+# colour picker, which CleanShot lacks, stays here.
 rows_trigger_capture() {
   local c="$DOT/capture/capture.sh"
-  row "Screenshot region (clipboard)" "/bin/bash $c region" "[ -f $c ]"
-  row "Screenshot region to file" "/bin/bash $c region-file" "[ -f $c ]"
-  row "Screenshot window" "/bin/bash $c window" "[ -f $c ]"
-  row "Capture text (OCR)" "/bin/bash $c text" "[ -f $c ]"
   row "Colour picker" "/bin/bash $c colour" "[ -f $c ]"
-  if rec_running; then row "Screen record: stop" "do_record stop"; else row "Screen record: start" "do_record start"; fi
-}
-
-rec_running() { [ -f "$STATE/record.pid" ] && kill -0 "$(cat "$STATE/record.pid")" 2>/dev/null; }
-do_record() {
-  case "$1" in
-    start) local d="$HOME/Movies/Screen Recordings"; mkdir -p "$d"
-           local f="$d/screenrecord-$(date +%Y-%m-%d_%H-%M-%S).mov"
-           nohup /usr/sbin/screencapture -v -x "$f" >/dev/null 2>&1 & echo $! > "$STATE/record.pid"; toast "Recording started" ;;
-    stop)  rec_running && kill -INT "$(cat "$STATE/record.pid")"; rm -f "$STATE/record.pid"; toast "Recording saved to Movies" ;;
-  esac
 }
 
 caf_running() { [ -f "$STATE/caffeinate.pid" ] && kill -0 "$(cat "$STATE/caffeinate.pid")" 2>/dev/null; }

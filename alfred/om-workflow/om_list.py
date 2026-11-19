@@ -26,11 +26,8 @@ try:
         items.append(item)
 except Exception:
     pass
-CAPTURE = [("region", "region", "Capture region", "Pick a region, PNG to the clipboard"),
-           ("file", "region-file", "Capture region to file", "Pick a region, saved to ~/Pictures/Screenshots"),
-           ("window", "window", "Capture window", "Click a window, PNG to the clipboard"),
-           ("text", "text", "Capture text (OCR)", "Pick a region, its text to the clipboard"),
-           ("colour", "colour", "Pick colour", "Colour under the cursor, #RRGGBB to the clipboard")]
+# Screenshots and OCR belong to CleanShot X; only the colour picker stays here.
+CAPTURE = [("colour", "colour", "Pick colour", "Colour under the cursor, #RRGGBB to the clipboard")]
 for uid, cmd, title, sub in CAPTURE:
     items.append({"uid": "cap-" + uid, "title": title, "subtitle": sub, "arg": "cap:" + cmd,
                   "match": "capture screenshot " + title.lower() + " " + cmd + (" color" if uid == "colour" else "")})
