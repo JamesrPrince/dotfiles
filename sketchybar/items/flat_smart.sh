@@ -88,12 +88,12 @@ sketchybar --set spotify.anchor position=right "${collapsed[@]}"                
            --subscribe spotify.anchor smart_refresh display_change
 
 # --- Next meeting and focus timer, after the clock --------------------------------------------------------
-sketchybar --set next_event position=center width=0 "${collapsed[@]}"            \
+sketchybar --set next_event position=e width=0 "${collapsed[@]}"            \
                             update_freq=$FLAT_POLL_MEETING                      \
                             icon=$CALENDAR icon.font="$sym" label.font="$txt"     \
                             label.max_chars=40                                  \
            --subscribe next_event smart_refresh display_change                  \
-           --set timer position=center width=0 "${collapsed[@]}"                \
+           --set timer position=e width=0 "${collapsed[@]}"                \
                        icon=$TIMER_ICON icon.font="$sym" icon.drawing=on        \
                        label.drawing=on label.font="$txt" label.color=$TRANSP    \
            --subscribe timer smart_refresh mouse.entered mouse.exited

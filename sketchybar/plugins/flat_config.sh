@@ -79,7 +79,7 @@ SMART_ITEMS="privacy vpn awake badge.slack badge.whatsapp market.1 market.2 mark
 # clipped to it (label.width is a hard clip, so even wide glyphs cannot draw past it). Test override:
 # FLAT_DISPLAY_W=1920 in the environment of a plugin run by hand.
 # Measured on the 2560 bar with every smart item on (see smart_lib.sh for the picture):
-FLAT_CLOCK_HALF=87        # the clock block (clock.pad + clock + world clock) is this far either side of the centre
+FLAT_CLOCK_HALF=195       # the clock block (clock.pad + clock + world clock) is this far either side of the centre
 FLAT_RIGHT_W=793          # market.1's left edge to the bar's right edge: markets, mic, VPN, awake, badges, stats, tray
 FLAT_GAP=16               # least clear pixels between the time items and the right-hand items
 FLAT_TITLE_GAP=20         # least clear pixels between the window title and the clock block

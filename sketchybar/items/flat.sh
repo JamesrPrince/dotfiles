@@ -69,18 +69,22 @@ sketchybar --add item window_title left                              \
                               padding_right=0                        \
            --subscribe window_title aerospace_focus_change aerospace_workspace_change front_app_switched
 
-# --- Centre: the clock, weekday and time ---------------------------------------------------------
-sketchybar --set calendar position=center                    \
+# --- Centre: clock left of the Vorssaint island, world clock right of it -------------------------
+# The island (about 96pt) sits dead centre. notch_width only works on notched screens, so the
+# gap is made with padding: half of it on each side of the centre line.
+ISLAND_HALF=65
+# the clock, weekday and time ---------------------------------------------------------
+sketchybar --set calendar position=q                         \
                           icon.drawing=off                   \
                           label.font="$TEXT_FONT:SemiBold:13.0" \
                           label.width=dynamic                \
                           label.align=center                 \
                           padding_left=0                     \
-                          padding_right=0                    \
+                          padding_right=$ISLAND_HALF         \
                           update_freq=10                     \
                           popup.align=center
 # The world clock sits right of the clock, as Elsewhen does in Omarchy 4.5 (centerEnd, before weather)
-sketchybar --set worldclock position=center                  \
+sketchybar --set worldclock position=e                       \
                             icon.font="Maple Mono NF:Regular:$FLAT_NF_FONT_SIZE" \
                             icon.color=$FLAT_REST            \
                             icon.highlight_color=$FLAT_HOVER \
@@ -88,15 +92,9 @@ sketchybar --set worldclock position=center                  \
                             icon.align=center                \
                             icon.padding_left=0              \
                             icon.padding_right=0             \
-                            padding_left=9                   \
+                            padding_left=$(( ISLAND_HALF + 9 )) \
                             padding_right=0                  \
-                            popup.align=center               \
-           --add item clock.pad center                       \
-           --set clock.pad width=25 padding_left=0 padding_right=0 icon.drawing=off label.drawing=off \
-                           background.drawing=off             \
-           --move clock.pad before calendar
-# clock.pad mirrors the globe's 25px (9 padding + 16 icon) on the clock's left, so the clock
-# itself stays centred on the screen, as Omarchy's does
+                            popup.align=center
 
 # --- Left: the Apple logo, before the workspaces; it opens the same popup as in Centre Stage -------
 sketchybar --set apple.logo icon.color=$FLAT_REST icon.font="$FONT:Medium:15.0" \
