@@ -188,6 +188,13 @@ gaps.outer.right =      8
     if.window-title-regex-substring = '(?i)(settings|preferences)$'
     run = 'layout floating'
 
+# Obsidian titles its Settings window "Settings - <vault> - Obsidian <version>",
+# so the end-anchored rule above misses it (checked 2026-11-22, Obsidian 1.15.1)
+[[on-window-detected]]
+    if.app-id = 'md.obsidian'
+    if.window-title-regex-substring = '^Settings - '
+    run = 'layout floating'
+
 [[on-window-detected]]
     if.app-id = 'com.brave.Browser'
     run = 'move-node-to-workspace 1'
