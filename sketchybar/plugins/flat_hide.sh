@@ -11,7 +11,6 @@ export PATH="/usr/local/bin:$PATH"
 
 sketchybar --set weather drawing=off \
            --set front_app drawing=off \
-           --set layout drawing=off \
            --set spotify.progress drawing=off \
            --set more drawing=off \
            --set brightness drawing=off \

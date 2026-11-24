@@ -40,7 +40,8 @@ default-root-container-orientation = 'auto'
 
 automatically-unhide-macos-hidden-apps = false
 
-# Numbered workspaces only: alt-<letter> stays free for typing accents and symbols
+# Numbered workspaces only. Most alt-<letter> keys carry Omarchy bindings (see below);
+# the unbound ones still type accents and symbols
 persistent-workspaces = ["1", "2", "3", "4", "5", "6", "7"]
 
 # Tell SketchyBar which mode is on (the pill next to the workspaces)
@@ -357,10 +358,12 @@ gaps.outer.right =      8
 
     alt-tab = 'workspace-back-and-forth'
 
-    # Caps Lock is F18 (launchd/dev.dotfiles.capslock-f18.plist): tap it, then a letter (mode launch below)
-    f18 = 'mode launch'
+    # Caps Lock is F18 (launchd/dev.dotfiles.capslock-f18.plist): tap it, then a letter (mode launch below).
+    # A stray tap falls back to main after 3 s, so it never leaves alt-hjkl and the rest dead.
+    f18 = ['mode launch', 'exec-and-forget sleep 3 && [ "$(/usr/local/bin/aerospace list-modes --current)" = launch ] && /usr/local/bin/aerospace mode main']
 
-    alt-shift-semicolon = 'mode service'
+    # Service mode also falls back to main after 5 s untouched
+    alt-shift-semicolon = ['mode service', 'exec-and-forget sleep 5 && [ "$(/usr/local/bin/aerospace list-modes --current)" = service ] && /usr/local/bin/aerospace mode main']
     alt-shift-r = 'mode resize'
 
     # Key-binding cheat sheet (SketchyBar popup, built from this file)
@@ -446,3 +449,4 @@ gaps.outer.right =      8
     b = ['balance-sizes', 'mode main']
     esc = 'mode main'
     enter = 'mode main'
+    alt-shift-r = 'mode main'

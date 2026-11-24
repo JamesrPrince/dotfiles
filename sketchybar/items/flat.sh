@@ -69,6 +69,15 @@ sketchybar --add item window_title left                              \
                               padding_right=0                        \
            --subscribe window_title aerospace_focus_change aerospace_workspace_change front_app_switched
 
+# --- Left, between the workspaces and the title: the window management in force -------------------
+# Coloured text, no pill: TILES neutral, ACCORDION in blue, FLOATING in the warn colour (alt-hjkl,
+# move, swap and resize do nothing there). plugins/layout.sh sets the label and its colour.
+sketchybar --set layout label.font="$TEXT_FONT:Bold:11.0" \
+                        label.padding_left=0 label.padding_right=0 \
+                        padding_left=12 padding_right=0 \
+                        background.drawing=off \
+           --move layout before window_title
+
 # --- Centre: clock left of the Vorssaint island, world clock right of it -------------------------
 # The island (about 96pt) sits dead centre. notch_width only works on notched screens, so the
 # gap is made with padding: half of it on each side of the centre line.
