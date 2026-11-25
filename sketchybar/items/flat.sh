@@ -58,6 +58,7 @@ done
 sketchybar --add item window_title left                              \
            --set window_title script="$PLUGIN_DIR/window_title.sh"   \
                               update_freq=5                          \
+                              updates=on                             \
                               icon.font="sketchybar-app-font:Regular:14.0" \
                               icon.color=$GREY                       \
                               icon.padding_left=0                    \
