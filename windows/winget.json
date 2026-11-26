@@ -1,0 +1,39 @@
+{
+  "$schema": "https://aka.ms/winget-packages.schema.2.0.json",
+  "Sources": [
+    {
+      "Packages": [
+        { "PackageIdentifier": "wez.wezterm" },
+        { "PackageIdentifier": "glzr-io.glazewm" },
+        { "PackageIdentifier": "glzr-io.zebar" },
+        { "PackageIdentifier": "Flow-Launcher.Flow-Launcher" },
+        { "PackageIdentifier": "Git.Git" },
+        { "PackageIdentifier": "GitHub.cli" },
+        { "PackageIdentifier": "Microsoft.PowerShell" },
+        { "PackageIdentifier": "Python.Python.3.12" },
+        { "PackageIdentifier": "Obsidian.Obsidian" },
+        { "PackageIdentifier": "Neovim.Neovim" },
+        { "PackageIdentifier": "Starship.Starship" },
+        { "PackageIdentifier": "JesseDuffield.lazygit" },
+        { "PackageIdentifier": "sharkdp.bat" },
+        { "PackageIdentifier": "sharkdp.fd" },
+        { "PackageIdentifier": "dandavison.delta" },
+        { "PackageIdentifier": "junegunn.fzf" },
+        { "PackageIdentifier": "BurntSushi.ripgrep.MSVC" },
+        { "PackageIdentifier": "ajeetdsouza.zoxide" },
+        { "PackageIdentifier": "aristocratos.btop4win" },
+        { "PackageIdentifier": "sxyazi.yazi" },
+        { "PackageIdentifier": "7zip.7zip" },
+        { "PackageIdentifier": "Google.Chrome" },
+        { "PackageIdentifier": "OpenJS.NodeJS.LTS" }
+      ],
+      "SourceDetails": {
+        "Argument": "https://cdn.winget.microsoft.com/cache",
+        "Identifier": "Microsoft.Winget.Source_8wekyb3d8bbwe",
+        "Name": "winget",
+        "Type": "Microsoft.PreIndexed.Package"
+      }
+    }
+  ],
+  "WinGetVersion": "1.9.0"
+}

@@ -1,0 +1,263 @@
+# GlazeWM config: the Windows counterpart of aerospace/aerospace.toml.
+# bootstrap.ps1 links this to %USERPROFILE%\.glzr\glazewm\config.yaml (GlazeWM's default location).
+#
+# AeroSpace bindings that do NOT map (GlazeWM has no equivalent), and what was done:
+#   - alt-slash / alt-shift-period (layout-cycle.sh), alt-comma (accordion): GlazeWM has tiling only,
+#     no accordion layout. Dropped. alt+v (toggle-tiling-direction) is added as the nearest thing.
+#   - join-with (service mode alt-shift-hjkl): no join command. Dropped.
+#   - flatten-workspace-tree, balance-sizes, close-all-windows-but-current: none. Dropped
+#     (use wm-redraw on alt+shift+b for a re-tile).
+#   - scratchpad send/bring (alt-shift-minus / alt-shift-equal): no scratchpad. alt+shift+minus
+#     minimises the window instead (restore through alt+shift+equal is NOT possible, use the taskbar).
+#   - alt-backtick / alt-shift-backtick (dfs-next / dfs-prev window cycling): no window-cycle command.
+#     Dropped; alt+hjkl focus covers it.
+#   - sketchybar triggers, theme.sh / barstyle.sh (alt-shift-t / alt-shift-b), keys.py cheat sheet,
+#     om-key.sh (alt-space, ctrl-alt-space, ctrl-alt-c/o, alt-esc), claude-console.sh (alt-c):
+#     macOS-only scripts. Dropped. alt+space is left to Flow Launcher.
+#   - f18 launch mode (Caps Lock): the launch.sh app launcher is replaced by Flow Launcher (alt+space).
+#   - Per-mode 3s/5s auto-return timeouts: GlazeWM binding modes have none; press esc to leave.
+#   - ctrl-alt-v Maccy: use Windows clipboard history (win+v). App-launch keys ctrl-alt-b/s/w/a/x/e/h/g/m/k
+#     are mapped only for apps likely to exist here (see the bottom).
+#   - focus-follows-mouse is off, same as AeroSpace.
+# Everything in this file is untested: it was written without a Windows machine.
+
+general:
+  # Start the Zebar top bar with the window manager.
+  startup_commands: ['shell-exec zebar']
+  shutdown_commands: ['shell-exec zebar shutdown']
+  config_reload_commands: []
+  focus_follows_cursor: false
+  toggle_workspace_on_refocus: false
+  cursor_jump:
+    enabled: true
+    trigger: 'window_focus'
+  hide_method: 'cloak'
+  show_all_in_taskbar: false
+
+gaps:
+  scale_with_dpi: true
+  inner_gap: '8px'
+  # Top 36px leaves room for the Zebar bar, as in aerospace.toml.
+  # If Zebar already reserves its own space (dockToEdge), lower top to 8px.
+  outer_gap:
+    top: '36px'
+    right: '8px'
+    bottom: '8px'
+    left: '8px'
+
+window_effects:
+  focused_window:
+    border:
+      enabled: true
+      color: '#7daea3'   # Gruvbox accent (aqua-blue), as the sketchybar ACCENT
+    hide_title_bar:
+      enabled: false
+    corner_style:
+      enabled: false
+  other_windows:
+    border:
+      enabled: true
+      color: '#504945'   # Gruvbox bg2
+
+window_behavior:
+  initial_state: 'tiling'
+  state_defaults:
+    floating:
+      centered: true
+      shown_on_top: true
+    fullscreen:
+      maximized: false
+      shown_on_top: false
+
+workspaces:
+  - name: '1'
+    display_name: 'Web'
+  - name: '2'
+    display_name: 'Code'
+  - name: '3'
+    display_name: 'Notes'
+  - name: '4'
+    display_name: 'Office'
+  - name: '5'
+    display_name: 'Chat'
+  - name: '6'
+    display_name: 'Trade'
+  - name: '7'
+    display_name: 'Other'
+
+window_rules:
+  # Float the Windows system dialogs AeroSpace floats on the Mac.
+  - commands: ['set-floating']
+    match:
+      - window_process: { regex: '^(SystemSettings|CalculatorApp|Calculator|Taskmgr|ApplicationFrameHost|mmc|control)$' }
+  - commands: ['set-floating']
+    match:
+      - window_title: { regex: '(?i)(settings|preferences|picture.in.picture)$' }
+  - commands: ['set-floating']
+    match:
+      - window_process: { equals: 'Obsidian' }
+        window_title: { regex: '^Settings' }
+  # ctrl+` scratch terminal: floating, launched by the binding below.
+  - commands: ['set-floating']
+    match:
+      - window_process: { equals: 'wezterm-gui' }
+        window_title: { regex: '^scratch$' }
+  # Default workspaces (AeroSpace on-window-detected).
+  - commands: ['move --workspace 1']
+    match:
+      - window_process: { regex: '^(chrome|msedge)$' }
+  - commands: ['move --workspace 2']
+    match:
+      - window_process: { regex: '^(wezterm-gui|Code|claude)$' }
+        window_title: { not_regex: '^scratch$' }
+  - commands: ['move --workspace 3']
+    match:
+      - window_process: { equals: 'Obsidian' }
+  - commands: ['move --workspace 4']
+    match:
+      - window_process: { regex: '^(EXCEL|OUTLOOK|WINWORD|soffice)$' }
+  - commands: ['move --workspace 6']
+    match:
+      # MetaTrader 5 (broker-installed): terminal64.exe by default.
+      - window_process: { regex: '^(terminal64|metatrader64)$' }
+  # Flow Launcher and the Windows taskbar-level popups should never be tiled.
+  - commands: ['ignore']
+    match:
+      - window_process: { equals: 'Flow.Launcher' }
+
+binding_modes:
+  - name: 'resize'
+    keybindings:
+      - commands: ['resize --width -2%']
+        bindings: ['h', 'left']
+      - commands: ['resize --width +2%']
+        bindings: ['l', 'right']
+      - commands: ['resize --height +2%']
+        bindings: ['k', 'up']
+      - commands: ['resize --height -2%']
+        bindings: ['j', 'down']
+      - commands: ['wm-disable-binding-mode --name resize']
+        bindings: ['escape', 'enter', 'alt+shift+r']
+
+keybindings:
+  # Focus (alt-hjkl)
+  - commands: ['focus --direction left']
+    bindings: ['alt+h']
+  - commands: ['focus --direction down']
+    bindings: ['alt+j']
+  - commands: ['focus --direction up']
+    bindings: ['alt+k']
+  - commands: ['focus --direction right']
+    bindings: ['alt+l']
+
+  # Move (alt-shift-hjkl)
+  - commands: ['move --direction left']
+    bindings: ['alt+shift+h']
+  - commands: ['move --direction down']
+    bindings: ['alt+shift+j']
+  - commands: ['move --direction up']
+    bindings: ['alt+shift+k']
+  - commands: ['move --direction right']
+    bindings: ['alt+shift+l']
+
+  # Swap (ctrl-alt-shift-hjkl): GlazeWM's move already swaps with a neighbour, so these mirror it.
+  - commands: ['move --direction left']
+    bindings: ['ctrl+alt+shift+h']
+  - commands: ['move --direction down']
+    bindings: ['ctrl+alt+shift+j']
+  - commands: ['move --direction up']
+    bindings: ['ctrl+alt+shift+k']
+  - commands: ['move --direction right']
+    bindings: ['ctrl+alt+shift+l']
+
+  # Resize (alt-minus / alt-equal)
+  - commands: ['resize --width -2%']
+    bindings: ['alt+oem_minus']
+  - commands: ['resize --width +2%']
+    bindings: ['alt+oem_plus']
+
+  # Close, fullscreen, float toggle
+  - commands: ['close']
+    bindings: ['alt+w']
+  - commands: ['toggle-fullscreen']
+    bindings: ['alt+f']
+  - commands: ['toggle-floating --centered']
+    bindings: ['alt+t']
+  - commands: ['toggle-tiling-direction']
+    bindings: ['alt+v']
+
+  # alt-shift-minus (scratchpad send): nearest equivalent
+  - commands: ['toggle-minimized']
+    bindings: ['alt+shift+oem_minus']
+
+  # Modes and housekeeping
+  - commands: ['wm-enable-binding-mode --name resize']
+    bindings: ['alt+shift+r']
+  - commands: ['wm-reload-config']
+    bindings: ['alt+shift+oem_1']   # alt-shift-; (AeroSpace service mode reload)
+  - commands: ['wm-redraw']
+    bindings: ['alt+shift+b']
+  - commands: ['toggle-pause']
+    bindings: ['alt+shift+p']
+
+  # Workspaces (alt-1..7), move window (alt-shift-1..7), move and follow (ctrl-alt-shift-1..7)
+  - commands: ['focus --workspace 1']
+    bindings: ['alt+1']
+  - commands: ['focus --workspace 2']
+    bindings: ['alt+2']
+  - commands: ['focus --workspace 3']
+    bindings: ['alt+3']
+  - commands: ['focus --workspace 4']
+    bindings: ['alt+4']
+  - commands: ['focus --workspace 5']
+    bindings: ['alt+5']
+  - commands: ['focus --workspace 6']
+    bindings: ['alt+6']
+  - commands: ['focus --workspace 7']
+    bindings: ['alt+7']
+  - commands: ['move --workspace 1']
+    bindings: ['alt+shift+1']
+  - commands: ['move --workspace 2']
+    bindings: ['alt+shift+2']
+  - commands: ['move --workspace 3']
+    bindings: ['alt+shift+3']
+  - commands: ['move --workspace 4']
+    bindings: ['alt+shift+4']
+  - commands: ['move --workspace 5']
+    bindings: ['alt+shift+5']
+  - commands: ['move --workspace 6']
+    bindings: ['alt+shift+6']
+  - commands: ['move --workspace 7']
+    bindings: ['alt+shift+7']
+  - commands: ['move --workspace 1', 'focus --workspace 1']
+    bindings: ['ctrl+alt+shift+1']
+  - commands: ['move --workspace 2', 'focus --workspace 2']
+    bindings: ['ctrl+alt+shift+2']
+  - commands: ['move --workspace 3', 'focus --workspace 3']
+    bindings: ['ctrl+alt+shift+3']
+  - commands: ['move --workspace 4', 'focus --workspace 4']
+    bindings: ['ctrl+alt+shift+4']
+  - commands: ['move --workspace 5', 'focus --workspace 5']
+    bindings: ['ctrl+alt+shift+5']
+  - commands: ['move --workspace 6', 'focus --workspace 6']
+    bindings: ['ctrl+alt+shift+6']
+  - commands: ['move --workspace 7', 'focus --workspace 7']
+    bindings: ['ctrl+alt+shift+7']
+  # alt-tab (workspace-back-and-forth). May fight Windows' own alt+tab; remap if it does.
+  - commands: ['focus --workspace recent']
+    bindings: ['alt+tab']
+
+  # ctrl+` drop-down terminal. WezTerm has no quick terminal, so this opens a floating WezTerm window
+  # titled "scratch" (floated by the window rule above). Press alt+w to close it.
+  - commands: ['shell-exec wezterm-gui start -- pwsh -NoLogo -NoExit -Command "$Host.UI.RawUI.WindowTitle=''scratch''"']
+    bindings: ['ctrl+oem_3']
+
+  # App launch keys (ctrl-alt-t Ghostty -> WezTerm, ctrl-alt-b browser, ctrl-alt-a Claude, ctrl-alt-x Excel)
+  - commands: ['shell-exec wezterm-gui']
+    bindings: ['ctrl+alt+t']
+  - commands: ['shell-exec cmd /c start chrome']
+    bindings: ['ctrl+alt+b']
+  - commands: ['shell-exec cmd /c start obsidian://open']
+    bindings: ['ctrl+alt+o']
+  - commands: ['shell-exec cmd /c start excel']
+    bindings: ['ctrl+alt+x']

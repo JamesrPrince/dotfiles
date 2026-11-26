@@ -127,6 +127,33 @@ Add a theme: put `colors.toml` and `neovim.lua` in `themes/<id>/`, add a line to
 - **fastfetch**: `fastfetch` prints Omarchy's boxed layout in terminal colours.
 - **lazydocker**: `lazydocker`, plus `lazygit`, `btop`, `yazi` as before.
 
+## Windows (Boot Camp)
+
+A Windows 11 side that mirrors the Mac one: everything lives in `windows/`. Nothing here is tested yet (written before Windows was installed), so expect to fix forward on first run.
+
+| Mac | Windows |
+| --- | --- |
+| AeroSpace | [GlazeWM](https://github.com/glzr-io/glazewm), `windows/glazewm/config.yaml` (same `alt-` keys) |
+| SketchyBar | [Zebar](https://github.com/glzr-io/zebar), `windows/zebar/gruvbox-bar`: workspaces, clock, wifi, battery |
+| Ghostty | [WezTerm](https://wezfurlong.org/wezterm/), `windows/wezterm/wezterm.lua` (Ghostty has no Windows build) |
+| Alfred / Raycast | [Flow Launcher](https://www.flowlauncher.com) (`alt-space`, its default) |
+| Homebrew | winget, `windows/winget.json` |
+
+Shared with the Mac: `starship/starship.toml`, `nvim/` and the delta settings in `git/`.
+
+Setup, from a normal PowerShell in a clone of this repo:
+
+```powershell
+.\windows\bootstrap.ps1
+```
+
+It imports the packages, installs Maple Mono NF (`windows/fonts.md`), links the configs into place (backing up anything already there), adds Starship and zoxide to the PowerShell 7 profile, offers to install Claude Code, then asks you to `gh auth login` and clones the private vault to `~\ICOR`. Re-running is safe. Flags: `-SkipPackages`, `-SkipFonts`, `-SkipVault`. Turn on Developer Mode first so file links are real symlinks (otherwise files are copied).
+
+- **Not ported**: accordion layout, join-with, scratchpad, the launch mode, the sketchybar-driven theme switcher and the other macOS-only scripts. The full list is at the top of `windows/glazewm/config.yaml`.
+- **ctrl+` terminal**: WezTerm has no drop-down mode, so GlazeWM opens a floating "scratch" WezTerm window on that key.
+- **Workspace 6** is Trade: MetaTrader 5 (from your broker, not in winget) is sent there.
+- **Neovim**: LazyVim's treesitter parsers need a C compiler on Windows (for example `winget install zig.zig`).
+
 ## Helpers
 
 Small native programs in `sketchybar/helper/`, compiled by `build.sh` (binaries are git-ignored):
