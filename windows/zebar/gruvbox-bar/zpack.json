@@ -1,9 +1,9 @@
 {
   "$schema": "https://github.com/glzr-io/zebar/raw/v3.3.1/resources/zpack-schema.json",
   "name": "gruvbox-bar",
-  "version": "1.0.0",
-  "description": "Minimal Gruvbox top bar: workspaces, clock, battery, wifi.",
-  "tags": ["bar", "gruvbox"],
+  "version": "2.0.0",
+  "description": "The Mac's flat SketchyBar in gruvbox: workspaces with app icons, window title, clock, markets, stats, tray.",
+  "tags": ["bar", "gruvbox", "flat"],
   "widgets": [
     {
       "name": "gruvbox-bar",
@@ -14,7 +14,16 @@
       "resizable": false,
       "transparent": true,
       "includeFiles": ["**/*"],
-      "privileges": { "shellCommands": [] },
+      "privileges": {
+        "shellCommands": [
+          {
+            "program": "curl",
+            "argsRegex": "^-s -m 8 -A dotfiles-bar https://(api\\.exchange\\.coinbase\\.com/products/BTC-USD/stats|api\\.gold-api\\.com/price/XAU|query2\\.finance\\.yahoo\\.com/v8/finance/chart/GC=F\\?interval=1d&range=2d)$"
+          },
+          { "program": "explorer", "argsRegex": "^ms-(settings|availablenetworks|actioncenter):[A-Za-z0-9/&=:-]*$" },
+          { "program": "taskmgr", "argsRegex": "^$" }
+        ]
+      },
       "presets": [
         {
           "name": "default",
@@ -22,7 +31,7 @@
           "offsetX": "0px",
           "offsetY": "0px",
           "width": "100%",
-          "height": "36px",
+          "height": "28px",
           "monitorSelection": { "type": "all" },
           "dockToEdge": { "enabled": true, "edge": "top", "windowMargin": "0px" }
         }

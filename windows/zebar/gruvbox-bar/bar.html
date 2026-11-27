@@ -3,116 +3,398 @@
 <head>
 <meta charset="utf-8">
 <title>gruvbox-bar</title>
-<!-- Minimal Zebar v2 widget, styled after the sketchybar Gruvbox theme (colours from sketchybar/colors.sh).
-     Untested: written without a Windows machine. Provider output names follow the Zebar v2 docs. -->
+<!-- The Mac's flat SketchyBar (sketchybar/items/flat.sh + plugins/flat_config.sh), ported to Zebar 3.3.
+     Layout, left to right:
+       logo | workspaces 1-7 with app icons | layout | focused window title
+       clock + world clock (centre)
+       music | BTC XAU | VPN | net up/down | CPU % + graph | memory | bluetooth wifi volume battery control
+     Colours are the gruvbox theme from sketchybar/colors.sh; thresholds are flat_config.sh's.
+     Not ported (no Windows source): GPU, mic/camera, keep-awake, Slack/WhatsApp badges, next meeting,
+     Claude sessions, focus timer, the detail popups. Hover tooltips stand in for the popups. -->
 <style>
   :root {
-    --bar: rgba(40, 40, 40, 0.63);
-    --pill: rgba(80, 73, 69, 0.56);
-    --fg: #d4be98;
+    /* gruvbox, sketchybar/colors.sh */
+    --white: #d4be98;
+    --rest: rgba(212, 190, 152, 0.80);   /* FLAT_REST = 0xcc WHITE */
+    --dim: rgba(212, 190, 152, 0.47);    /* FLAT_DIM  = 0x77 WHITE */
     --grey: #93856d;
     --accent: #7daea3;
-    --green: #a9b665;
-    --orange: #e1875c;
-    --red: #ea6962;
-    --bg: #282828;
+    --warn: #e1875c;                     /* ORANGE */
+    --crit: #ea6962;                     /* RED */
+    --good: #a9b665;                     /* GREEN */
+    --bar: rgba(40, 40, 40, 0.63);       /* BAR_COLOR 0xa0282828 */
+    --marker: rgba(80, 73, 69, 0.56);    /* BACKGROUND_1 */
+    --divider: rgba(147, 133, 109, 0.33);/* FLAT_DIVIDER 0x55 GREY */
+    --font: "Maple Mono NF", "Cascadia Mono", monospace;
   }
-  * { box-sizing: border-box; margin: 0; }
-  html, body { height: 100%; background: transparent; }
-  body {
-    font-family: "Maple Mono NF", monospace;
-    font-size: 13px;
-    color: var(--fg);
-    overflow: hidden;
-  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: transparent; overflow: hidden; }
+  body { font: 600 13px var(--font); color: var(--rest); user-select: none; cursor: default; }
+
+  /* Flat: edge to edge, no rounding, 8px side padding (sketchybarrc flat bar) */
   .bar {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
     height: 100%;
-    margin: 4px 8px 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
     padding: 0 8px;
     background: var(--bar);
-    border-radius: 8px;
   }
-  .left, .right { display: flex; gap: 6px; align-items: center; }
+  .left, .right { display: flex; align-items: center; min-width: 0; }
   .right { justify-content: flex-end; }
-  .ws, .item {
-    padding: 2px 10px;
-    border-radius: 6px;
-    background: var(--pill);
-    color: var(--grey);
-    border: 0;
-    font: inherit;
-    cursor: pointer;
-  }
-  .ws.focused { background: var(--accent); color: var(--bg); }
-  .ws.displayed:not(.focused) { color: var(--fg); }
-  .item { cursor: default; color: var(--fg); }
-  .item.warn { color: var(--orange); }
-  .item.crit { color: var(--red); }
-  .item.good { color: var(--green); }
+  .centre { display: flex; align-items: center; gap: 10px; padding: 0 16px; }
+
+  .click { cursor: pointer; }
+  .click:hover { color: var(--white); }
+
+  /* Logo */
+  .logo { width: 20px; text-align: center; margin: 0 4px; font-size: 15px; }
+
+  /* Workspaces: number, then grey app icons (max 4, then +N); focused in ACCENT on a faint marker */
+  .ws { display: flex; align-items: center; height: 20px; border-radius: 4px; padding: 0 7px; margin-left: 1px; color: var(--dim); }
+  .ws.used { color: var(--rest); }
+  .ws.focused { color: var(--accent); background: var(--marker); }
+  .ws .apps { color: var(--grey); font-weight: 400; margin-left: 6px; letter-spacing: 3px; }
+  .ws .more { font-size: 11px; margin-left: 2px; letter-spacing: 0; }
+
+  /* Layout mode: TILES neutral, FLOATING in warn, RESIZE / PAUSED in accent */
+  .layout { margin-left: 12px; font: 700 11px var(--font); }
+  .layout.warn { color: var(--warn); }
+  .layout.mode { color: var(--accent); }
+
+  /* Focused window: app icon and title, clipped before the clock */
+  .title { display: flex; align-items: center; margin-left: 12px; min-width: 0; font: 500 12px var(--font); color: var(--white); }
+  .title .ico { color: var(--grey); margin-right: 6px; font-size: 14px; flex: none; }
+  .title .txt { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+  /* Centre */
+  .clock { font-size: 13px; color: var(--white); }
+  .globe { font-size: 16px; }
+
+  /* Right: smart items, stats, divider, tray */
+  .item { display: flex; align-items: center; padding: 0 4px; white-space: nowrap; }
+  .item[hidden] { display: none; }
+  .item .i { margin-right: 4px; }
+  .music { max-width: 260px; }
+  .music .txt { overflow: hidden; text-overflow: ellipsis; font-weight: 500; font-size: 12px; }
+  .mkt { font-size: 12px; }
+  .up { color: var(--good); }
+  .down { color: var(--crit); }
+  .stale { color: var(--dim); }
+  .net { flex-direction: column; align-items: flex-end; font: 700 9px/1.05 var(--font); width: 72px; }
+  .num { display: inline-block; text-align: right; font-weight: 800; font-size: 12px; }
+  .cpu .num { width: 34px; }
+  .mem .num { width: 34px; }
+  canvas.graph { width: 38px; height: 20px; margin-right: 4px; }
+  .warn { color: var(--warn); }
+  .crit { color: var(--crit); }
+  .good { color: var(--good); }
+  .div { width: 1px; height: 14px; background: var(--divider); margin: 0 7px; }
+  .tray { width: 20px; text-align: center; margin: 0 3px; font-size: 15px; }
+  .tray.batt { width: auto; min-width: 24px; display: flex; align-items: center; justify-content: center; gap: 3px; }
+  .tray.batt .pct { font-size: 12px; }
 </style>
 </head>
 <body>
 <div class="bar">
-  <div class="left" id="workspaces"></div>
-  <div class="item" id="clock"></div>
+  <div class="left">
+    <div class="logo click" id="logo" title="Settings (right-click: Task Manager)">&#xf17a;</div>
+    <div id="workspaces" style="display:flex"></div>
+    <div class="layout" id="layout"></div>
+    <div class="title" id="title"><span class="ico" id="title-ico"></span><span class="txt" id="title-txt"></span></div>
+  </div>
+
+  <div class="centre">
+    <div class="clock" id="clock"></div>
+    <div class="globe click" id="globe" title="">&#xf0ac;</div>
+  </div>
+
   <div class="right">
-    <div class="item" id="wifi"></div>
-    <div class="item" id="battery"></div>
+    <div class="item music click" id="music" hidden title="Click: play / pause"><span class="i">&#xf001;</span><span class="txt" id="music-txt"></span></div>
+    <div class="item mkt" id="mkt-btc" hidden></div>
+    <div class="item mkt" id="mkt-xau" hidden></div>
+    <div class="item" id="vpn" hidden title="VPN connected">&#xf132;</div>
+    <div class="item net click" id="net" title="Network settings"><span id="net-up">&#x2191; --</span><span id="net-down">&#x2193; --</span></div>
+    <div class="item cpu click" id="cpu" title="Task Manager"><span class="i">&#xf4bc;</span><span class="num" id="cpu-num">--%</span></div>
+    <canvas class="graph click" id="cpu-graph" width="76" height="40" title="Task Manager"></canvas>
+    <div class="item mem click" id="mem" title="Task Manager"><span class="i">&#xf035b;</span><span class="num" id="mem-num">--%</span></div>
+    <div class="div"></div>
+    <div class="tray click" id="bt" title="Bluetooth settings">&#xf00af;</div>
+    <div class="tray click" id="wifi" title="">&#xf092e;</div>
+    <div class="tray click" id="vol" title="Click: mute. Scroll: volume">&#xf057e;</div>
+    <div class="tray batt" id="batt"><span id="batt-ico">&#xf0079;</span><span class="pct" id="batt-pct" hidden></span></div>
+    <div class="tray click" id="ctl" title="Quick settings">&#xf1de;</div>
   </div>
 </div>
 
 <script type="module">
-  import * as zebar from 'https://esm.sh/zebar@2';
+  import * as zebar from 'https://esm.sh/zebar@3.3.1';
 
-  const providers = zebar.createProviderGroup({
-    glazewm: { type: 'glazewm' },
-    date: { type: 'date', formatting: 'EEE d MMM  HH:mm' },
-    battery: { type: 'battery' },
-    network: { type: 'network' },
-  });
+  // ---- Tuning, from sketchybar/plugins/flat_config.sh -------------------------------------------
+  const CPU_HIGH = 80, CPU_CRIT = 95, CPU_SAMPLES = 2;
+  const MEM_HIGH = 80, MEM_CRIT = 90;          // the Mac colours memory by kernel pressure; Windows has none, so by use
+  const BATT_WARN = 30, BATT_CRIT = 15;
+  const WIFI_WEAK = 50, WIFI_BAD = 30;         // signal % (the Mac uses -70 / -80 dBm)
+  const MARKET_MOVE_PCT = 1, MARKET_FETCH_SECS = 30;
+  const WS_MAX_ICONS = 4;
+  // workspaces.conf / glazewm config.yaml
+  const WORKSPACES = ['1', '2', '3', '4', '5', '6', '7'];
+  // World clock: the four FX sessions, for the trading machine
+  const CITIES = [['Sydney', 'Australia/Sydney'], ['Tokyo', 'Asia/Tokyo'], ['London', 'Europe/London'], ['New York', 'America/New_York']];
+
+  // App icons by process name (Nerd Font glyphs; the Mac uses sketchybar-app-font, which Windows lacks)
+  const ICONS = {
+    chrome: '', msedge: '', firefox: '', brave: '',
+    'wezterm-gui': '', windowsterminal: '', pwsh: '', powershell: '', cmd: '',
+    code: '', 'code - insiders': '', nvim: '',
+    obsidian: '', excel: '', winword: '', powerpnt: '', outlook: '', olk: '',
+    spotify: '', slack: '', whatsapp: '', telegram: '',
+    explorer: '', terminal64: '', metatrader64: '', tradingview: '',
+    systemsettings: '', taskmgr: '', claude: '',
+  };
+  const icon = (p) => ICONS[(p || '').toLowerCase()] ?? '';
 
   const $ = (id) => document.getElementById(id);
+  const run = (prog, args) => zebar.shellExec(prog, args).catch(() => {});
+  const settings = (uri) => run('explorer', uri);
 
-  function render(out) {
-    const { glazewm, date, battery, network } = out;
+  // ---- Providers ------------------------------------------------------------------------------
+  const p = zebar.createProviderGroup({
+    glazewm: { type: 'glazewm' },
+    cpu: { type: 'cpu', refreshInterval: 3000 },
+    memory: { type: 'memory', refreshInterval: 5000 },
+    network: { type: 'network', refreshInterval: 3000 },
+    battery: { type: 'battery', refreshInterval: 30000 },
+    audio: { type: 'audio' },
+    media: { type: 'media' },
+  });
 
-    if (glazewm) {
-      const box = $('workspaces');
-      box.replaceChildren();
-      for (const ws of glazewm.currentWorkspaces) {
-        const b = document.createElement('button');
-        b.className = 'ws' + (ws.hasFocus ? ' focused' : '') + (ws.isDisplayed ? ' displayed' : '');
-        b.textContent = ws.displayName ?? ws.name;
-        b.onclick = () => glazewm.runCommand(`focus --workspace ${ws.name}`);
-        box.appendChild(b);
+  // ---- Workspaces, layout and title ----------------------------------------------------------
+  function windowsIn(node, out = []) {
+    for (const c of node?.children ?? []) {
+      if (c.type === 'window') out.push(c); else windowsIn(c, out);
+    }
+    return out;
+  }
+
+  function renderWm(wm) {
+    const box = $('workspaces');
+    box.replaceChildren();
+    const byName = Object.fromEntries((wm.allWorkspaces ?? wm.currentWorkspaces).map((w) => [w.name, w]));
+    for (const name of WORKSPACES) {
+      const ws = byName[name];
+      const wins = ws ? windowsIn(ws).filter((w) => w.state?.type !== 'minimized') : [];
+      const el = document.createElement('div');
+      el.className = 'ws click' + (wins.length ? ' used' : '') + (ws?.hasFocus ? ' focused' : '');
+      el.title = ws?.displayName ?? name;
+      el.textContent = name;
+      if (wins.length) {
+        const apps = document.createElement('span');
+        apps.className = 'apps';
+        apps.textContent = wins.slice(0, WS_MAX_ICONS).map((w) => icon(w.processName)).join('');
+        if (wins.length > WS_MAX_ICONS) {
+          const more = document.createElement('span');
+          more.className = 'more';
+          more.textContent = `+${wins.length - WS_MAX_ICONS}`;
+          apps.appendChild(more);
+        }
+        el.appendChild(apps);
       }
+      el.onclick = () => wm.runCommand(`focus --workspace ${name}`);
+      box.appendChild(el);
     }
 
-    if (date) $('clock').textContent = date.formatted;
+    // Layout: binding mode first (the Mac's mode pill), then pause, then the focused window's state
+    const lay = $('layout');
+    const mode = wm.bindingModes?.[0];
+    const fc = wm.focusedContainer;
+    if (mode) { lay.textContent = (mode.displayName ?? mode.name).toUpperCase(); lay.className = 'layout mode'; }
+    else if (wm.isPaused) { lay.textContent = 'PAUSED'; lay.className = 'layout mode'; }
+    else if (fc?.type === 'window' && fc.state?.type === 'floating') { lay.textContent = 'FLOATING'; lay.className = 'layout warn'; }
+    else if (fc?.type === 'window' && fc.state?.type === 'fullscreen') { lay.textContent = 'FULL'; lay.className = 'layout'; }
+    else if (fc?.type === 'window') { lay.textContent = wm.tilingDirection === 'vertical' ? 'TILES ↕' : 'TILES ↔'; lay.className = 'layout'; }
+    else { lay.textContent = ''; lay.className = 'layout'; }
 
-    if (network) {
-      const iface = network.defaultInterface;
-      const strength = network.defaultGateway?.signalStrength;
-      $('wifi').textContent = !iface
-        ? '󰤮 offline'
-        : iface.type === 'wifi'
-          ? `󰤨 ${strength ?? ''}%`
-          : '󰈀 wired';
-      $('wifi').className = 'item' + (iface ? '' : ' crit');
-    }
-
-    if (battery) {
-      const pct = Math.round(battery.chargePercent);
-      const cls = battery.isCharging ? 'good' : pct < 20 ? 'crit' : pct < 40 ? 'warn' : '';
-      $('battery').textContent = `${battery.isCharging ? '󰂄' : '󰁹'} ${pct}%`;
-      $('battery').className = 'item ' + cls;
+    // Title: hidden on an empty workspace
+    const isWin = fc?.type === 'window';
+    $('title').hidden = !isWin;
+    if (isWin) {
+      $('title-ico').textContent = icon(fc.processName);
+      $('title-txt').textContent = fc.title || fc.processName;
     }
   }
 
-  providers.onOutput(render);
+  // ---- Stats ----------------------------------------------------------------------------------
+  const cpuHist = [];
+  let cpuHot = 0;
+  function renderCpu(cpu) {
+    const u = Math.round(cpu.usage);
+    cpuHist.push(u); if (cpuHist.length > 30) cpuHist.shift();
+    cpuHot = u >= CPU_HIGH ? cpuHot + 1 : 0;          // FLAT_CPU_SAMPLES in a row, so one spike does not flash
+    const cls = cpuHot >= CPU_SAMPLES ? (u >= CPU_CRIT ? 'crit' : 'warn') : '';
+    $('cpu-num').textContent = `${u}%`;
+    $('cpu').className = 'item cpu click ' + cls;
+    drawGraph(cls === 'crit' ? '#ea6962' : cls === 'warn' ? '#e1875c' : 'rgba(212,190,152,0.8)');
+  }
+  function drawGraph(stroke) {
+    const c = $('cpu-graph'), g = c.getContext('2d'), w = c.width, h = c.height, n = cpuHist.length;
+    g.clearRect(0, 0, w, h);
+    if (n < 2) return;
+    const x = (i) => (i / 29) * w, y = (v) => h - 2 - (v / 100) * (h - 4);
+    const x0 = x(30 - n);
+    g.beginPath(); g.moveTo(x0, h);
+    cpuHist.forEach((v, i) => g.lineTo(x(30 - n + i), y(v)));
+    g.lineTo(w, h); g.closePath(); g.fillStyle = 'rgba(212,190,152,0.13)'; g.fill();   // FLAT_GRAPH_FILL
+    g.beginPath();
+    cpuHist.forEach((v, i) => (i ? g.lineTo : g.moveTo).call(g, x(30 - n + i), y(v)));
+    g.strokeStyle = stroke; g.lineWidth = 2; g.stroke();
+  }
+
+  function renderMem(m) {
+    const u = Math.round(m.usage);
+    $('mem-num').textContent = `${u}%`;
+    $('mem').className = 'item mem click ' + (u >= MEM_CRIT ? 'crit' : u >= MEM_HIGH ? 'warn' : '');
+    $('mem').title = `Memory ${(m.usedMemory / 2 ** 30).toFixed(1)} of ${(m.totalMemory / 2 ** 30).toFixed(1)} GB. Click: Task Manager`;
+  }
+
+  const rate = (b) => {
+    if (b == null) return '--';
+    // Switch unit at 1000 so a label never reads "1000 B/s"
+    if (b < 1000) return `${Math.round(b)} B/s`;
+    if (b < 1000 * 1024) return `${(b / 1024).toFixed(b < 10 * 1024 ? 1 : 0)} KB/s`;
+    return `${(b / 1024 ** 2).toFixed(1)} MB/s`;
+  };
+  function renderNet(n) {
+    $('net-up').textContent = `↑ ${rate(n.traffic?.transmitted?.bytes)}`;
+    $('net-down').textContent = `↓ ${rate(n.traffic?.received?.bytes)}`;
+
+    const iface = n.defaultInterface, gw = n.defaultGateway, wifi = $('wifi');
+    if (!iface) { wifi.textContent = '\u{f092e}'; wifi.className = 'tray click crit'; wifi.title = 'Offline'; }
+    else if (iface.type === 'wifi') {
+      const s = gw?.signalStrength ?? 0;
+      wifi.textContent = s >= 75 ? '\u{f0928}' : s >= 50 ? '\u{f0925}' : s >= 25 ? '\u{f0922}' : '\u{f091f}';
+      wifi.className = 'tray click ' + (s < WIFI_BAD ? 'crit' : s < WIFI_WEAK ? 'warn' : '');
+      wifi.title = `${gw?.ssid ?? 'Wi-Fi'}  ${s}%\n${iface.ipv4Addresses?.[0] ?? ''}`;
+    } else { wifi.textContent = '\u{f0200}'; wifi.className = 'tray click'; wifi.title = `${iface.friendlyName ?? 'Wired'}\n${iface.ipv4Addresses?.[0] ?? ''}`; }
+
+    // VPN: any up interface that looks like a tunnel (Proton, WireGuard, OpenVPN TAP, etc.)
+    const vpn = (n.interfaces ?? []).find((i) => /vpn|wireguard|tap-|tun|proton|wintun/i.test(`${i.friendlyName} ${i.description}`) && i.ipv4Addresses?.length);
+    $('vpn').hidden = !vpn;
+    if (vpn) $('vpn').title = `VPN: ${vpn.friendlyName ?? vpn.description}`;
+  }
+
+  function renderBattery(b) {
+    const pct = Math.round(b.chargePercent);
+    const glyphs = ['\u{f008e}', '\u{f007a}', '\u{f007b}', '\u{f007c}', '\u{f007d}', '\u{f007e}', '\u{f007f}', '\u{f0080}', '\u{f0081}', '\u{f0082}', '\u{f0079}'];
+    $('batt-ico').textContent = b.isCharging ? '\u{f0084}' : glyphs[Math.min(10, Math.floor(pct / 10))];
+    const cls = b.isCharging ? 'good' : pct <= BATT_CRIT ? 'crit' : pct <= BATT_WARN ? 'warn' : '';
+    $('batt').className = 'tray batt ' + cls;
+    const showPct = !b.isCharging && pct <= BATT_WARN;          // the Mac shows the % only once it needs you
+    $('batt-pct').hidden = !showPct; $('batt-pct').textContent = `${pct}%`;
+    const mins = (ms) => `${Math.floor(ms / 3.6e6)}h ${Math.round((ms % 3.6e6) / 6e4)}m`;
+    $('batt').title = `Battery ${pct}% (${b.state})` + (b.timeTillEmpty ? `, ${mins(b.timeTillEmpty)} left` : '') + (b.timeTillFull ? `, full in ${mins(b.timeTillFull)}` : '') + `\nHealth ${Math.round(b.healthPercent)}%`;
+  }
+
+  let audioOut = null;
+  function renderAudio(a) {
+    audioOut = a;
+    const d = a.defaultPlaybackDevice, vol = $('vol');
+    if (!d) { vol.textContent = '\u{f0581}'; return; }
+    vol.textContent = d.isMuted || d.volume === 0 ? '\u{f0581}' : d.volume < 34 ? '\u{f057f}' : d.volume < 67 ? '\u{f0580}' : '\u{f057e}';
+    vol.title = `${d.name}  ${d.isMuted ? 'muted' : d.volume + '%'}\nClick: mute. Scroll: volume`;
+  }
+
+  let mediaOut = null;
+  function renderMedia(m) {
+    mediaOut = m;
+    const s = m.currentSession ?? m.session;
+    const show = !!(s && s.title);
+    $('music').hidden = !show;
+    if (show) {
+      $('music-txt').textContent = s.artist ? `${s.artist} – ${s.title}` : s.title;
+      $('music').classList.toggle('stale', !s.isPlaying);
+    }
+  }
+
+  p.onOutput((o) => {
+    if (o.glazewm) renderWm(o.glazewm);
+    if (o.cpu) renderCpu(o.cpu);
+    if (o.memory) renderMem(o.memory);
+    if (o.network) renderNet(o.network);
+    if (o.battery) renderBattery(o.battery);
+    if (o.audio) renderAudio(o.audio);
+    if (o.media) renderMedia(o.media);
+  });
+
+  // ---- Clock and world clock -----------------------------------------------------------------
+  function tick() {
+    const now = new Date();
+    // calendar.sh flat: "%A %H:%M"
+    $('clock').textContent = now.toLocaleDateString('en-GB', { weekday: 'long' }) + ' ' +
+      now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+    $('globe').title = CITIES.map(([n, z]) =>
+      `${n.padEnd(9)} ${now.toLocaleTimeString('en-GB', { timeZone: z, hour: '2-digit', minute: '2-digit', hour12: false })}  ${now.toLocaleDateString('en-GB', { timeZone: z, weekday: 'short' })}`).join('\n');
+  }
+  tick(); setInterval(tick, 10000);
+
+  // ---- Markets: BTC and XAU, the Mac's keyless sources (plugins/market_fetch.sh) ----------------
+  const CURL = ['-s', '-m', '8', '-A', 'dotfiles-bar'];
+  async function getJson(url) {
+    const r = await zebar.shellExec('curl', [...CURL, url]);
+    return JSON.parse(r.stdout);
+  }
+  const short = (v) => v >= 10000 ? `${(v / 1000).toFixed(1)}k` : v >= 1000 ? Math.round(v).toLocaleString('en-US') : v.toFixed(2);
+  const quotes = {};
+  async function btc() {
+    const d = await getJson('https://api.exchange.coinbase.com/products/BTC-USD/stats');
+    const last = +d.last, open = +d.open;
+    return { price: last, chg: open ? ((last - open) / open) * 100 : null };
+  }
+  async function xau() {
+    const price = +(await getJson('https://api.gold-api.com/price/XAU')).price;
+    let chg = null;
+    try {
+      const m = (await getJson('https://query2.finance.yahoo.com/v8/finance/chart/GC=F?interval=1d&range=2d')).chart.result[0].meta;
+      chg = ((m.regularMarketPrice - m.chartPreviousClose) / m.chartPreviousClose) * 100;
+    } catch {}
+    return { price, chg };
+  }
+  function renderMarket(id, sym) {
+    const q = quotes[sym], el = $(id);
+    if (!q) { el.hidden = true; return; }
+    el.hidden = false;
+    const old = Date.now() - q.at > MARKET_FETCH_SECS * 4 * 1000;     // nothing newer for 4 fetch periods: dim
+    const move = q.chg != null && Math.abs(q.chg) >= MARKET_MOVE_PCT ? (q.chg < 0 ? 'down' : 'up') : '';
+    el.className = 'item mkt ' + (old ? 'stale' : move);
+    el.textContent = `${sym} ${short(q.price)}`;
+    el.title = `${sym}/USD ${q.price.toLocaleString('en-US', { maximumFractionDigits: 2 })}` +
+      (q.chg != null ? `  ${q.chg >= 0 ? '+' : ''}${q.chg.toFixed(2)}%` : '') +
+      (sym === 'XAU' ? "\nDay change is the COMEX futures session;\nthe price is spot, so it sits flat on weekends." : '\n24h change');
+  }
+  async function fetchMarkets() {
+    for (const [sym, fn, id] of [['BTC', btc, 'mkt-btc'], ['XAU', xau, 'mkt-xau']]) {
+      try { const q = await fn(); if (q.price > 0) quotes[sym] = { ...q, at: Date.now() }; } catch {}
+      renderMarket(id, sym);
+    }
+  }
+  fetchMarkets(); setInterval(fetchMarkets, MARKET_FETCH_SECS * 1000);
+
+  // ---- Clicks -----------------------------------------------------------------------------------
+  $('logo').onclick = () => settings('ms-settings:');
+  $('logo').oncontextmenu = (e) => { e.preventDefault(); run('taskmgr'); };
+  for (const id of ['cpu', 'cpu-graph', 'mem']) $(id).onclick = () => run('taskmgr');
+  $('net').onclick = () => settings('ms-settings:network-status');
+  $('bt').onclick = () => settings('ms-settings:bluetooth');
+  $('wifi').onclick = () => settings('ms-availablenetworks:');
+  $('ctl').onclick = () => settings('ms-actioncenter:controlcenter/&showFooter=true');
+  $('batt').onclick = () => settings('ms-settings:batterysaver');
+  $('globe').onclick = () => settings('ms-settings:dateandtime');
+  $('music').onclick = () => mediaOut?.togglePlayPause();
+  $('vol').onclick = () => { const d = audioOut?.defaultPlaybackDevice; if (d) audioOut.setMute(!d.isMuted); };
+  $('vol').onwheel = (e) => {
+    const d = audioOut?.defaultPlaybackDevice; if (!d) return;
+    audioOut.setVolume(Math.max(0, Math.min(100, d.volume + (e.deltaY < 0 ? 5 : -5))));
+  };
 </script>
 </body>
 </html>

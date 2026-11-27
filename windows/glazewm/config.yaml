@@ -3,7 +3,9 @@
 #
 # AeroSpace bindings that do NOT map (GlazeWM has no equivalent), and what was done:
 #   - alt-slash / alt-shift-period (layout-cycle.sh), alt-comma (accordion): GlazeWM has tiling only,
-#     no accordion layout. Dropped. alt+v (toggle-tiling-direction) is added as the nearest thing.
+#     no accordion layout. Dropped. alt+v (toggle-tiling-direction) is added as the nearest thing, but it
+#     only sets which way the NEXT window splits from the focused one; it never re-orients windows already
+#     open. To stack two open windows, move one with alt+shift+j/k (tested 2026-11-27).
 #   - join-with (service mode alt-shift-hjkl): no join command. Dropped.
 #   - flatten-workspace-tree, balance-sizes, close-all-windows-but-current: none. Dropped
 #     (use wm-redraw on alt+shift+b for a re-tile).
@@ -19,8 +21,9 @@
 #   - ctrl-alt-v Maccy: use Windows clipboard history (win+v). App-launch keys ctrl-alt-b/s/w/a/x/e/h/g/m/k
 #     are mapped only for apps likely to exist here (see the bottom).
 #   - focus-follows-mouse is off, same as AeroSpace.
-# Tested on Windows 11 (Boot Camp, GlazeWM 3.10.1) 2026-11-27: alt+hjkl focus (h/l), alt+shift+hjkl move (h/l),
-# alt+1..7, ctrl+` scratch, ctrl+alt+t, window rules. Key names: GlazeWM uses oem_tilde / oem_semicolon,
+# Tested on Windows 11 (Boot Camp, GlazeWM 3.10.1) 2026-11-27: alt+hjkl focus, alt+shift+hjkl move,
+# alt+1..7, alt+v, resize mode (alt+shift+r, then hjkl, esc), ctrl+` scratch, ctrl+alt+t, window rules.
+# Key names: GlazeWM uses oem_tilde / oem_semicolon,
 # not oem_3 / oem_1 (unknown key names are ignored without an error).
 
 general:
