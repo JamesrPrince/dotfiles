@@ -28,7 +28,10 @@
 
 general:
   # Start the Zebar top bar with the window manager.
-  startup_commands: ['shell-exec zebar']
+  # wm.mjs watch: hides the ctrl+` drop-down when focus leaves it (exits with GlazeWM).
+  startup_commands:
+    - 'shell-exec zebar'
+    - 'shell-exec --hide-window cmd /c node "%USERPROFILE%\.glzr\glazewm\wm.mjs" watch'
   # Zebar has no "shutdown" subcommand; GlazeWM's own sample config kills it like this.
   shutdown_commands: ['shell-exec taskkill /IM zebar.exe /F']
   config_reload_commands: []
@@ -90,6 +93,10 @@ workspaces:
     display_name: 'Trade'
   - name: '7'
     display_name: 'Other'
+  # Hidden: the scratchpad (alt+shift+minus / equal) and the parked ctrl+` drop-down, as AeroSpace's
+  # workspace S. Never focused by a key; the bar lists only 1-7.
+  - name: 'S'
+    display_name: 'Scratchpad'
 
 window_rules:
   # Float the Windows system dialogs AeroSpace floats on the Mac.
@@ -103,13 +110,19 @@ window_rules:
     match:
       - window_process: { equals: 'Obsidian' }
         window_title: { regex: '^Settings' }
-  # ctrl+` scratch terminal: floating, launched by the binding below.
-  # Matched on the window class (wezterm start --class scratch), which is set at creation; the title
-  # is only set once the shell runs, too late for the workspace-2 rule below.
+  # Windows' standard dialogs (Save, Open, message boxes, the file-copy progress window), credential
+  # prompts and installers float instead of being squeezed into a tile.
   - commands: ['set-floating --centered']
     match:
+      - window_class: { regex: '^(#32770|OperationStatusWindow|Credential Dialog Xaml Host)$' }
+      - window_process: { regex: '(?i)^(msiexec|setup|.*installer.*|.*setup.*|consent|CredentialUIBroker)$' }
+      - window_title: { regex: '(?i)^(open|save as|save|select folder|browse for folder|print|properties)$' }
+  # ctrl+` drop-down terminal (wm.mjs quick): floats; wm.mjs places it top-centre.
+  # Matched on the window class (wezterm start --class quick), which is set at creation.
+  - commands: ['set-floating --shown-on-top']
+    match:
       - window_process: { equals: 'wezterm-gui' }
-        window_class: { equals: 'scratch' }
+        window_class: { equals: 'quick' }
   # Default workspaces (AeroSpace on-window-detected).
   - commands: ['move --workspace 1']
     match:
@@ -117,7 +130,7 @@ window_rules:
   - commands: ['move --workspace 2']
     match:
       - window_process: { regex: '^(wezterm-gui|Code|claude)$' }
-        window_class: { not_equals: 'scratch' }
+        window_class: { not_equals: 'quick' }
   - commands: ['move --workspace 3']
     match:
       - window_process: { equals: 'Obsidian' }
@@ -136,6 +149,24 @@ window_rules:
   - commands: ['ignore']
     match:
       - window_process: { equals: 'zebar' }
+  # From GlazeWM 3.10.1's sample config: browser picture-in-picture, PowerToys pop-ups, and the Office
+  # splash and child windows (only the main Excel/Word/PowerPoint window tiles).
+  - commands: ['ignore']
+    match:
+      - window_title: { regex: '[Pp]icture.in.[Pp]icture' }
+        window_class: { regex: 'Chrome_WidgetWin_1|MozillaDialogClass' }
+      - window_process: { equals: 'PowerToys' }
+        window_class: { regex: 'HwndWrapper\[PowerToys\.PowerAccent.*?\]' }
+      - window_title: { equals: 'Command Palette' }
+        window_class: { equals: 'WinUIDesktopWin32WindowClass' }
+      - window_process: { equals: 'PowerToys' }
+        window_title: { regex: '.*? - Peek' }
+      - window_process: { equals: 'EXCEL' }
+        window_class: { not_regex: 'XLMAIN' }
+      - window_process: { equals: 'WINWORD' }
+        window_class: { not_regex: 'OpusApp' }
+      - window_process: { equals: 'POWERPNT' }
+        window_class: { not_regex: 'PPTFrameClass' }
 
 binding_modes:
   - name: 'resize'
@@ -150,6 +181,34 @@ binding_modes:
         bindings: ['j', 'down']
       - commands: ['wm-disable-binding-mode --name resize']
         bindings: ['escape', 'enter', 'alt+shift+r']
+
+  # Caps Lock leader (aerospace launch mode + launch.sh). The bar shows LAUNCH while it is on; a letter
+  # launches and leaves, esc or Caps Lock leaves. Not installed here, so not bound yet: c VS Code,
+  # s Slack, w WhatsApp, x Excel, p Spotify, d lazydocker (add a line when the app is installed).
+  - name: 'launch'
+    keybindings:
+      - commands: ['shell-exec --hide-window cmd /c start chrome', 'wm-disable-binding-mode --name launch']
+        bindings: ['b']
+      - commands: ['shell-exec --hide-window cmd /c node "%USERPROFILE%\.glzr\glazewm\wm.mjs" run wezterm-gui wezterm-gui', 'wm-disable-binding-mode --name launch']
+        bindings: ['t']
+      - commands: ['shell-exec --hide-window cmd /c node "%USERPROFILE%\.glzr\glazewm\wm.mjs" new wezterm-gui', 'wm-disable-binding-mode --name launch']
+        bindings: ['n']
+      - commands: ['shell-exec explorer', 'wm-disable-binding-mode --name launch']
+        bindings: ['f']
+      - commands: ['shell-exec --hide-window cmd /c node "%USERPROFILE%\.glzr\glazewm\wm.mjs" new wezterm-gui start -- btop', 'wm-disable-binding-mode --name launch']
+        bindings: ['m']
+      - commands: ['shell-exec --hide-window cmd /c node "%USERPROFILE%\.glzr\glazewm\wm.mjs" new wezterm-gui start -- lazygit', 'wm-disable-binding-mode --name launch']
+        bindings: ['l']
+      - commands: ['shell-exec --hide-window cmd /c node "%USERPROFILE%\.glzr\glazewm\wm.mjs" new wezterm-gui start -- yazi', 'wm-disable-binding-mode --name launch']
+        bindings: ['y']
+      - commands: ['shell-exec --hide-window cmd /c node "%USERPROFILE%\.glzr\glazewm\wm.mjs" run Obsidian explorer shell:AppsFolder\md.obsidian', 'wm-disable-binding-mode --name launch']
+        bindings: ['o']
+      - commands: ['shell-exec --hide-window cmd /c node "%USERPROFILE%\.glzr\glazewm\wm.mjs" claude', 'wm-disable-binding-mode --name launch']
+        bindings: ['a']
+      - commands: ['shell-exec --hide-window cmd /c node "%USERPROFILE%\.glzr\glazewm\wm.mjs" run olk explorer shell:AppsFolder\Microsoft.OutlookForWindows_8wekyb3d8bbwe!Microsoft.OutlookforWindows', 'wm-disable-binding-mode --name launch']
+        bindings: ['e']
+      - commands: ['wm-disable-binding-mode --name launch']
+        bindings: ['escape', 'caps_lock']
 
 keybindings:
   # Focus (alt-hjkl)
@@ -198,9 +257,16 @@ keybindings:
   - commands: ['toggle-tiling-direction']
     bindings: ['alt+v']
 
-  # alt-shift-minus (scratchpad send): nearest equivalent
-  - commands: ['toggle-minimized']
+  # Scratchpad (AeroSpace scratchpad.sh): send the focused window to hidden workspace S, bring the
+  # last-sent one back to the current workspace.
+  - commands: ['shell-exec --hide-window cmd /c node "%USERPROFILE%\.glzr\glazewm\wm.mjs" scratch-send']
     bindings: ['alt+shift+oem_minus']
+  - commands: ['shell-exec --hide-window cmd /c node "%USERPROFILE%\.glzr\glazewm\wm.mjs" scratch-bring']
+    bindings: ['alt+shift+oem_plus']
+
+  # Caps Lock: the launch leader (binding mode 'launch' above)
+  - commands: ['wm-enable-binding-mode --name launch']
+    bindings: ['caps_lock']
 
   # Modes and housekeeping
   - commands: ['wm-enable-binding-mode --name resize']
@@ -257,13 +323,15 @@ keybindings:
     bindings: ['ctrl+alt+shift+6']
   - commands: ['move --workspace 7', 'focus --workspace 7']
     bindings: ['ctrl+alt+shift+7']
-  # alt-tab (workspace-back-and-forth). May fight Windows' own alt+tab; remap if it does.
-  - commands: ['focus --workspace recent']
-    bindings: ['alt+tab']
+  # Workspace back-and-forth (AeroSpace alt-tab). Windows keeps alt+tab for its own switcher, so it
+  # lives on alt+escape here (tested 2026-11-27: alt+tab never reached GlazeWM).
+  # (The command is focus --recent-workspace; "--workspace recent" looks for a workspace named recent.)
+  - commands: ['focus --recent-workspace']
+    bindings: ['alt+escape']
 
-  # ctrl+` drop-down terminal. WezTerm has no quick terminal, so this opens a floating WezTerm window
-  # titled "scratch" (floated by the window rule above). Press alt+w to close it.
-  - commands: ['shell-exec wezterm-gui start --class scratch']
+  # ctrl+` drop-down terminal (Ghostty's quick terminal): wm.mjs toggles one persistent WezTerm
+  # window, top-centre, 50% wide and 45% tall; the watcher hides it when focus leaves.
+  - commands: ['shell-exec --hide-window cmd /c node "%USERPROFILE%\.glzr\glazewm\wm.mjs" quick']
     bindings: ['ctrl+oem_tilde']
 
   # App launch keys (ctrl-alt-t Ghostty -> WezTerm, ctrl-alt-b browser, ctrl-alt-a Claude, ctrl-alt-x Excel)

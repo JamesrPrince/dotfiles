@@ -109,6 +109,7 @@ if (-not $SkipFonts) {
 # ---- 3. Config links ---------------------------------------------------------------------------
 Link-Item (Join-Path $Win 'wezterm')                   (Join-Path $Home_ '.config\wezterm')
 Link-Item (Join-Path $Win 'glazewm\config.yaml')       (Join-Path $Home_ '.glzr\glazewm\config.yaml')
+Link-Item (Join-Path $Win 'glazewm\wm.mjs')            (Join-Path $Home_ '.glzr\glazewm\wm.mjs')   # ctrl+` drop-down, scratchpad, launch keys
 Link-Item (Join-Path $Win 'zebar\gruvbox-bar')         (Join-Path $Home_ '.glzr\zebar\gruvbox-bar')
 $zs = Join-Path $Home_ '.glzr\zebar\settings.json'
 if (-not (Test-Path $zs)) { Link-Item (Join-Path $Win 'zebar\settings.json') $zs }
@@ -162,6 +163,10 @@ foreach ($name in $autostart.Keys) {
         Say 'startup' "$name starts at sign-in"
     } else { Say 'WARN' "$name not found at $exe; not added to startup" }
 }
+
+# ---- 4c. Windows polish (settings.ps1): taskbar auto-hide, key repeat, no animations, dark mode,
+#          gruvbox wallpaper. Saves the old values first; `settings.ps1 -Undo` restores them.
+& (Join-Path $Win 'settings.ps1')
 
 # ---- 5. Vault (private repo; needs gh auth) ----------------------------------------------------
 if (-not $SkipVault) {
