@@ -19,12 +19,15 @@
 #   - ctrl-alt-v Maccy: use Windows clipboard history (win+v). App-launch keys ctrl-alt-b/s/w/a/x/e/h/g/m/k
 #     are mapped only for apps likely to exist here (see the bottom).
 #   - focus-follows-mouse is off, same as AeroSpace.
-# Everything in this file is untested: it was written without a Windows machine.
+# Tested on Windows 11 (Boot Camp, GlazeWM 3.10.1) 2026-11-27: alt+hjkl focus (h/l), alt+shift+hjkl move (h/l),
+# alt+1..7, ctrl+` scratch, ctrl+alt+t, window rules. Key names: GlazeWM uses oem_tilde / oem_semicolon,
+# not oem_3 / oem_1 (unknown key names are ignored without an error).
 
 general:
   # Start the Zebar top bar with the window manager.
   startup_commands: ['shell-exec zebar']
-  shutdown_commands: ['shell-exec zebar shutdown']
+  # Zebar has no "shutdown" subcommand; GlazeWM's own sample config kills it like this.
+  shutdown_commands: ['shell-exec taskkill /IM zebar.exe /F']
   config_reload_commands: []
   focus_follows_cursor: false
   toggle_workspace_on_refocus: false
@@ -37,10 +40,10 @@ general:
 gaps:
   scale_with_dpi: true
   inner_gap: '8px'
-  # Top 36px leaves room for the Zebar bar, as in aerospace.toml.
-  # If Zebar already reserves its own space (dockToEdge), lower top to 8px.
+  # Zebar docks as a Windows app bar (dockToEdge) and reserves its own 36px, which GlazeWM respects,
+  # so the top gap is the same 8px as the other sides (36px here doubled the space; tested 2026-11-27).
   outer_gap:
-    top: '36px'
+    top: '8px'
     right: '8px'
     bottom: '8px'
     left: '8px'
@@ -98,10 +101,12 @@ window_rules:
       - window_process: { equals: 'Obsidian' }
         window_title: { regex: '^Settings' }
   # ctrl+` scratch terminal: floating, launched by the binding below.
-  - commands: ['set-floating']
+  # Matched on the window class (wezterm start --class scratch), which is set at creation; the title
+  # is only set once the shell runs, too late for the workspace-2 rule below.
+  - commands: ['set-floating --centered']
     match:
       - window_process: { equals: 'wezterm-gui' }
-        window_title: { regex: '^scratch$' }
+        window_class: { equals: 'scratch' }
   # Default workspaces (AeroSpace on-window-detected).
   - commands: ['move --workspace 1']
     match:
@@ -109,7 +114,7 @@ window_rules:
   - commands: ['move --workspace 2']
     match:
       - window_process: { regex: '^(wezterm-gui|Code|claude)$' }
-        window_title: { not_regex: '^scratch$' }
+        window_class: { not_equals: 'scratch' }
   - commands: ['move --workspace 3']
     match:
       - window_process: { equals: 'Obsidian' }
@@ -124,6 +129,10 @@ window_rules:
   - commands: ['ignore']
     match:
       - window_process: { equals: 'Flow.Launcher' }
+  # The Zebar bar itself (GlazeWM's default config has this; without it the bar is grabbed as an 800x600 float).
+  - commands: ['ignore']
+    match:
+      - window_process: { equals: 'zebar' }
 
 binding_modes:
   - name: 'resize'
@@ -194,10 +203,12 @@ keybindings:
   - commands: ['wm-enable-binding-mode --name resize']
     bindings: ['alt+shift+r']
   - commands: ['wm-reload-config']
-    bindings: ['alt+shift+oem_1']   # alt-shift-; (AeroSpace service mode reload)
+    # alt-shift-; (AeroSpace service mode reload). GlazeWM names OEM keys by symbol (oem_semicolon,
+    # oem_tilde); VK-number names like oem_1/oem_3 are silently ignored.
+    bindings: ['alt+shift+oem_semicolon']
   - commands: ['wm-redraw']
     bindings: ['alt+shift+b']
-  - commands: ['toggle-pause']
+  - commands: ['wm-toggle-pause']
     bindings: ['alt+shift+p']
 
   # Workspaces (alt-1..7), move window (alt-shift-1..7), move and follow (ctrl-alt-shift-1..7)
@@ -249,8 +260,8 @@ keybindings:
 
   # ctrl+` drop-down terminal. WezTerm has no quick terminal, so this opens a floating WezTerm window
   # titled "scratch" (floated by the window rule above). Press alt+w to close it.
-  - commands: ['shell-exec wezterm-gui start -- pwsh -NoLogo -NoExit -Command "$Host.UI.RawUI.WindowTitle=''scratch''"']
-    bindings: ['ctrl+oem_3']
+  - commands: ['shell-exec wezterm-gui start --class scratch']
+    bindings: ['ctrl+oem_tilde']
 
   # App launch keys (ctrl-alt-t Ghostty -> WezTerm, ctrl-alt-b browser, ctrl-alt-a Claude, ctrl-alt-x Excel)
   - commands: ['shell-exec wezterm-gui']

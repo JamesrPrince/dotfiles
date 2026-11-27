@@ -5,7 +5,6 @@
       "Packages": [
         { "PackageIdentifier": "wez.wezterm" },
         { "PackageIdentifier": "glzr-io.glazewm" },
-        { "PackageIdentifier": "glzr-io.zebar" },
         { "PackageIdentifier": "Flow-Launcher.Flow-Launcher" },
         { "PackageIdentifier": "Git.Git" },
         { "PackageIdentifier": "GitHub.cli" },

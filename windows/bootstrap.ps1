@@ -148,6 +148,21 @@ if (Get-Command zoxide -ErrorAction SilentlyContinue)   { Invoke-Expression (& {
     Say 'profile' "added starship + zoxide to $profilePath"
 } else { Say 'ok' 'PowerShell profile already set up' }
 
+# ---- 4b. Start at sign-in: GlazeWM (which starts Zebar) and Flow Launcher, per-user Run keys ---
+$run = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'
+$autostart = [ordered]@{
+    'GlazeWM'       = Join-Path $env:ProgramFiles 'glzr.io\GlazeWM\glazewm.exe'
+    'Flow.Launcher' = Join-Path $env:LOCALAPPDATA 'FlowLauncher\Flow.Launcher.exe'
+}
+foreach ($name in $autostart.Keys) {
+    $exe = $autostart[$name]
+    if (Test-Path $exe) {
+        $value = if ($name -eq 'GlazeWM') { "`"$exe`" start" } else { "`"$exe`"" }
+        Set-ItemProperty -Path $run -Name $name -Value $value
+        Say 'startup' "$name starts at sign-in"
+    } else { Say 'WARN' "$name not found at $exe; not added to startup" }
+}
+
 # ---- 5. Vault (private repo; needs gh auth) ----------------------------------------------------
 if (-not $SkipVault) {
     $vault = Join-Path $Home_ 'ICOR'

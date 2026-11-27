@@ -1,23 +1,32 @@
 {
+  "$schema": "https://github.com/glzr-io/zebar/raw/v3.3.1/resources/zpack-schema.json",
   "name": "gruvbox-bar",
+  "version": "1.0.0",
   "description": "Minimal Gruvbox top bar: workspaces, clock, battery, wifi.",
   "tags": ["bar", "gruvbox"],
-  "htmlPath": "bar.html",
-  "defaultPlacements": [
+  "widgets": [
     {
-      "anchor": "top_center",
-      "offsetX": "0",
-      "offsetY": "0",
-      "width": "100%",
-      "height": "32px",
-      "monitorSelection": "all",
-      "dockToEdge": { "enabled": true, "edge": "top", "windowMargin": "0px" }
+      "name": "gruvbox-bar",
+      "htmlPath": "bar.html",
+      "zOrder": "normal",
+      "shownInTaskbar": false,
+      "focused": false,
+      "resizable": false,
+      "transparent": true,
+      "includeFiles": ["**/*"],
+      "privileges": { "shellCommands": [] },
+      "presets": [
+        {
+          "name": "default",
+          "anchor": "top_center",
+          "offsetX": "0px",
+          "offsetY": "0px",
+          "width": "100%",
+          "height": "36px",
+          "monitorSelection": { "type": "all" },
+          "dockToEdge": { "enabled": true, "edge": "top", "windowMargin": "0px" }
+        }
+      ]
     }
-  ],
-  "privileged": false,
-  "focused": false,
-  "shownInTaskbar": false,
-  "alwaysOnTop": false,
-  "resizable": false,
-  "transparent": true
+  ]
 }

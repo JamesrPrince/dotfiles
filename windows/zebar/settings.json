@@ -1,6 +1,10 @@
 {
-  "$schema": "https://github.com/glzr-io/zebar/raw/v2.3.0/resources/settings-schema.json",
+  "$schema": "https://github.com/glzr-io/zebar/raw/v3.3.1/resources/settings-schema.json",
   "startupConfigs": [
-    { "pack": "local.gruvbox-bar", "widget": "gruvbox-bar" }
+    {
+      "pack": "gruvbox-bar",
+      "widget": "gruvbox-bar",
+      "preset": "default"
+    }
   ]
 }
